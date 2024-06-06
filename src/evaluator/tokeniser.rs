@@ -24,7 +24,7 @@ pub(crate) fn tokenize(expression: &str, evaluator: &Evaluator) -> Result<Vec<To
             '^' => tokens.push(Token::Exponent),
             '(' => tokens.push(Token::OpenParen),
             ')' => tokens.push(Token::CloseParen),
-            ' ' => {} // Ignore spaces
+            ' ' | '\n' => {} // Ignore spaces
             _ => {
                 // We now look for a function.
                 match parse_functions(&chars, chars.len(), i, &evaluator) {

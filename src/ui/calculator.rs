@@ -1,43 +1,20 @@
-use crate::evaluator::Evaluator;
+use crate::evaluator::{AngleMode, Evaluator};
 
 #[derive(Debug, Default)]
 pub(crate) struct Calc {
-    expression: String,
-    result: Option<f64>
+    angle_mode: AngleMode,
 }
 
 impl Calc {
 
-    pub(crate) fn evaluate(&mut self) {
-        self.result = Evaluator::default().evaluate(&self.expression).ok();
+    pub(crate) fn evaluate(&mut self, expr: &str) -> Result<f64, String> {
+        Evaluator::with_mode(&self.angle_mode).evaluate(&expr)
     }
 
-    pub(crate) fn add_chunk(&mut self, chunk: String) {
-        self.expression.push_str(&chunk);
+    pub fn angle_mode(&self) -> &AngleMode {
+        &self.angle_mode
     }
-
-    pub(crate) fn insert(&mut self, chunk: String, pos: usize) {
-        self.expression.insert_str(pos, &chunk);
-    }
-
-    pub(crate) fn remove(&mut self, pos: usize) {
-        self.expression.remove(pos);
-    }
-
-    pub(crate) fn clear(&mut self) {
-        self.expression.clear();
-    }
-
-    pub(crate) fn remove_last(&mut self) {
-        let _ = self.expression.pop();
-    }
-
-    pub(crate) fn get_expression(&self) -> &str {
-        &self.expression
-    }
-
-
-    pub fn result(&self) -> Option<f64> {
-        self.result
+    pub fn set_angle_mode(&mut self, angle_mode: AngleMode) {
+        self.angle_mode = angle_mode;
     }
 }

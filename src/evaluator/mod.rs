@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
 
 use crate::evaluator::functions::Function;
@@ -23,7 +23,7 @@ pub(crate) enum Token {
 }
 
 impl Token {
-    pub(crate) fn perform_binary(&self, left: f64, right: f64) -> f64 {
+    pub(crate) fn perform_binary(&self, left: f64, right: f64, _mode: &AngleMode) -> f64 {
         match self {
             Token::Plus => left + right,
             Token::Minus => left - right,
@@ -34,10 +34,10 @@ impl Token {
         }
     }
 
-    pub(crate) fn perform_unary(&self, val: f64) -> f64 {
+    pub(crate) fn perform_unary(&self, val: f64, mode: &AngleMode) -> f64 {
         match self {
             Token::Minus => -val,
-            Token::UnaryFunction(f) => f.evaluate(val),
+            Token::UnaryFunction(f) => f.evaluate(val, mode),
             _ => panic!("Unexpected operator in unary operation: {:?}", self),
         }
     }
@@ -62,44 +62,60 @@ pub(crate) enum AstNode {
 }
 
 impl AstNode {
-    pub(crate) fn evaluate(&self) -> f64 {
+    pub(crate) fn evaluate(&self, mode: &AngleMode) -> f64 {
         match self {
             AstNode::Number(value) => *value,
             AstNode::UnaryOp { op, expr } => {
-                let value = expr.evaluate();
-                op.perform_unary(value)
+                let value = expr.evaluate(mode);
+                op.perform_unary(value, mode)
             }
             AstNode::BinaryOp { left, op, right } => {
-                let left_val = left.evaluate();
-                let right_val = right.evaluate();
-                op.perform_binary(left_val, right_val)
+                let left_val = left.evaluate(mode);
+                let right_val = right.evaluate(mode);
+                op.perform_binary(left_val, right_val, mode)
             }
-            AstNode::Function { func, expr } => func.evaluate(expr.evaluate()),
+            AstNode::Function { func, expr } => func.evaluate(expr.evaluate(mode), mode),
         }
     }
 }
 
+#[derive(Debug)]
 pub(crate) enum AngleMode {
     Degrees,
     Radians,
     Gradians,
 }
 
-pub(crate) struct Evaluator {
-    angle_mode: AngleMode,
+impl Default for AngleMode {
+    fn default() -> Self {
+        AngleMode::Radians
+    }
+}
+impl Display for AngleMode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            AngleMode::Degrees => "Degrees",
+            AngleMode::Radians => "Radians",
+            AngleMode::Gradians => "Grads"
+        })
+    }
+}
+
+pub(crate) struct Evaluator<'a> {
+    angle_mode: &'a AngleMode,
     function_register: Vec<Function>,
 }
 
-impl Evaluator {
-    pub(crate) fn create(angle_mode: AngleMode) -> Self {
+impl<'a> Evaluator<'a> {
+    pub(crate) fn create(angle_mode: &'a AngleMode) -> Self {
         Self {
             angle_mode,
             function_register: functions::get_all(),
         }
     }
 
-    pub(crate) fn default() -> Self {
-        Self::create(AngleMode::Degrees)
+    pub(crate) fn with_mode(mode: &'a AngleMode) -> Self {
+        Self::create(mode)
     }
 
     pub(crate) fn evaluate(&self, expression: &str) -> Result<f64, String> {
@@ -110,7 +126,7 @@ impl Evaluator {
             Ok(tokens) => {
                 let mut parser = Parser::new(tokens);
                 let ast = parser.parse()?;
-                Ok(ast.evaluate())
+                Ok(ast.evaluate(&self.angle_mode))
             }
             Err(s) => Err(s),
         }

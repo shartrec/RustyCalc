@@ -1,17 +1,17 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use crate::evaluator::Token;
+use crate::evaluator::{AngleMode, Token};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Function {
     name: &'static str,
-    function: fn(f64) -> f64,
+    function: fn(f64, &AngleMode) -> f64,
 }
 
 impl Function {
-    pub(crate) fn evaluate(&self, val: f64) -> f64 {
-        (self.function)(val)
+    pub(crate) fn evaluate(&self, val: f64, mode: &AngleMode) -> f64 {
+        (self.function)(val, mode)
     }
 
     pub(crate) fn name(&self) -> &'static str {
@@ -38,69 +38,88 @@ impl Function {
             None
         }
     }
+
+}
+
+fn do_trig(v: f64, mode: &AngleMode, f: fn(f64) -> f64) -> f64 {
+    let v_radians = match mode {
+        AngleMode::Radians => v,
+        AngleMode::Degrees => v.to_radians(),
+        AngleMode::Gradians => (v * 0.9).to_radians()
+    };
+    f(v_radians)
+}
+
+fn do_atrig(v: f64, mode: &AngleMode, f: fn(f64) -> f64) -> f64 {
+    let r = f(v);
+    match mode {
+        AngleMode::Radians => r,
+        AngleMode::Degrees => r.to_degrees(),
+        AngleMode::Gradians => r.to_degrees() / 0.9
+    }
 }
 
 pub(crate) fn get_all() -> Vec<Function> {
     vec![
         Function {
             name: "sin",
-            function: f64::sin,
+            function: |v, mode| do_trig(v, mode, f64::sin)
         },
         Function {
             name: "cos",
-            function: f64::cos,
+            function: |v, mode| do_trig(v, mode, f64::cos),
         },
         Function {
             name: "tan",
-            function: f64::tan,
+            function: |v, mode| do_trig(v, mode, f64::tan),
         },
         Function {
             name: "asin",
-            function: f64::asin,
+            function: |v, mode| do_atrig(v, mode, f64::asin),
         },
         Function {
             name: "acos",
-            function: f64::acos,
+            function: |v, mode| do_atrig(v, mode, f64::acos),
         },
         Function {
             name: "atan",
-            function: f64::atan,
+            function: |v, mode| do_atrig(v, mode, f64::atan),
         },
         Function {
             name: "exp",
-            function: f64::exp,
+            function: |v, _| v.exp(),
         },
         Function {
             name: "ln",
-            function: f64::ln,
+            function: |v, _| v.ln(),
         },
         Function {
             name: "log",
-            function: f64::log10,
+            function: |v, _| v.log10(),
         },
         Function {
             name: "log2",
-            function: f64::log2,
+            function: |v, _| v.log2(),
         },
         Function {
             name: "sqrt",
-            function: f64::sqrt,
+            function: |v, _| v.sqrt(),
         },
         Function {
             name: "abs",
-            function: f64::abs,
+            function: |v, _| v.abs(),
         },
         Function {
             name: "ceil",
-            function: f64::ceil,
+            function: |v, _| v.ceil(),
         },
         Function {
             name: "floor",
-            function: f64::floor,
+            function: |v, _| v.floor(),
         },
         Function {
             name: "factorial",
-            function: |v| -> f64 {
+            function: |v, _| -> f64 {
                 if v > 170.0 {
                     f64::INFINITY
                 } else if v.fract() != 0.0 {
@@ -122,14 +141,15 @@ pub(crate) fn get_all() -> Vec<Function> {
 #[cfg(test)]
 mod tests {
     use crate::assert_near;
+    use crate::evaluator::AngleMode;
     use crate::evaluator::functions::Function;
 
     #[test]
     fn test_fn() {
         let f = Function {
             name: "sin",
-            function: f64::sin,
+            function: |v, _| v.sin(),
         };
-        assert_near!(f.evaluate(std::f64::consts::PI / 2.0), 1.0);
+        assert_near!(f.evaluate(std::f64::consts::PI / 2.0, &AngleMode::Radians), 1.0);
     }
 }
