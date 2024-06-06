@@ -25,4 +25,4 @@ jobs:
       with:
         name: MyCalculator
         path: |
-          target/release/MyCalculator
+          target/release/my_calculator
