@@ -12,7 +12,8 @@ macro_rules! calculator_button {
     ($var:ident, $b_width:ident, $b_height:ident, $name:literal, $msg:expr) => {
     let container = Container::new($name)
     .align_x(Horizontal::Center)
-    .align_y(Vertical::Center);
+    .align_y(Vertical::Center)
+    .clip(false);
 
     let $var = Button::new(container)
             .width($b_width)
@@ -95,6 +96,11 @@ impl CalculatorApp {
     }
 
     pub(crate) fn view(&self) -> Container<Message, Theme, Renderer> {
+
+        // Get the sizes for the major blocks
+        let (lcd_height, button_height, button_width) = get_container_sizes(self.window_width, self.window_height);
+
+
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             // .height(Length::Fill)
@@ -137,7 +143,7 @@ impl CalculatorApp {
         let top = Column::with_children([mode, lcd, result]).spacing(5);
         let lcd_container = container(top)
             .width(Length::Fill)
-            .height(Length::Fill)
+            .height(lcd_height)
             .style(move |_theme, _status| {
                 container::Appearance {
                     background: Some(Background::Color(Color::from_rgb8(0xd4, 0xed, 0xd4))),
@@ -146,8 +152,8 @@ impl CalculatorApp {
             })
             .padding(2);
 
-        let w = ((self.window_width as f32 - 4.0) / 5.0 - 4.0).max(55.0);
-        let h = ((self.window_height as f32 - 100.0) / 8.0 - 4.0).max(32.0).min(55.0);
+        let w = button_width;
+        let h = button_height;
 
         calculator_button!(b_one, w, h, "1");
         calculator_button!(b_two, w, h, "2");
@@ -295,4 +301,27 @@ impl CalculatorApp {
             }
         }
     }
+}
+/// Calculate the sizes for the variable components of the display.
+/// These are needed to make sure the display scales sensibly and smoothly as the window is resized.
+///
+/// Returns the height of the *LCD* panel, followed by the height and width of the buttons.
+/// The returned values may be Length::Fill
+fn get_container_sizes(width: u32, height: u32) -> (Length, Length, Length) {
+    const MIN_LCD_PANEL_HEIGHT : f32 = 100.0;
+    const MIN_BUTTON_HEIGHT : f32 = 33.0;
+    const MIN_BUTTON_WIDTH : f32 = 55.0;
+    const MAX_BUTTON_HEIGHT : f32 = 45.0;
+
+    // The buttons take up rows * (button height + button spacing) + container spacing.
+    let b_h = ((height as f32 - MIN_LCD_PANEL_HEIGHT) / 8.0 - 4.0).max(MIN_BUTTON_HEIGHT).min(MAX_BUTTON_HEIGHT);
+    let b_w = ((width as f32 - 4.0) / 5.0 - 4.0).max(MIN_BUTTON_WIDTH);
+
+    let t_panel = if b_h < MAX_BUTTON_HEIGHT {
+        Length::from(MIN_LCD_PANEL_HEIGHT)
+    } else {
+        Length::Fill
+    };
+
+    (t_panel, Length::from(b_h), Length::from(b_w))
 }
