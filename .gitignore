@@ -1,0 +1,6 @@
+# Project exclude paths
+/target/
+/.idea/.gitignore
+/.idea/modules.xml
+/.idea/MyCalculator.iml
+/.idea/vcs.xml
