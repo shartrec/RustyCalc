@@ -20,7 +20,8 @@
  *
  */
 
-use iced::{alignment, Background, Border, Color, Command, Degrees, event, Event, gradient, Length, Pixels, Radians, Renderer, Shadow, Subscription, Theme, Vector, window};
+use iced::{alignment, Background, Border, Color, Command, Degrees, Element, event, Event, gradient,
+           Length, Pixels, Radians, Renderer, Shadow, Subscription, Theme, Vector, window};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Button, Column, Container, container, Row, text, text_editor};
 use iced::widget::button::{Appearance, Status};
@@ -29,72 +30,6 @@ use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
 use crate::ui::messages::Message;
-
-macro_rules! calculator_button {
-    ($var:ident, $b_width:ident, $b_height:ident, $name:literal, $msg:expr) => {
-    let container = Container::new($name)
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
-    .clip(false);
-
-    let $var = Button::new(container)
-            .width($b_width)
-            .height($b_height)
-            .style(|_theme, status| {
-                get_style(status)
-            })
-            .on_press($msg)
-            .into();
-    };
-    ($var:ident, $b_width:ident, $b_height:ident, $name:literal) => {
-        calculator_button!($var, $b_width, $b_height, $name, Message::Char(String::from($name)));
-    };
-}
-
-fn get_style(status: Status) -> Appearance {
-    match status {
-        Status::Active => {
-            let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
-                .add_stop(0.0, Color::from_rgb8(0x24, 0x24, 0x24))
-                .add_stop(1.0, Color::from_rgb8(0x55, 0x55, 0x55));
-
-            Appearance {
-                background: Some(Background::from(g)),
-                text_color: Color::WHITE,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::from_rgb8(0x20, 0x20, 0x20)),
-                shadow: Shadow { color: Color::WHITE, offset: Vector::new(-2.0, -2.0), blur_radius: 2.0 },
-            }
-        }
-        Status::Hovered => {
-            let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
-                .add_stop(0.0, Color::from_rgb8(0x54, 0x54, 0x54))
-                .add_stop(1.0, Color::from_rgb8(0x85, 0x85, 0x85));
-
-            Appearance {
-                background: Some(Background::from(g)),
-                text_color: Color::WHITE,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
-                shadow: Default::default(),
-            }
-        }
-        Status::Pressed => {
-            Appearance {
-                background: None,
-                text_color: Color::BLACK,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
-                shadow: Default::default(),
-            }
-        }
-        Status::Disabled => {
-            Appearance {
-                background: None,
-                text_color: Color::BLACK,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
-                shadow: Default::default(),
-            }
-        }
-    }
-}
 
 #[derive(Debug, Default)]
 pub(crate) struct CalculatorApp {
@@ -177,49 +112,49 @@ impl CalculatorApp {
         let w = button_width;
         let h = button_height;
 
-        calculator_button!(b_one, w, h, "1");
-        calculator_button!(b_two, w, h, "2");
-        calculator_button!(b_three, w, h, "3");
-        calculator_button!(b_four, w, h, "4");
-        calculator_button!(b_five, w, h, "5");
-        calculator_button!(b_six, w, h, "6");
-        calculator_button!(b_seven, w, h, "7");
-        calculator_button!(b_eight, w, h, "8");
-        calculator_button!(b_nine, w, h, "9");
-        calculator_button!(b_zero, w, h, "0");
-        calculator_button!(b_dec, w, h, ".");
-
-        calculator_button!(b_plus, w, h, "+");
-        calculator_button!(b_minus, w, h, "-");
-        calculator_button!(b_mult, w, h, "x", Message::Char("*".to_string()));
-        calculator_button!(b_div, w, h, "/");
-        calculator_button!(b_pow, w, h, "^");
-        calculator_button!(b_lparen, w, h, "(", Message::Func("()".to_string()));
-        calculator_button!(b_rparen, w, h, ")");
-
-        calculator_button!(b_sin, w, h, "sin", Message::Func("sin()".to_string()));
-        calculator_button!(b_cos, w, h, "cos", Message::Func("cos()".to_string()));
-        calculator_button!(b_tan, w, h, "tan", Message::Func("tan()".to_string()));
-        calculator_button!(b_asin, w, h, "asin", Message::Func("asin()".to_string()));
-        calculator_button!(b_acos, w, h, "acos", Message::Func("acos()".to_string()));
-        calculator_button!(b_atan, w, h, "atan", Message::Func("atan()".to_string()));
-        calculator_button!(b_exp, w, h, "exp", Message::Func("exp()".to_string()));
-        calculator_button!(b_ln, w, h, "ln", Message::Func("ln()".to_string()));
-        calculator_button!(b_log, w, h, "log", Message::Func("log()".to_string()));
-        calculator_button!(b_log2, w, h, "log2", Message::Func("log2()".to_string()));
-        calculator_button!(b_sqrt, w, h, "√", Message::Func("sqrt()".to_string()));
-        calculator_button!(b_abs, w, h, "abs", Message::Func("abs()".to_string()));
-        calculator_button!(b_ceil, w, h, "ceil", Message::Func("ceil()".to_string()));
-        calculator_button!(b_floor, w, h, "floor", Message::Func("floor()".to_string()));
-        calculator_button!(b_fact, w, h, "!", Message::Func("factorial()".to_string()));
-
-
-        calculator_button!(b_equals, w, h, "=", Message::Evaluate);
-        calculator_button!(b_clear, w, h, "AC", Message::Clear);
-        calculator_button!(b_left, w, h, "<-", Message::Move(-1));
-        calculator_button!(b_right, w, h, "->", Message::Move(1));
-        calculator_button!(b_back, w, h, "<del", Message::BackSpace);
-        calculator_button!(b_drg, w, h, "DRG", Message::ToggleMode);
+        // The standard numer buttons
+        let b_one = make_button(w, h, "1");
+        let b_two = make_button(w, h, "2");
+        let b_three = make_button(w, h, "3");
+        let b_four = make_button(w, h, "4");
+        let b_five = make_button(w, h, "5");
+        let b_six = make_button(w, h, "6");
+        let b_seven = make_button(w, h, "7");
+        let b_eight = make_button(w, h, "8");
+        let b_nine = make_button(w, h, "9");
+        let b_zero = make_button(w, h, "0");
+        let b_dec = make_button(w, h, ".");
+        // Basic operations
+        let b_plus = make_button(w, h, "+");
+        let b_minus = make_button(w, h, "-");
+        let b_mult = button_with_msg(w, h, "x", Message::Char("*".to_string()));
+        let b_div = make_button(w, h, "/");
+        let b_pow = make_button(w, h, "^");
+        let b_lparen = button_with_msg(w, h, "(", Message::Func("()".to_string()));
+        let b_rparen = make_button(w, h, ")");
+        // Functions
+        let b_sin = button_with_msg(w, h, "sin", Message::Func("sin()".to_string()));
+        let b_cos = button_with_msg(w, h, "cos", Message::Func("cos()".to_string()));
+        let b_tan = button_with_msg(w, h, "tan", Message::Func("tan()".to_string()));
+        let b_asin = button_with_msg(w, h, "asin", Message::Func("asin()".to_string()));
+        let b_acos = button_with_msg(w, h, "acos", Message::Func("acos()".to_string()));
+        let b_atan = button_with_msg(w, h, "atan", Message::Func("atan()".to_string()));
+        let b_exp = button_with_msg(w, h, "exp", Message::Func("exp()".to_string()));
+        let b_ln = button_with_msg(w, h, "ln", Message::Func("ln()".to_string()));
+        let b_log = button_with_msg(w, h, "log", Message::Func("log()".to_string()));
+        let b_log2 = button_with_msg(w, h, "log2", Message::Func("log2()".to_string()));
+        let b_sqrt = button_with_msg(w, h, "√", Message::Func("sqrt()".to_string()));
+        let b_abs = button_with_msg(w, h, "abs", Message::Func("abs()".to_string()));
+        let b_ceil = button_with_msg(w, h, "ceil", Message::Func("ceil()".to_string()));
+        let b_floor = button_with_msg(w, h, "floor", Message::Func("floor()".to_string()));
+        let b_fact = button_with_msg(w, h, "!", Message::Func("factorial()".to_string()));
+        // Command buttons
+        let b_equals = button_with_msg(w, h, "=", Message::Evaluate);
+        let b_clear = button_with_msg(w, h, "AC", Message::Clear);
+        let b_left = button_with_msg(w, h, "<-", Message::Move(-1));
+        let b_right = button_with_msg(w, h, "->", Message::Move(1));
+        let b_back = button_with_msg(w, h, "<del", Message::BackSpace);
+        let b_drg = button_with_msg(w, h, "DRG", Message::ToggleMode);
 
         let col_all = Column::with_children([
             lcd_container.into(),
@@ -324,16 +259,84 @@ impl CalculatorApp {
         }
     }
 }
+
+/// Make a button in a container that centers it using the default Message generated from the button text
+fn make_button(width: Length, height: Length, name: &str) -> Element<Message> {
+    crate::ui::window::button_with_msg(width, height, name, Message::Char(name.to_string()))
+}
+
+/// Make a button in a container that centers it
+fn button_with_msg(width: Length, height: Length, name: &str, msg: Message) -> Element<Message> {
+    let container = Container::new(name)
+        .align_x(Horizontal::Center)
+        .align_y(Vertical::Center)
+        .clip(false);
+
+    Button::new(container)
+        .width(width)
+        .height(height)
+        .style(|_theme, status| {
+            crate::ui::window::get_style(status)
+        })
+        .on_press(msg)
+        .into()
+}
+
+fn get_style(status: Status) -> Appearance {
+    match status {
+        Status::Active => {
+            let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
+                .add_stop(0.0, Color::from_rgb8(0x24, 0x24, 0x24))
+                .add_stop(1.0, Color::from_rgb8(0x55, 0x55, 0x55));
+
+            Appearance {
+                background: Some(Background::from(g)),
+                text_color: Color::WHITE,
+                border: Border::default().with_width(Pixels::from(2)).with_color(Color::from_rgb8(0x20, 0x20, 0x20)),
+                shadow: Shadow { color: Color::WHITE, offset: Vector::new(-2.0, -2.0), blur_radius: 2.0 },
+            }
+        }
+        Status::Hovered => {
+            let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
+                .add_stop(0.0, Color::from_rgb8(0x54, 0x54, 0x54))
+                .add_stop(1.0, Color::from_rgb8(0x85, 0x85, 0x85));
+
+            Appearance {
+                background: Some(Background::from(g)),
+                text_color: Color::WHITE,
+                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
+                shadow: Default::default(),
+            }
+        }
+        Status::Pressed => {
+            Appearance {
+                background: None,
+                text_color: Color::BLACK,
+                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
+                shadow: Default::default(),
+            }
+        }
+        Status::Disabled => {
+            Appearance {
+                background: None,
+                text_color: Color::BLACK,
+                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
+                shadow: Default::default(),
+            }
+        }
+    }
+}
+
 /// Calculate the sizes for the variable components of the display.
 /// These are needed to make sure the display scales sensibly and smoothly as the window is resized.
 ///
 /// Returns the height of the *LCD* panel, followed by the height and width of the buttons.
 /// The returned values may be Length::Fill
 fn get_container_sizes(width: u32, height: u32) -> (Length, Length, Length) {
-    const MIN_LCD_PANEL_HEIGHT : f32 = 100.0;
-    const MIN_BUTTON_HEIGHT : f32 = 33.0;
-    const MIN_BUTTON_WIDTH : f32 = 55.0;
-    const MAX_BUTTON_HEIGHT : f32 = 45.0;
+    const MIN_LCD_PANEL_HEIGHT: f32 = 100.0;
+    const MIN_BUTTON_HEIGHT: f32 = 33.0;
+    const MIN_BUTTON_WIDTH: f32 = 55.0;
+    const MAX_BUTTON_HEIGHT: f32 = 45.0;
 
     // The buttons take up rows * (button height + button spacing) + container spacing.
     let b_h = ((height as f32 - MIN_LCD_PANEL_HEIGHT) / 8.0 - 4.0).max(MIN_BUTTON_HEIGHT).min(MAX_BUTTON_HEIGHT);
