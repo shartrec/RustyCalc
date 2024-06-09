@@ -20,7 +20,7 @@
  *
  */
 
-use iced::{alignment, Background, Border, Color, Command, Degrees, Element, event, Event, Font, gradient, Length, Pixels, Radians, Renderer, Shadow, Subscription, Theme, Vector, window};
+use iced::{Background, Border, Color, Command, Degrees, Element, event, Event, Font, gradient, Length, Pixels, Radians, Renderer, Shadow, Subscription, Theme, Vector, window};
 use iced::alignment::{Horizontal, Vertical};
 use iced::font::{Family, Stretch, Style, Weight};
 use iced::widget::{Button, Column, Container, container, Row, text, text_editor};
@@ -69,12 +69,12 @@ impl CalculatorApp {
             // .height(Length::Fill)
             .style(|_theme, _status| {
                 text_editor::Appearance {
-                    background: Background::Color(Color::from_rgba8(0, 0, 0, 0.0)),
+                    background: Background::Color(Color::TRANSPARENT),
                     border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
                     icon: Default::default(),
                     placeholder: Default::default(),
                     value: Color::BLACK,
-                    selection: Default::default(),
+                    selection: Color::from_rgb8(0x7f, 0x9f, 0x9f),
                 }
             })
             .on_action(|action| {
@@ -102,16 +102,36 @@ impl CalculatorApp {
                 None => String::from(""),
             })
             .width(Length::Fill)
-            .horizontal_alignment(alignment::Horizontal::Right)
+            .horizontal_alignment(Horizontal::Right)
             .font(font2)
             .into();
 
-        let mode = text(self.calc.angle_mode())
-            .width(Length::Fill)
-            .horizontal_alignment(alignment::Horizontal::Right)
+
+        let mode: Element<Message> = Button::new(text(self.calc.angle_mode()))
+            .style(|_theme, _status| {
+                Appearance {
+                    background: Some(Background::Color(Color::TRANSPARENT)),
+                    text_color: Color::BLACK,
+                    border: Border::default(),
+                    shadow: Default::default(),
+                }
+            })
+            .on_press(Message::ToggleMode)
             .into();
 
-        let top = Column::with_children([mode, lcd, result]).spacing(5);
+        let con_mode = Container::new(mode)
+            .width(Length::Fill)
+            .align_x(Horizontal::Right)
+            .clip(false)
+            .into();
+
+
+        // let mode = text(self.calc.angle_mode())
+        //     .width(Length::Fill)
+        //     .horizontal_alignment(Horizontal::Right)
+        //     .into();
+
+        let top = Column::with_children([con_mode, lcd, result]).spacing(5);
         let lcd_container = container(top)
             .width(Length::Fill)
             .height(lcd_height)
@@ -158,24 +178,25 @@ impl CalculatorApp {
         let b_ln = ButtonBuilder::for_func("ln", w, h).make();
         let b_log = ButtonBuilder::for_func("log", w, h).make();
         let b_log2 = ButtonBuilder::for_func("log2", w, h).make();
-        let b_sqrt = ButtonBuilder::for_func("√", w, h).make();
+        let b_sqrt = ButtonBuilder::new("√", w, h).msg(Message::Func("sqrt".to_string())).make();
         let b_abs = ButtonBuilder::for_func("abs", w, h).make();
         let b_ceil = ButtonBuilder::for_func("ceil", w, h).make();
         let b_floor = ButtonBuilder::for_func("floor", w, h).make();
         let b_fact = ButtonBuilder::for_func("!", w, h).make();
         // Command buttons
-        let b_equals = ButtonBuilder::for_func("=", w, h).msg(Message::Evaluate).make();
-        let b_clear = ButtonBuilder::for_func("AC", w, h).msg(Message::Clear).make();
-        let b_left = ButtonBuilder::for_func("<-", w, h).msg(Message::MoveLeft).make();
-        let b_right = ButtonBuilder::for_func("->", w, h).msg(Message::MoveRight).make();
-        let b_back = ButtonBuilder::for_func("<del", w, h).msg(Message::BackSpace).make();
-        let b_drg = ButtonBuilder::for_func("DRG", w, h).msg(Message::ToggleMode).make();
+        let b_equals = ButtonBuilder::new("=", w, h).msg(Message::Evaluate).make();
+        let b_clear = ButtonBuilder::new("AC", w, h).msg(Message::Clear)
+            .colors((Color::from_rgb8(0xf0, 0x24, 0x24), Color::from_rgb8(0xD0, 0x24, 0x24))).make();
+        let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
+        let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
+        let b_back = ButtonBuilder::new("<-del", w, h).msg(Message::BackSpace).make();
+        let b_more = ButtonBuilder::new("more..", w, h).msg(Message::Menu).make();
 
         let col_all = Column::with_children([
             lcd_container.into(),
             Row::with_children([
                 Column::with_children([
-                    Row::with_children([b_back, b_left, b_right, b_clear, b_drg]).spacing(2).into(),
+                    Row::with_children([b_back, b_left, b_right, b_more, b_clear]).spacing(2).into(),
                     Row::with_children([b_sin, b_cos, b_tan, b_sqrt, b_abs]).spacing(2).into(),
                     Row::with_children([b_asin, b_acos, b_atan, b_ceil, b_floor]).spacing(2).into(),
                     Row::with_children([b_exp, b_ln, b_log, b_log2, b_fact]).spacing(2).into(),
@@ -220,12 +241,43 @@ impl CalculatorApp {
                 Command::none()
             }
             Message::Func(s) => {
-                for c in s.chars() {
-                    self.content.perform(Action::Edit(Edit::Insert(c)));
+                // If we have a selection, we want to surround it with the function
+                if let Some(sel) = self.content.selection() {
+                    for c in s.chars() {
+                        self.content.perform(Action::Edit(Edit::Insert(c)));
+                    }
+                    self.content.perform(Action::Edit(Edit::Insert('(')));
+                    for c in sel.chars() {
+                        self.content.perform(Action::Edit(Edit::Insert(c)));
+                    }
+                    self.content.perform(Action::Edit(Edit::Insert(')')));
+                    Command::none()
+                } else {
+                    // determine if we are at the end of the text. If so surround all text in function call
+                    let cursor = self.content.cursor_position();
+                    let line_count = self.content.line_count();
+
+                    if cursor.0 == line_count - 1 && cursor.1 == self.content.line(cursor.0).unwrap().len()
+                       && cursor != (0,0) {
+                        self.content.perform(Action::Move(Motion::DocumentStart));
+                        for c in s.chars() {
+                            self.content.perform(Action::Edit(Edit::Insert(c)));
+                        }
+                        self.content.perform(Action::Edit(Edit::Insert('(')));
+                        Command::batch(vec![
+                            // Send the Message::MoveLeft message
+                            Command::perform(async {}, |_| Message::MoveEnd),
+                            Command::perform(async {}, |_| Message::Char(")".to_string()))
+                        ])
+                    } else {  //otherwise insert the function and move cursor between the parentheses
+                        for c in s.chars() {
+                            self.content.perform(Action::Edit(Edit::Insert(c)));
+                        }
+                        self.content.perform(Action::Edit(Edit::Insert('(')));
+                        self.content.perform(Action::Edit(Edit::Insert(')')));
+                        Command::perform(async {}, |_| Message::MoveLeft)
+                    }
                 }
-                self.content.perform(Action::Edit(Edit::Insert('(')));
-                self.content.perform(Action::Edit(Edit::Insert(')')));
-                Command::perform(async {}, |_| Message::MoveLeft)
             }
             Message::EditorAction(action) => {
                 match action {
@@ -255,6 +307,10 @@ impl CalculatorApp {
                 self.content.perform(Action::Move(Motion::Right));
                 Command::none()
             }
+            Message::MoveEnd => {
+                self.content.perform(Action::Move(Motion::DocumentEnd));
+                Command::none()
+            }
             Message::BackSpace => {
                 self.content.perform(Action::Edit(Edit::Backspace));
                 Command::none()
@@ -272,6 +328,10 @@ impl CalculatorApp {
                 });
                 Command::none()
             }
+            Message::Menu => {
+                // todo Show menu
+                Command::none()
+            }
         }
     }
 }
@@ -280,29 +340,38 @@ struct ButtonBuilder<'a> {
     name : &'a str,
     w : Length,
     h : Length,
-    msg : Option<Message>
+    msg : Option<Message>,
+    colors : Option<(Color, Color)>,
 }
 impl <'a> ButtonBuilder<'static> {
 
     fn new(name: &'static str, w: Length, h: Length) -> Self {
-        Self {name, w, h , msg: None}
+        Self {name, w, h , msg: None, colors: None}
     }
 
     fn for_func(name: &'static str, w: Length, h: Length) -> Self {
-        Self {name, w, h, msg: Some(Message::Func(name.to_string()))}
+        Self {name, w, h, msg: Some(Message::Func(name.to_string())), colors: None}
     }
     fn msg(&mut self, msg : Message) -> &mut ButtonBuilder<'static> {
         self.msg = Some(msg);
         self
     }
+
+    fn colors(&mut self, colors : (Color, Color)) -> &mut ButtonBuilder<'static> {
+        self.colors = Some(colors);
+        self
+    }
+
     fn make(&mut self) -> Element<'static, Message> {
-        make_button(self.w, self.h, self.name, self.msg.take().unwrap_or(Message::Char(self.name.to_string())))
+        make_button(self.w, self.h, self.name,
+                    self.msg.take().unwrap_or(Message::Char(self.name.to_string())),
+                    self.colors.take().unwrap_or((Color::from_rgb8(0x24, 0x24, 0x24), Color::from_rgb8(0x55, 0x55, 0x55))))
     }
 }
 
 
 /// Make a button in a container that centers it
-fn make_button(width: Length, height: Length, name: &str, msg: Message) -> Element<Message> {
+fn make_button(width: Length, height: Length, name: &str, msg: Message, colors: (Color, Color)) -> Element<Message> {
     let container = Container::new(name)
         .align_x(Horizontal::Center)
         .align_y(Vertical::Center)
@@ -311,19 +380,19 @@ fn make_button(width: Length, height: Length, name: &str, msg: Message) -> Eleme
     Button::new(container)
         .width(width)
         .height(height)
-        .style(|_theme, status| {
-            crate::ui::window::get_style(status)
+        .style(move |_theme, status| {
+            crate::ui::window::get_style(status, colors)
         })
         .on_press(msg)
         .into()
 }
 
-fn get_style(status: Status) -> Appearance {
+fn get_style(status: Status, colors: (Color, Color)) -> Appearance {
     match status {
         Status::Active => {
             let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
-                .add_stop(0.0, Color::from_rgb8(0x24, 0x24, 0x24))
-                .add_stop(1.0, Color::from_rgb8(0x55, 0x55, 0x55));
+                .add_stop(0.0, colors.0)
+                .add_stop(1.0, colors.1);
 
             Appearance {
                 background: Some(Background::from(g)),
@@ -346,7 +415,7 @@ fn get_style(status: Status) -> Appearance {
         }
         Status::Pressed => {
             Appearance {
-                background: None,
+                background: Some(Background::from(Color::from_rgb8(0xd0, 0xd0, 0xd0))),
                 text_color: Color::BLACK,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
                 shadow: Default::default(),
@@ -369,7 +438,7 @@ fn get_style(status: Status) -> Appearance {
 /// Returns the height of the *LCD* panel, followed by the height and width of the buttons.
 /// The returned values may be Length::Fill
 fn get_container_sizes(width: u32, height: u32) -> (Length, Length, Length) {
-    const MIN_LCD_PANEL_HEIGHT: f32 = 100.0;
+    const MIN_LCD_PANEL_HEIGHT: f32 = 110.0;
     const MIN_BUTTON_HEIGHT: f32 = 33.0;
     const MIN_BUTTON_WIDTH: f32 = 55.0;
     const MAX_BUTTON_HEIGHT: f32 = 45.0;
