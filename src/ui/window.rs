@@ -142,7 +142,6 @@ impl CalculatorApp {
 
         // The standard numer buttons
         let b_one = ButtonBuilder::new("1", w, h).make();
-        // let b_one = Builder::new("1", w, h).make();
         let b_two = ButtonBuilder::new("2", w, h).make();
         let b_three = ButtonBuilder::new("3", w, h).make();
         let b_four = ButtonBuilder::new("4", w, h).make();
@@ -337,30 +336,26 @@ struct ButtonBuilder<'a> {
     msg : Option<Message>,
     colors : Option<(Color, Color)>,
 }
-impl <'a> ButtonBuilder<'static> {
+impl <'a> ButtonBuilder<'a> {
 
-    fn new(name: &'static str, w: Length, h: Length) -> Self {
+    fn new(name: &'a str, w: Length, h: Length) -> Self {
         Self {name, w, h , msg: None, colors: None}
     }
 
-    fn for_func(name: &'static str, w: Length, h: Length) -> Self {
+    fn for_func(name: &'a str, w: Length, h: Length) -> Self {
         Self {name, w, h, msg: Some(Message::Func(name.to_string())), colors: None}
     }
-    fn msg(self, msg : Message) -> Self {
-        Self {
-            msg : Some(msg),
-            ..self
-    }
+    fn msg(mut self, msg : Message) -> Self {
+        self.msg = Some(msg);
+        self
     }
 
-    fn colors(self, colors : (Color, Color)) -> Self {
-        Self {
-            colors : Some(colors),
-            ..self
-        }
+    fn colors(mut self, colors : (Color, Color)) -> Self {
+        self.colors = Some(colors);
+        self
     }
 
-    fn make(self) -> Element<'static, Message> {
+    fn make(self) -> Element<'a, Message> {
         make_button(self.w, self.h, self.name,
                     self.msg.unwrap_or_else(|| {Message::Char(self.name.to_string())}),
                     self.colors.unwrap_or_else(|| {(Color::from_rgb8(0x24, 0x24, 0x24), Color::from_rgb8(0x55, 0x55, 0x55))}))
