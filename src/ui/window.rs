@@ -166,8 +166,8 @@ impl CalculatorApp {
         // Command buttons
         let b_equals = ButtonBuilder::for_func("=", w, h).msg(Message::Evaluate).make();
         let b_clear = ButtonBuilder::for_func("AC", w, h).msg(Message::Clear).make();
-        let b_left = ButtonBuilder::for_func("<-", w, h).msg(Message::Move(-1)).make();
-        let b_right = ButtonBuilder::for_func("->", w, h).msg(Message::Move(1)).make();
+        let b_left = ButtonBuilder::for_func("<-", w, h).msg(Message::MoveLeft).make();
+        let b_right = ButtonBuilder::for_func("->", w, h).msg(Message::MoveRight).make();
         let b_back = ButtonBuilder::for_func("<del", w, h).msg(Message::BackSpace).make();
         let b_drg = ButtonBuilder::for_func("DRG", w, h).msg(Message::ToggleMode).make();
 
@@ -225,7 +225,7 @@ impl CalculatorApp {
                 }
                 self.content.perform(Action::Edit(Edit::Insert('(')));
                 self.content.perform(Action::Edit(Edit::Insert(')')));
-                Command::perform(async {-1}, |i| Message::Move { 0: i })
+                Command::perform(async {}, |_| Message::MoveLeft)
             }
             Message::EditorAction(action) => {
                 match action {
@@ -247,12 +247,12 @@ impl CalculatorApp {
                 self.result = None;
                 Command::none()
             }
-            Message::Move(i) => {
-                if i == -1 {
-                    self.content.perform(Action::Move(Motion::Left));
-                } else if i == 1 {
-                    self.content.perform(Action::Move(Motion::Right));
-                }
+            Message::MoveLeft => {
+                self.content.perform(Action::Move(Motion::Left));
+                Command::none()
+            }
+            Message::MoveRight => {
+                self.content.perform(Action::Move(Motion::Right));
                 Command::none()
             }
             Message::BackSpace => {
