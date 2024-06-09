@@ -20,9 +20,9 @@
  *
  */
 
-use iced::{alignment, Background, Border, Color, Command, Degrees, Element, event, Event, gradient,
-           Length, Pixels, Radians, Renderer, Shadow, Subscription, Theme, Vector, window};
+use iced::{alignment, Background, Border, Color, Command, Degrees, Element, event, Event, Font, gradient, Length, Pixels, Radians, Renderer, Shadow, Subscription, Theme, Vector, window};
 use iced::alignment::{Horizontal, Vertical};
+use iced::font::{Family, Stretch, Style, Weight};
 use iced::widget::{Button, Column, Container, container, Row, text, text_editor};
 use iced::widget::button::{Appearance, Status};
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
@@ -57,6 +57,12 @@ impl CalculatorApp {
         // Get the sizes for the major blocks
         let (lcd_height, button_height, button_width) = get_container_sizes(self.window_width, self.window_height);
 
+        let font1 = Font {
+            family: Family::Monospace,
+            weight: Weight::Bold,
+            stretch: Stretch::Normal,
+            style: Style::Normal,
+        };
 
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
@@ -74,22 +80,30 @@ impl CalculatorApp {
             .on_action(|action| {
                 Message::EditorAction(action)
             })
+            .font(font1)
             .into();
 
+        let font2 = Font {
+            family: Family::SansSerif,
+            weight: Weight::Bold,
+            stretch: Stretch::Normal,
+            style: Style::Normal,
+        };
         let result = text(match &self.result {
-            Some(r) => {
-                match r {
-                    Ok(v) => {
-                        let formatted = format!("= {0:.1$}", v, 10);
-                        formatted.trim_end_matches('0').trim_end_matches('.').to_string()
+                Some(r) => {
+                    match r {
+                        Ok(v) => {
+                            let formatted = format!("= {0:.1$}", v, 10);
+                            formatted.trim_end_matches('0').trim_end_matches('.').to_string()
+                        }
+                        Err(e) => e.clone()
                     }
-                    Err(e) => e.clone()
                 }
-            }
-            None => String::from(""),
-        })
+                None => String::from(""),
+            })
             .width(Length::Fill)
             .horizontal_alignment(alignment::Horizontal::Right)
+            .font(font2)
             .into();
 
         let mode = text(self.calc.angle_mode())
@@ -113,48 +127,49 @@ impl CalculatorApp {
         let h = button_height;
 
         // The standard numer buttons
-        let b_one = make_button(w, h, "1");
-        let b_two = make_button(w, h, "2");
-        let b_three = make_button(w, h, "3");
-        let b_four = make_button(w, h, "4");
-        let b_five = make_button(w, h, "5");
-        let b_six = make_button(w, h, "6");
-        let b_seven = make_button(w, h, "7");
-        let b_eight = make_button(w, h, "8");
-        let b_nine = make_button(w, h, "9");
-        let b_zero = make_button(w, h, "0");
-        let b_dec = make_button(w, h, ".");
+        let b_one = ButtonBuilder::new("1", w, h).make();
+        // let b_one = Builder::new("1", w, h).make();
+        let b_two = ButtonBuilder::new("2", w, h).make();
+        let b_three = ButtonBuilder::new("3", w, h).make();
+        let b_four = ButtonBuilder::new("4", w, h).make();
+        let b_five = ButtonBuilder::new("5", w, h).make();
+        let b_six = ButtonBuilder::new("6", w, h).make();
+        let b_seven = ButtonBuilder::new("7", w, h).make();
+        let b_eight = ButtonBuilder::new("8", w, h).make();
+        let b_nine = ButtonBuilder::new("9", w, h).make();
+        let b_zero = ButtonBuilder::new("0", w, h).make();
+        let b_dec = ButtonBuilder::new(".", w, h).make();
         // Basic operations
-        let b_plus = make_button(w, h, "+");
-        let b_minus = make_button(w, h, "-");
-        let b_mult = button_with_msg(w, h, "x", Message::Char("*".to_string()));
-        let b_div = make_button(w, h, "/");
-        let b_pow = make_button(w, h, "^");
-        let b_lparen = button_with_msg(w, h, "(", Message::Func("()".to_string()));
-        let b_rparen = make_button(w, h, ")");
+        let b_plus = ButtonBuilder::new("+", w, h).make();
+        let b_minus = ButtonBuilder::new("-", w, h).make();
+        let b_mult = ButtonBuilder::new("x", w, h).msg(Message::Char("*".to_string())).make();
+        let b_div = ButtonBuilder::new("/", w, h).make();
+        let b_pow = ButtonBuilder::new("^", w, h).make();
+        let b_lparen = ButtonBuilder::new("(", w, h).msg(Message::Func("".to_string())).make();
+        let b_rparen = ButtonBuilder::new(")", w, h).make();
         // Functions
-        let b_sin = button_with_msg(w, h, "sin", Message::Func("sin()".to_string()));
-        let b_cos = button_with_msg(w, h, "cos", Message::Func("cos()".to_string()));
-        let b_tan = button_with_msg(w, h, "tan", Message::Func("tan()".to_string()));
-        let b_asin = button_with_msg(w, h, "asin", Message::Func("asin()".to_string()));
-        let b_acos = button_with_msg(w, h, "acos", Message::Func("acos()".to_string()));
-        let b_atan = button_with_msg(w, h, "atan", Message::Func("atan()".to_string()));
-        let b_exp = button_with_msg(w, h, "exp", Message::Func("exp()".to_string()));
-        let b_ln = button_with_msg(w, h, "ln", Message::Func("ln()".to_string()));
-        let b_log = button_with_msg(w, h, "log", Message::Func("log()".to_string()));
-        let b_log2 = button_with_msg(w, h, "log2", Message::Func("log2()".to_string()));
-        let b_sqrt = button_with_msg(w, h, "√", Message::Func("sqrt()".to_string()));
-        let b_abs = button_with_msg(w, h, "abs", Message::Func("abs()".to_string()));
-        let b_ceil = button_with_msg(w, h, "ceil", Message::Func("ceil()".to_string()));
-        let b_floor = button_with_msg(w, h, "floor", Message::Func("floor()".to_string()));
-        let b_fact = button_with_msg(w, h, "!", Message::Func("factorial()".to_string()));
+        let b_sin = ButtonBuilder::for_func("sin", w, h).make();
+        let b_cos = ButtonBuilder::for_func("cos", w, h).make();
+        let b_tan = ButtonBuilder::for_func("tan", w, h).make();
+        let b_asin = ButtonBuilder::for_func("asin", w, h).make();
+        let b_acos = ButtonBuilder::for_func("acos", w, h).make();
+        let b_atan = ButtonBuilder::for_func("atan", w, h).make();
+        let b_exp = ButtonBuilder::for_func("exp", w, h).make();
+        let b_ln = ButtonBuilder::for_func("ln", w, h).make();
+        let b_log = ButtonBuilder::for_func("log", w, h).make();
+        let b_log2 = ButtonBuilder::for_func("log2", w, h).make();
+        let b_sqrt = ButtonBuilder::for_func("√", w, h).make();
+        let b_abs = ButtonBuilder::for_func("abs", w, h).make();
+        let b_ceil = ButtonBuilder::for_func("ceil", w, h).make();
+        let b_floor = ButtonBuilder::for_func("floor", w, h).make();
+        let b_fact = ButtonBuilder::for_func("!", w, h).make();
         // Command buttons
-        let b_equals = button_with_msg(w, h, "=", Message::Evaluate);
-        let b_clear = button_with_msg(w, h, "AC", Message::Clear);
-        let b_left = button_with_msg(w, h, "<-", Message::Move(-1));
-        let b_right = button_with_msg(w, h, "->", Message::Move(1));
-        let b_back = button_with_msg(w, h, "<del", Message::BackSpace);
-        let b_drg = button_with_msg(w, h, "DRG", Message::ToggleMode);
+        let b_equals = ButtonBuilder::for_func("=", w, h).msg(Message::Evaluate).make();
+        let b_clear = ButtonBuilder::for_func("AC", w, h).msg(Message::Clear).make();
+        let b_left = ButtonBuilder::for_func("<-", w, h).msg(Message::Move(-1)).make();
+        let b_right = ButtonBuilder::for_func("->", w, h).msg(Message::Move(1)).make();
+        let b_back = ButtonBuilder::for_func("<del", w, h).msg(Message::BackSpace).make();
+        let b_drg = ButtonBuilder::for_func("DRG", w, h).msg(Message::ToggleMode).make();
 
         let col_all = Column::with_children([
             lcd_container.into(),
@@ -208,9 +223,9 @@ impl CalculatorApp {
                 for c in s.chars() {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
-                // self.content.perform(Action::Move(Motion::End));
-                self.content.perform(Action::Move(Motion::Left));
-                Command::none()
+                self.content.perform(Action::Edit(Edit::Insert('(')));
+                self.content.perform(Action::Edit(Edit::Insert(')')));
+                Command::perform(async {-1}, |i| Message::Move { 0: i })
             }
             Message::EditorAction(action) => {
                 match action {
@@ -229,6 +244,7 @@ impl CalculatorApp {
                 self.content.perform(Action::Move(Motion::DocumentStart));
                 self.content.perform(Action::Select(Motion::DocumentEnd));
                 self.content.perform(Action::Edit(Edit::Delete));
+                self.result = None;
                 Command::none()
             }
             Message::Move(i) => {
@@ -250,9 +266,9 @@ impl CalculatorApp {
             }
             Message::ToggleMode => {
                 self.calc.set_angle_mode(match self.calc.angle_mode() {
-                    AngleMode::Degrees => AngleMode::Gradians,
-                    AngleMode::Radians => AngleMode::Degrees,
-                    AngleMode::Gradians => AngleMode::Radians
+                    AngleMode::Degrees => AngleMode::Radians,
+                    AngleMode::Radians => AngleMode::Gradians,
+                    AngleMode::Gradians => AngleMode::Degrees,
                 });
                 Command::none()
             }
@@ -260,13 +276,33 @@ impl CalculatorApp {
     }
 }
 
-/// Make a button in a container that centers it using the default Message generated from the button text
-fn make_button(width: Length, height: Length, name: &str) -> Element<Message> {
-    crate::ui::window::button_with_msg(width, height, name, Message::Char(name.to_string()))
+struct ButtonBuilder<'a> {
+    name : &'a str,
+    w : Length,
+    h : Length,
+    msg : Option<Message>
+}
+impl <'a> ButtonBuilder<'static> {
+
+    fn new(name: &'static str, w: Length, h: Length) -> Self {
+        Self {name, w, h , msg: None}
+    }
+
+    fn for_func(name: &'static str, w: Length, h: Length) -> Self {
+        Self {name, w, h, msg: Some(Message::Func(name.to_string()))}
+    }
+    fn msg(&mut self, msg : Message) -> &mut ButtonBuilder<'static> {
+        self.msg = Some(msg);
+        self
+    }
+    fn make(&mut self) -> Element<'static, Message> {
+        make_button(self.w, self.h, self.name, self.msg.take().unwrap_or(Message::Char(self.name.to_string())))
+    }
 }
 
+
 /// Make a button in a container that centers it
-fn button_with_msg(width: Length, height: Length, name: &str, msg: Message) -> Element<Message> {
+fn make_button(width: Length, height: Length, name: &str, msg: Message) -> Element<Message> {
     let container = Container::new(name)
         .align_x(Horizontal::Center)
         .align_y(Vertical::Center)
