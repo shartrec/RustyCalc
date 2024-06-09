@@ -21,6 +21,7 @@
  */
 
 use iced::{program, Size};
+use iced::Settings;
 
 use crate::ui::window::CalculatorApp;
 
@@ -32,8 +33,26 @@ mod ui;
 
 /// Calculate.
 fn main() -> iced::Result {
+
+    // let event_loop = EventLoop::new();
+    // let window_builder = WindowBuilder::new()
+    //     .with_title("KelpieCalc")
+    //     .with_window_class("KelpieCalcClass", "KelpieCalcIcon");
+    //
+    let window_settings = iced::window::Settings {
+        size: Size::new(330.0, 450.0),
+        min_size: Some(Size::new(300.0, 420.0)),
+        ..iced::window::Settings::default()
+    };
+
+    let settings = Settings {
+        id: Some(String::from("RustyCalc")),
+        window: window_settings,
+        .. Settings::default()
+    };
+
     program("My Calculator", CalculatorApp::update, CalculatorApp::view)
-        .window_size(Size::new(330.0, 450.0))
+        .settings(settings)
         .subscription(CalculatorApp::subscription)
         .run()
 }
