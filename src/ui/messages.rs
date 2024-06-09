@@ -25,13 +25,15 @@ use iced::widget::text_editor::Action;
 #[derive(Debug, Clone)]
 pub enum Message {
     WindowResized(u32, u32),
-    Char(String),
     EditorAction(Action),
+    Char(String),
     Func(String),
     MoveRight,
     MoveLeft,
+    MoveEnd,
     BackSpace,
     Clear,
     Evaluate,
     ToggleMode,
+    Menu,
 }
