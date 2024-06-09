@@ -110,7 +110,7 @@ pub(crate) enum AngleMode {
 
 impl Default for AngleMode {
     fn default() -> Self {
-        AngleMode::Radians
+        AngleMode::Degrees
     }
 }
 impl Display for AngleMode {
