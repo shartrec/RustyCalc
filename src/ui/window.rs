@@ -182,7 +182,7 @@ impl CalculatorApp {
         let b_abs = ButtonBuilder::for_func("abs", w, h).make();
         let b_ceil = ButtonBuilder::for_func("ceil", w, h).make();
         let b_floor = ButtonBuilder::for_func("floor", w, h).make();
-        let b_fact = ButtonBuilder::for_func("!", w, h).make();
+        let b_fact = ButtonBuilder::for_func("!", w, h).msg(Message::Func("factorial".to_string())).make();
         // Command buttons
         let b_equals = ButtonBuilder::new("=", w, h).msg(Message::Evaluate).make();
         let b_clear = ButtonBuilder::new("AC", w, h).msg(Message::Clear)
@@ -352,20 +352,24 @@ impl <'a> ButtonBuilder<'static> {
     fn for_func(name: &'static str, w: Length, h: Length) -> Self {
         Self {name, w, h, msg: Some(Message::Func(name.to_string())), colors: None}
     }
-    fn msg(&mut self, msg : Message) -> &mut ButtonBuilder<'static> {
-        self.msg = Some(msg);
-        self
+    fn msg(self, msg : Message) -> Self {
+        Self {
+            msg : Some(msg),
+            ..self
+        }
     }
 
-    fn colors(&mut self, colors : (Color, Color)) -> &mut ButtonBuilder<'static> {
-        self.colors = Some(colors);
-        self
+    fn colors(self, colors : (Color, Color)) -> Self {
+        Self {
+            colors : Some(colors),
+            ..self
+        }
     }
 
-    fn make(&mut self) -> Element<'static, Message> {
+    fn make(self) -> Element<'static, Message> {
         make_button(self.w, self.h, self.name,
-                    self.msg.take().unwrap_or(Message::Char(self.name.to_string())),
-                    self.colors.take().unwrap_or((Color::from_rgb8(0x24, 0x24, 0x24), Color::from_rgb8(0x55, 0x55, 0x55))))
+                    self.msg.unwrap_or_else(|| {Message::Char(self.name.to_string())}),
+                    self.colors.unwrap_or_else(|| {(Color::from_rgb8(0x24, 0x24, 0x24), Color::from_rgb8(0x55, 0x55, 0x55))}))
     }
 }
 
@@ -381,7 +385,7 @@ fn make_button(width: Length, height: Length, name: &str, msg: Message, colors: 
         .width(width)
         .height(height)
         .style(move |_theme, status| {
-            crate::ui::window::get_style(status, colors)
+            get_style(status, colors)
         })
         .on_press(msg)
         .into()
