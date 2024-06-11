@@ -84,9 +84,9 @@ impl multi_window::Application for CalculatorApp {
 
             Message::FuncPopup => {
                 // Get the position of the main window
-                let (x,y) = self.main_window.position();
+                let (x, y) = self.main_window.position();
                 // window moved events only work on some platforms, so if "(0, 0)" use default
-                let (w, h) = self.main_window.size();
+                let (w, _h) = self.main_window.size();
                 let new_pos =  if (x, y) == (0, 0) {
                     Position::Default
                 } else {
