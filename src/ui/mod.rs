@@ -22,5 +22,7 @@
 
 pub(crate) mod calculator;
 mod messages;
-pub(crate) mod window;
+pub(crate) mod calculator_app;
+mod func_popup;
+mod calc_window;
 

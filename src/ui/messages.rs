@@ -21,10 +21,12 @@
  */
 
 use iced::widget::text_editor::Action;
+use iced::window::Id;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    WindowResized(u32, u32),
+    WindowResized(Id, u32, u32),
+    WindowMoved(Id, i32, i32),
     EditorAction(Action),
     Char(String),
     Func(String),
@@ -35,5 +37,5 @@ pub enum Message {
     Clear,
     Evaluate,
     ToggleMode,
-    Menu,
+    FuncPopup,
 }

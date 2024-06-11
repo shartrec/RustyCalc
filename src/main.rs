@@ -20,10 +20,11 @@
  *
  */
 
-use iced::{program, Size};
+use iced::multi_window::Application;
 use iced::Settings;
+use iced::Size;
 
-use crate::ui::window::CalculatorApp;
+use crate::ui::calculator_app::CalculatorApp;
 
 mod evaluator;
 
@@ -40,7 +41,7 @@ fn main() -> iced::Result {
     //     .with_window_class("KelpieCalcClass", "KelpieCalcIcon");
     //
     let window_settings = iced::window::Settings {
-        size: Size::new(330.0, 450.0),
+        size: Size::new(330.0, 420.0),
         min_size: Some(Size::new(300.0, 420.0)),
         ..iced::window::Settings::default()
     };
@@ -51,9 +52,6 @@ fn main() -> iced::Result {
         .. Settings::default()
     };
 
-    program("My Calculator", CalculatorApp::update, CalculatorApp::view)
-        .settings(settings)
-        .subscription(CalculatorApp::subscription)
-        .run()
+    CalculatorApp::run(settings)
 }
 
