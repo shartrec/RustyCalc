@@ -104,6 +104,6 @@ mod tests {
             name: "Pi",
             value: 50.2,
         };
-        assert_near!(f.value(), 50.2);
+        assert_near!(f.value, 50.2);
     }
 }
