@@ -23,6 +23,7 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
 
+use crate::evaluator::constants::Constant;
 use crate::evaluator::functions::Function;
 use crate::evaluator::parser::Parser;
 use crate::evaluator::tokeniser::tokenize;
@@ -30,6 +31,7 @@ use crate::evaluator::tokeniser::tokenize;
 mod functions;
 pub(crate) mod parser;
 pub(crate) mod tokeniser;
+mod constants;
 
 #[derive(Clone, Debug)]
 pub(crate) enum Token {
@@ -126,6 +128,7 @@ impl Display for AngleMode {
 pub(crate) struct Evaluator<'a> {
     angle_mode: &'a AngleMode,
     function_register: Vec<Function>,
+    constant_register: Vec<Constant>,
 }
 
 impl<'a> Evaluator<'a> {
@@ -133,6 +136,7 @@ impl<'a> Evaluator<'a> {
         Self {
             angle_mode,
             function_register: functions::get_all(),
+            constant_register: constants::get_all(),
         }
     }
 
@@ -155,5 +159,8 @@ impl<'a> Evaluator<'a> {
     }
     pub fn function_register(&self) -> &Vec<Function> {
         &self.function_register
+    }
+    pub fn constant_register(&self) -> &Vec<Constant> {
+        &self.constant_register
     }
 }

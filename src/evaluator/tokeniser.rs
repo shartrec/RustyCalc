@@ -50,12 +50,23 @@ pub(crate) fn tokenize(expression: &str, evaluator: &Evaluator) -> Result<Vec<To
             _ => {
                 // We now look for a function.
                 match parse_functions(&chars, chars.len(), i, &evaluator) {
-                    Ok((token, consumed)) => {
+                    Some((token, consumed)) => {
                         tokens.push(token);
                         i += consumed;
                         continue;
                     }
-                    Err(e) => return Err(e),
+                    None => {
+                        match parse_constants(&chars, chars.len(), i, &evaluator) {
+                            Some((token, consumed)) => {
+                                tokens.push(token);
+                                i += consumed;
+                                continue;
+                            }
+                            None => {
+                                return Err(format!("Invalid token '{}' at position: {}", chars[i], i))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -70,11 +81,24 @@ fn parse_functions(
     exp_len: usize,
     i: usize,
     evaluator: &Evaluator,
-) -> Result<(Token, usize), String> {
+) -> Option<(Token, usize)> {
     for function in evaluator.function_register() {
         if let Some((token, consumed)) = function.is_token(chars, &exp_len, &i) {
-            return Ok((token, consumed));
+            return Some((token, consumed));
         }
     }
-    Err(format!("Invalid token '{}' at position: {}", &chars[i], i))
+    None
+}
+fn parse_constants(
+    chars: &Vec<char>,
+    exp_len: usize,
+    i: usize,
+    evaluator: &Evaluator,
+) -> Option<(Token, usize)> {
+    for constant in evaluator.constant_register() {
+        if let Some((token, consumed)) = constant.is_token(chars, &exp_len, &i) {
+            return Some((token, consumed));
+        }
+    }
+    None
 }

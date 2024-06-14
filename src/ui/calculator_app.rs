@@ -24,15 +24,28 @@ use iced::{Command, Element, event, Event, executor, multi_window, Point, Size, 
 use iced::widget::text;
 use iced::window::{Id, Level, Position};
 
+use crate::ui;
 use crate::ui::calc_window::CalcWindow;
-use crate::ui::messages::Message;
 use crate::ui::func_popup::FuncPopup;
+use crate::ui::messages::Message;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(crate) struct CalculatorApp {
     main_window: CalcWindow,
-    settings_window: Option<(Id, FuncPopup)>,
+    pick_window: Option<(Id, FuncPopup)>,
+    theme: Theme
 }
+
+impl Default for CalculatorApp {
+    fn default() -> Self {
+        Self {
+            main_window: CalcWindow::default(),
+            pick_window: None,
+            theme: ui::lcd_theme(),
+        }
+    }
+}
+
 
 impl multi_window::Application for CalculatorApp {
     type Executor = executor::Default;
@@ -64,9 +77,9 @@ impl multi_window::Application for CalculatorApp {
     fn view(&self, id: Id) -> Element<Message> {
 
         match id {
-            Id::MAIN => self.main_window.view(),
-            _ => match &self.settings_window {
-                Some((id_settings, settings)) if id == *id_settings => settings.view(),
+            Id::MAIN => self.main_window.view(id),
+            _ => match &self.pick_window {
+                Some((id_settings, settings)) if id == *id_settings => settings.view(id),
                 _ => text("WE HAVE A PROBLEM").into(),
             }
         }
@@ -77,6 +90,9 @@ impl multi_window::Application for CalculatorApp {
 
         let mut commands: Vec<Command<Message>> = vec![];
 
+        if let Some((id, window)) = &self.pick_window {
+            commands.push(window.update(id, message.clone()));
+        }
         commands.push(self.main_window.update(message.clone()));
 
 
@@ -103,8 +119,12 @@ impl multi_window::Application for CalculatorApp {
                     ..Default::default()
                 });
 
-                self.settings_window = Some((id, FuncPopup::default()));
+                self.pick_window = Some((id, FuncPopup::default()));
                 spawn_window
+            }
+            Message::ThemeChanged(t) => {
+                self.theme = t;
+                Command::none()
             }
             _ => {
                 Command::none()
@@ -117,13 +137,15 @@ impl multi_window::Application for CalculatorApp {
     fn title(&self, id: Id) -> String {
         match id {
             Id::MAIN => self.main_window.title(),
-            _ => match &self.settings_window {
+            _ => match &self.pick_window {
                 Some((id_settings, settings)) if id == *id_settings => settings.title(),
                 _ => "Unknown".to_string(),
             }
         }
     }
 
-
+    fn theme(&self, _window: Id) -> Self::Theme {
+        self.theme.clone()
+    }
 }
 

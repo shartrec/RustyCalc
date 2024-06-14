@@ -108,6 +108,54 @@ pub(crate) fn get_all() -> Vec<Function> {
             function: |v, mode| do_atrig(v, mode, f64::atan),
         },
         Function {
+            name: "cosec",
+            function: |v, mode| 1.0 / do_trig(v, mode, f64::sin)
+        },
+        Function {
+            name: "sec",
+            function: |v, mode| 1.0 / do_trig(v, mode, f64::cos),
+        },
+        Function {
+            name: "cot",
+            function: |v, mode| 1.0 / do_trig(v, mode, f64::tan),
+        },
+        Function {
+            name: "acosec",
+            function: |v, mode| do_atrig(1.0 / v, mode, f64::asin)
+        },
+        Function {
+            name: "asec",
+            function: |v, mode| do_atrig(1.0 / v, mode, f64::acos),
+        },
+        Function {
+            name: "acot",
+            function: |v, mode| do_atrig(1.0 / v, mode, f64::atan),
+        },
+        Function {
+            name: "sinh",
+            function: |v, _| v.sinh(),
+        },
+        Function {
+            name: "cosh",
+            function: |v, _| v.cosh(),
+        },
+        Function {
+            name: "tanh",
+            function: |v, _| v.tanh(),
+        },
+        Function {
+            name: "asinh",
+            function: |v, _| v.asinh(),
+        },
+        Function {
+            name: "acosh",
+            function: |v, _| v.acosh(),
+        },
+        Function {
+            name: "atanh",
+            function: |v, _| v.atanh(),
+        },
+        Function {
             name: "exp",
             function: |v, _| v.exp(),
         },

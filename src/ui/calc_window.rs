@@ -24,13 +24,16 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
-use iced::{Background, Border, Color, Command, Degrees, Element, Font, gradient, Length, Padding, Pixels, Radians, Shadow, Vector};
+use iced::{Background, Border, Color, Command, Degrees, Element, Font, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector};
 use iced::alignment::{Horizontal, Vertical};
 use iced::font::{Family, Stretch, Style, Weight};
+use iced::theme::palette::Pair;
 use iced::widget::{Button, Column, container, Container, Row, text, text_editor};
 use iced::widget::button::{Appearance, Status};
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::window::Id;
+use palette::{convert::FromColor, Hsl};
+use palette::rgb::Rgb;
 
 use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
@@ -55,6 +58,12 @@ impl CalcWindow {
     pub fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::Char(s) => {
+                for c in s.chars() {
+                    self.content.perform(Action::Edit(Edit::Insert(c)));
+                }
+                Command::none()
+            }
+            Message::Constant(s) => {
                 for c in s.chars() {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
@@ -162,11 +171,11 @@ impl CalcWindow {
             }
         }
     }
-    pub(super) fn view<'a>(&'a self) -> Element<Message> {
+    pub(super) fn view<'a>(&'a self, _id: Id) -> Element<Message> {
         // Get the sizes for the major blocks
         let font1 = Font {
-            family: Family::Monospace,
-            weight: Weight::Bold,
+            family: Family::Name("DejaVu Sans Mono"),
+            weight: Weight::Normal,
             stretch: Stretch::Normal,
             style: Style::Normal,
         };
@@ -178,10 +187,7 @@ impl CalcWindow {
                 text_editor::Appearance {
                     background: Background::Color(Color::TRANSPARENT),
                     border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
-                    icon: Default::default(),
-                    placeholder: Default::default(),
-                    value: Color::BLACK,
-                    selection: Color::from_rgb8(0x7f, 0x9f, 0x9f),
+                    .. text_editor::default(_theme, _status)
                 }
             })
             .on_action(|action| {
@@ -191,7 +197,7 @@ impl CalcWindow {
             .into();
 
         let font2 = Font {
-            family: Family::SansSerif,
+            family: Family::Name("DejaVu Sans"),
             weight: Weight::Bold,
             stretch: Stretch::Normal,
             style: Style::Normal,
@@ -200,8 +206,12 @@ impl CalcWindow {
             Some(r) => {
                 match r {
                     Ok(v) => {
-                        let formatted = format!("= {0:.1$}", v, 10);
-                        formatted.trim_end_matches('0').trim_end_matches('.').to_string()
+                        if *v < 0.001 || *v > 10000000.0 {
+                            format!("= {:+e}", v)
+                        } else {
+                            let formatted = format!("= {0:.1$}", v, 10);
+                            formatted.trim_end_matches('0').trim_end_matches('.').to_string()
+                        }
                     }
                     Err(e) => e.clone()
                 }
@@ -215,12 +225,11 @@ impl CalcWindow {
 
 
         let mode: Element<Message> = Button::new(text(self.calc.angle_mode()))
-            .style(|_theme, _status| {
+            .style(|theme: &Theme, _status| {
                 Appearance {
                     background: Some(Background::Color(Color::TRANSPARENT)),
-                    text_color: Color::BLACK,
-                    border: Border::default(),
-                    shadow: Default::default(),
+                    text_color: theme.extended_palette().background.base.text,
+                    .. Appearance::default()
                 }
             })
             .padding(Padding::from(0))
@@ -239,7 +248,7 @@ impl CalcWindow {
             .width(Length::Fill)
             .style(move |_theme, _status| {
                 container::Appearance {
-                    background: Some(Background::Color(Color::from_rgb8(0xd4, 0xed, 0xd4))),
+                    background: Some(Background::Color(_theme.extended_palette().background.strong.color)),
                     ..Default::default()
                 }
             })
@@ -288,7 +297,7 @@ impl CalcWindow {
         let b_equals = ButtonBuilder::new("=", Length::FillPortion(2), h).msg(Message::Evaluate).make();
         let b_clear = ButtonBuilder::new("AC", w, h)
             .msg(Message::Clear)
-            .colors((Color::from_rgb8(0xf0, 0x24, 0x24), Color::from_rgb8(0xD0, 0x24, 0x24)))
+            .danger(true)
             .make();
         let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
         let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
@@ -319,16 +328,8 @@ impl CalcWindow {
             .width(Length::Fill)
             .height(Length::Fill)
             .style(move |_theme, _status| {
-                let gradient = gradient::Linear::new(Radians(135.0))
-                    .add_stop(0.0, Color::from_rgb8(0x30, 0x30, 0x30))
-                    .add_stop(0.25, Color::from_rgb8(0x35, 0x35, 0x35))
-                    .add_stop(0.50, Color::from_rgb8(0x40, 0x40, 0x40))
-                    .add_stop(0.75, Color::from_rgb8(0x45, 0x45, 0x45))
-                    .add_stop(1.0, Color::from_rgb8(0x50, 0x50, 0x50))
-                    .into();
-
                 container::Appearance {
-                    background: Some(Background::Gradient(gradient)),
+                    background: Some(Background::Color(_theme.extended_palette().background.weak.color)),
                     ..Default::default()
                 }
             })
@@ -365,7 +366,7 @@ struct ButtonBuilder<'a> {
     w : Length,
     h : Length,
     msg : Option<Message>,
-    colors : Option<(Color, Color)>,
+    danger : bool,
 }
 impl <'a> ButtonBuilder<'a> {
 
@@ -386,7 +387,7 @@ impl <'a> ButtonBuilder<'a> {
     /// ButtonBuilder::new("1", w, h)
     /// ```
     fn new(name: &'a str, w: Length, h: Length) -> Self {
-        Self {name, w, h , msg: None, colors: None}
+        Self {name, w, h , msg: None, danger: false}
     }
 
     /// Get a new builder for a button that provides a Func message.
@@ -408,7 +409,7 @@ impl <'a> ButtonBuilder<'a> {
     /// ButtonBuilder::for_func("ln", w, h)
     /// ```
     fn for_func(name: &'a str, w: Length, h: Length) -> Self {
-        Self {name, w, h, msg: Some(Message::Func(name.to_string())), colors: None}
+        Self {name, w, h, msg: Some(Message::Func(name.to_string())), danger: false}
     }
 
     /// Add the message to be generated by the button. This will replace any default message.
@@ -442,26 +443,32 @@ impl <'a> ButtonBuilder<'a> {
     /// ```
     /// .colors((Color::from_rgb8(0xf0, 0x24, 0x24), Color::from_rgb8(0xD0, 0x24, 0x24)))
     /// ```
-    fn colors(mut self, colors : (Color, Color)) -> Self {
-        self.colors = Some(colors);
+    fn danger(mut self, danger: bool) -> Self {
+        self.danger = danger;
         self
     }
 
     /// Make the button
     fn make(self) -> Element<'a, Message> {
-        let container = Container::new(self.name)
+        let container: Container<'_, Message, Theme, Renderer> = Container::new(self.name)
             .align_x(Horizontal::Center)
             .align_y(Vertical::Center)
             .height(Length::Fill)
-            .width(Length::Fill)
-
-            .clip(true);
+            .width(Length::Fill);
 
         Button::new(container)
             .width(self.w)
             .height(self.h)
-            .style(move |_theme, status| {
-                let style = get_style(status, self.colors.unwrap_or((Color::from_rgb8(0x24, 0x24, 0x24), Color::from_rgb8(0x55, 0x55, 0x55))));
+            .style(move |theme, status| {
+
+                let color_active = if self.danger {
+                    theme.extended_palette().danger.strong
+                } else {
+                    theme.extended_palette().secondary.strong
+                };
+                let color_hover = theme.extended_palette().secondary.base;
+                let color_pressed = theme.extended_palette().secondary.weak;
+                let style = get_style(status, color_active, color_hover, color_pressed);
                 style
             })
             .on_press(self.msg.unwrap_or(Message::Char(self.name.to_string())))
@@ -469,36 +476,50 @@ impl <'a> ButtonBuilder<'a> {
     }
 }
 
-fn get_style(status: Status, colors: (Color, Color)) -> Appearance {
+fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> Appearance {
+    // make a gradient from the palette
+    let c1 = lighten(active.color, 0.20);
+    let c2 = darken(active.color, 0.05);
+
+    let c3 = lighten(hover.color, 0.05);
+    let c4 = darken(hover.color, 0.05);
+
+    let c5 = lighten(pressed.color, 0.05);
+    let c6 = darken(pressed.color, 0.05);
+
     match status {
         Status::Active => {
             let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
-                .add_stop(0.0, colors.0)
-                .add_stop(1.0, colors.1);
+                .add_stop(0.0, c1)
+                .add_stop(1.0, c2);
 
             Appearance {
                 background: Some(Background::from(g)),
-                text_color: Color::WHITE,
+                text_color: active.text,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::from_rgb8(0x20, 0x20, 0x20)),
                 shadow: Shadow { color: Color::WHITE, offset: Vector::new(-2.0, -2.0), blur_radius: 2.0 },
             }
         }
         Status::Hovered => {
             let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
-                .add_stop(0.0, Color::from_rgb8(0x54, 0x54, 0x54))
-                .add_stop(1.0, Color::from_rgb8(0x85, 0x85, 0x85));
+                .add_stop(0.0, c3)
+                .add_stop(1.0, c4);
 
             Appearance {
                 background: Some(Background::from(g)),
-                text_color: Color::WHITE,
+                text_color: hover.text,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
                 shadow: Default::default(),
             }
         }
         Status::Pressed => {
+            let g = gradient::Linear::new(Radians::from(Degrees(150.0)))
+                .add_stop(0.0, c5)
+                .add_stop(1.0, c6);
+
             Appearance {
-                background: Some(Background::from(Color::from_rgb8(0xd0, 0xd0, 0xd0))),
-                text_color: Color::BLACK,
+                background: Some(Background::from(g)),
+                text_color: pressed.text,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
                 shadow: Default::default(),
             }
@@ -512,4 +533,31 @@ fn get_style(status: Status, colors: (Color, Color)) -> Appearance {
             }
         }
     }
+}
+
+fn darken(color: Color, amount: f32) -> Color {
+
+    let srgb = Rgb::from(color);
+    let mut hsl = Hsl::from_color(srgb);
+
+    hsl.lightness = if hsl.lightness - amount < 0.0 {
+        0.0
+    } else {
+        hsl.lightness - amount
+    };
+
+    Color::from(Rgb::from_color(hsl))
+}
+
+fn lighten(color: Color, amount: f32) -> Color {
+    let srgb = Rgb::from(color);
+    let mut hsl = Hsl::from_color(srgb);
+
+    hsl.lightness = if hsl.lightness + amount > 1.0 {
+        1.0
+    } else {
+        hsl.lightness + amount
+    };
+
+    Color::from(Rgb::from_color(hsl))
 }

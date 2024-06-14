@@ -1,4 +1,5 @@
 # Project exclude paths
+Cargo.lock
 /target/
 /.idea/.gitignore
 /.idea/modules.xml

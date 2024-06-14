@@ -20,6 +20,7 @@
  *
  */
 
+use iced::Theme;
 use iced::widget::text_editor::Action;
 use iced::window::Id;
 
@@ -29,6 +30,7 @@ pub enum Message {
     WindowMoved(Id, i32, i32),
     EditorAction(Action),
     Char(String),
+    Constant(String),
     Func(String),
     MoveRight,
     MoveLeft,
@@ -38,4 +40,6 @@ pub enum Message {
     Evaluate,
     ToggleMode,
     FuncPopup,
+    CloseAndSend(Id, Box<Message>),
+    ThemeChanged(Theme),
 }
