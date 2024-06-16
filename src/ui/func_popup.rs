@@ -156,7 +156,7 @@ impl FuncPopup {
     fn get_all_themes() -> Vec<Theme> {
         let mut themes: Vec<Theme> = Vec::new();
 
-        themes.insert(0, ui::lcd_theme());
+        themes.insert(0, ui::lcd_theme().clone());
         for t in Theme::ALL {
             themes.push(t.clone());
         }

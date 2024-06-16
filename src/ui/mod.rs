@@ -26,6 +26,7 @@ use iced::{Color, Theme};
 use iced::theme::Custom;
 use iced::theme::Palette;
 use iced::theme::palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success};
+use lazy_static::lazy_static;
 
 pub(crate) mod calculator;
 mod messages;
@@ -34,7 +35,7 @@ mod func_popup;
 mod calc_window;
 
 pub const PALETT_LCD: Palette = Palette {
-    background: Color::from_rgb(
+    background: Color::from_rgb(  // LCD Green background
         0xd4 as f32 / 255.0,
         0xed as f32 / 255.0,
         0xd4 as f32 / 255.0,
@@ -45,7 +46,7 @@ pub const PALETT_LCD: Palette = Palette {
         0x40 as f32 / 255.0,
         0x40 as f32 / 255.0,
     ),
-    success: Color::from_rgb(
+    success: Color::from_rgb(   // Dark teal
         0x12 as f32 / 255.0,
         0x66 as f32 / 255.0,
         0x4F as f32 / 255.0,
@@ -57,33 +58,38 @@ pub const PALETT_LCD: Palette = Palette {
     ),
 };
 
-fn lcd_theme() -> Theme {
-    Theme::Custom(Arc::new(Custom::with_fn(String::from("Lcd Calculator"), PALETT_LCD, |palette| -> Extended {
-        Extended {
-            background: Background{
-                weak: Pair::new(Color::from_rgb8(0x50,0x40,0x50), palette.text),
-                .. Background::new(palette.background, palette.text)
-            },
-            primary: Primary::generate (
-                palette.primary,
-                Color::BLACK,
-                Color::WHITE,
-            ),
-            secondary: Secondary{
-                strong: Pair::new(Color::from_rgb8(0x04,0x04,0x04,), Color::WHITE),
-                .. Secondary::generate(Color::BLACK, Color::WHITE)
-            },
-            success: Success::generate(
-                palette.primary,
-                Color::BLACK,
-                Color::WHITE,
-            ),
-            danger: Danger::generate(
-                palette.danger,
-                palette.background,
-                palette.text,
-            ),
-            is_dark: false,
-        }
-    })))
+lazy_static! {
+    static ref LCD_THEME: Theme =
+        Theme::Custom(Arc::new(Custom::with_fn(String::from("Lcd Calculator"), PALETT_LCD, |palette| -> Extended {
+            Extended {
+                background: Background{
+                    weak: Pair::new(Color::from_rgb8(0x00,0x50,0x60), palette.text), // Grey Blue
+                    .. Background::new(palette.background, palette.text)
+                },
+                primary: Primary::generate (
+                    palette.primary,
+                    Color::BLACK,
+                    Color::WHITE,
+                ),
+                secondary: Secondary{
+                    strong: Pair::new(Color::from_rgb8(0x04,0x04,0x04,), Color::WHITE),
+                    .. Secondary::generate(Color::BLACK, Color::WHITE)
+                },
+                success: Success::generate(
+                    palette.primary,
+                    Color::BLACK,
+                    Color::WHITE,
+                ),
+                danger: Danger::generate(
+                    palette.danger,
+                    palette.background,
+                    palette.text,
+                ),
+                is_dark: false,
+            }
+        })));
+}
+
+fn lcd_theme() -> &'static Theme {
+    &LCD_THEME
 }

@@ -41,7 +41,7 @@ impl Default for CalculatorApp {
         Self {
             main_window: CalcWindow::default(),
             pick_window: None,
-            theme: ui::lcd_theme(),
+            theme: ui::lcd_theme().clone(),
         }
     }
 }
