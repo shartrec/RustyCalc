@@ -22,6 +22,8 @@
 
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
+use std::time::{Instant, SystemTime};
+use log::info;
 
 use crate::evaluator::constants::Constant;
 use crate::evaluator::functions::Function;
@@ -125,6 +127,19 @@ impl Display for AngleMode {
     }
 }
 
+impl AngleMode {
+    pub(crate) fn get_from_name(name: &str) -> AngleMode{
+        match name {
+            "Degrees" => AngleMode::Degrees,
+            "Radians" => AngleMode::Radians,
+            "Grads" => AngleMode::Gradians,
+            _ => Self::default()
+        }
+    }
+}
+
+
+
 pub(crate) struct Evaluator<'a> {
     angle_mode: &'a AngleMode,
     function_register: Vec<Function>,
@@ -145,17 +160,27 @@ impl<'a> Evaluator<'a> {
     }
 
     pub(crate) fn evaluate(&self, expression: &str) -> Result<f64, String> {
+
+        let t_start = Instant::now();
+
         if expression.is_empty() {
             return Err("Please supply an expression to evaluate".to_string());
         }
-        match tokenize(expression, &self) {
-            Ok(tokens) => {
+        tokenize(expression, &self)
+            .and_then(|tokens| {
                 let mut parser = Parser::new(tokens);
                 let ast = parser.parse()?;
                 Ok(ast.evaluate(&self.angle_mode))
-            }
-            Err(s) => Err(s),
-        }
+            })
+            .inspect(|_| {
+                let duration = Instant::now().duration_since(t_start);
+                info!("Evaluated \"{}\" in {} micro seconds", expression.trim(), duration.as_micros());
+            })
+            .inspect_err(|_| {
+                let duration = Instant::now().duration_since(t_start);
+                info!("Failed to evaluate \"{}\" in {} micro seconds", expression.trim(), duration.as_micros());
+            })
+
     }
     pub fn function_register(&self) -> &Vec<Function> {
         &self.function_register

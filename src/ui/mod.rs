@@ -33,6 +33,7 @@ mod messages;
 pub(crate) mod calculator_app;
 mod func_popup;
 mod calc_window;
+pub(super) mod preferences;
 
 pub const PALETT_LCD: Palette = Palette {
     background: Color::from_rgb(  // LCD Green background

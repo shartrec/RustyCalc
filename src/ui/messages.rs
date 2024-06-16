@@ -28,6 +28,7 @@ use iced::window::Id;
 pub enum Message {
     WindowResized(Id, u32, u32),
     WindowMoved(Id, i32, i32),
+    WindowClose(Id),
     EditorAction(Action),
     Char(String),
     Constant(String),

@@ -24,7 +24,7 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
-use iced::{Background, Border, Color, Command, Degrees, Element, Font, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector};
+use iced::{Background, Border, Color, Command, Degrees, Element, Font, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector, window};
 use iced::alignment::{Horizontal, Vertical};
 use iced::font::{Family, Stretch, Style, Weight};
 use iced::theme::palette::Pair;
@@ -39,7 +39,7 @@ use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
 use crate::ui::messages::Message;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(super) struct CalcWindow {
     content: Content,
     result: Option<Result<f64, String>>,
@@ -48,6 +48,27 @@ pub(super) struct CalcWindow {
     window_height: u32,
     window_x: i32,
     window_y: i32,
+}
+
+impl Default for CalcWindow {
+    fn default() -> Self {
+        let mut calc = Calc::default();
+        // Load the angle mode from preferences
+        let pref = crate::ui::preferences::manager();
+        if let Some(am) = pref.get::<String>(crate::ui::preferences::ANGLE_MODE) {
+            calc.set_angle_mode(AngleMode::get_from_name(am.as_str()));
+        }
+
+        Self {
+            content: Default::default(),
+            result: None,
+            calc: calc,
+            window_width: 0,
+            window_height: 0,
+            window_x: 0,
+            window_y: 0,
+        }
+    }
 }
 
 impl CalcWindow {
@@ -158,12 +179,22 @@ impl CalcWindow {
                 }
                 Command::none()
             }
+           Message::WindowClose(id) => {
+                if id == Id::MAIN {
+                    let _ = save_window_size(self.window_width, self.window_height);
+                    window::close::<Message>(id)
+                } else {
+                    Command::none()
+                }
+            }
             Message::ToggleMode => {
                 self.calc.set_angle_mode(match self.calc.angle_mode() {
                     AngleMode::Degrees => AngleMode::Radians,
                     AngleMode::Radians => AngleMode::Gradians,
                     AngleMode::Gradians => AngleMode::Degrees,
                 });
+                let pref = crate::ui::preferences::manager();
+                pref.put(crate::ui::preferences::ANGLE_MODE, self.calc.angle_mode());
                 Command::none()
             }
             _ => {
@@ -560,4 +591,13 @@ fn lighten(color: Color, amount: f32) -> Color {
     };
 
     Color::from(Rgb::from_color(hsl))
+}
+
+pub fn save_window_size(width: u32, height: u32) -> Result<(), String> {
+    // Set the window state in `settings`
+    let pref = crate::ui::preferences::manager();
+    pref.put("window-width", width);
+    pref.put("window-height", height);
+
+    Ok(())
 }

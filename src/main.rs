@@ -23,6 +23,9 @@
 use iced::multi_window::Application;
 use iced::Settings;
 use iced::Size;
+use std::fs::File;
+use log::info;
+use simplelog::*;
 
 use crate::ui::calculator_app::CalculatorApp;
 
@@ -35,14 +38,18 @@ mod ui;
 /// Calculate.
 fn main() -> iced::Result {
 
+    init_logger();
+
+    info!("Calculator started");
     // let event_loop = EventLoop::new();
     // let window_builder = WindowBuilder::new()
     //     .with_title("KelpieCalc")
     //     .with_window_class("KelpieCalcClass", "KelpieCalcIcon");
     //
     let window_settings = iced::window::Settings {
-        size: Size::new(330.0, 420.0),
+        size: load_window_size().unwrap_or(Size::new(330.0, 420.0)),
         min_size: Some(Size::new(300.0, 420.0)),
+        exit_on_close_request: false,
         ..iced::window::Settings::default()
     };
 
@@ -52,6 +59,58 @@ fn main() -> iced::Result {
         .. Settings::default()
     };
 
-    CalculatorApp::run(settings)
+    let r = CalculatorApp::run(settings);
+
+    info!("Calculator shutdown");
+
+    r
+
 }
 
+fn init_logger() {
+    if let Some(home_path) = home::home_dir() {
+        let log_path = home_path.join("rusty-calc.log");
+        match File::create(log_path) {
+            Ok(file) => {
+                CombinedLogger::init(vec![
+                    TermLogger::new(
+                        LevelFilter::Warn,
+                        Config::default(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    ),
+                    WriteLogger::new(
+                        LevelFilter::Info,
+                        Config::default(),
+                        file,
+                    ),
+                ]).unwrap_or_else(|e| {
+                    println!("Unable to initiate logger: {}.", e)
+                });
+                return;
+            }
+            Err(e) => println!("Unable to initiate logger: {}", e)
+        }
+    }
+    TermLogger::init(
+        LevelFilter::Warn,
+        Config::default(),
+        TerminalMode::Mixed,
+        ColorChoice::Auto,
+    ).unwrap_or_else(|e| {
+        println!("Unable to initiate logger: {}.", e)
+    });
+}
+
+fn load_window_size() -> Option<Size> {
+    // Get the window state from `settings`
+    let pref = crate::ui::preferences::manager();
+
+    // Set the size of the window
+    if let Some(w) = pref.get::<f32>("window-width") {
+        if let Some(h) = pref.get::<f32>("window-height") {
+            return Some(Size::new(w, h))
+        }
+    }
+    None
+}

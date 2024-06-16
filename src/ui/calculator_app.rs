@@ -69,6 +69,9 @@ impl multi_window::Application for CalculatorApp {
                 Event::Window(id, window::Event::Moved { x, y}) => {
                     Some(Message::WindowMoved(id, x, y))
                 }
+                Event::Window(id, window::Event::CloseRequested {}) => {
+                    Some(Message::WindowClose(id))
+                }
                 _ => None
             }
         })
