@@ -102,31 +102,13 @@ impl CalcWindow {
                     }
                     self.content.perform(Action::Edit(Edit::Insert(')')));
                     Command::none()
-                } else {
-                    // determine if we are at the end of the text. If so surround all text in function call
-                    let cursor = self.content.cursor_position();
-                    let line_count = self.content.line_count();
-
-                    if cursor.0 == line_count - 1 && cursor.1 == self.content.line(cursor.0).unwrap().len()
-                        && cursor != (0,0) {
-                        self.content.perform(Action::Move(Motion::DocumentStart));
-                        for c in s.chars() {
-                            self.content.perform(Action::Edit(Edit::Insert(c)));
-                        }
-                        self.content.perform(Action::Edit(Edit::Insert('(')));
-                        Command::batch(vec![
-                            // Send the Message::MoveLeft message
-                            Command::perform(async {}, |_| Message::MoveEnd),
-                            Command::perform(async {}, |_| Message::Char(")".to_string()))
-                        ])
-                    } else {  //otherwise insert the function and move cursor between the parentheses
-                        for c in s.chars() {
-                            self.content.perform(Action::Edit(Edit::Insert(c)));
-                        }
-                        self.content.perform(Action::Edit(Edit::Insert('(')));
-                        self.content.perform(Action::Edit(Edit::Insert(')')));
-                        Command::perform(async {}, |_| Message::MoveLeft)
+                } else {  //otherwise insert the function and move cursor between the parentheses
+                    for c in s.chars() {
+                        self.content.perform(Action::Edit(Edit::Insert(c)));
                     }
+                    self.content.perform(Action::Edit(Edit::Insert('(')));
+                    self.content.perform(Action::Edit(Edit::Insert(')')));
+                    Command::perform(async {}, |_| Message::MoveLeft)
                 }
             }
             Message::EditorAction(action) => {
