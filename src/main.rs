@@ -34,6 +34,7 @@ mod evaluator;
 #[cfg(test)]
 mod test;
 mod ui;
+pub(crate) mod history;
 
 /// Calculate.
 fn main() -> iced::Result {

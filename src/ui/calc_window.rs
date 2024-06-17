@@ -132,14 +132,14 @@ impl CalcWindow {
             Message::EditorAction(action) => {
                 match action {
                     Action::Edit(Edit::Enter) => {
-                        self.result = Some(self.calc.evaluate(&self.content.text()))
+                        self.result = Some(self.calc.evaluate(&self.content.text().trim()))
                     }
                     _ => self.content.perform(action)
                 }
                 Command::none()
             }
             Message::Evaluate => {
-                self.result = Some(self.calc.evaluate(&self.content.text()));
+                self.result = Some(self.calc.evaluate(&self.content.text().trim()));
                 Command::none()
             }
             Message::Clear => {

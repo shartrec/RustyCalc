@@ -22,13 +22,14 @@
 
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
-use std::time::{Instant, SystemTime};
+use std::time::Instant;
 use log::info;
 
 use crate::evaluator::constants::Constant;
 use crate::evaluator::functions::Function;
 use crate::evaluator::parser::Parser;
 use crate::evaluator::tokeniser::tokenize;
+use crate::history;
 
 mod functions;
 pub(crate) mod parser;
@@ -172,7 +173,9 @@ impl<'a> Evaluator<'a> {
                 let ast = parser.parse()?;
                 Ok(ast.evaluate(&self.angle_mode))
             })
-            .inspect(|_| {
+            .inspect(|result| {
+                history::manager().add((&expression, &result));
+                history::manager().save();
                 let duration = Instant::now().duration_since(t_start);
                 info!("Evaluated \"{}\" in {} micro seconds", expression.trim(), duration.as_micros());
             })
