@@ -5,3 +5,5 @@ Cargo.lock
 /.idea/modules.xml
 /.idea/MyCalculator.iml
 /.idea/vcs.xml
+/.idea/RustyCalc.iml
+/.idea/workspace.xml
