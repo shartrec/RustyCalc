@@ -19,6 +19,7 @@
  * OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+#![allow(non_upper_case_globals)]
 
 use std::fmt::Debug;
 
@@ -26,8 +27,8 @@ use crate::evaluator::Token;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Constant {
-    name: &'static str,
-    value: f64,
+    pub name: &'static str,
+    pub value: f64,
 }
 
 impl Constant {
@@ -62,35 +63,15 @@ impl Constant {
 
 }
 
+pub static Pi: Constant =  Constant{name: "π", value: std::f64::consts::PI};
+pub static Euler: Constant =  Constant{name: "ℇ", value: std::f64::consts::E};
+pub static Phi: Constant =  Constant{name: "ɸ", value: 1.618};
+pub static C: Constant =  Constant{name: "C", value: 299792458.0};
+pub static Planck: Constant =  Constant{name: "ℎ", value: 6.626e-34};
+pub static G: Constant =  Constant{name: "G", value: 6.674e-11};
 
-pub(crate) fn get_all() -> Vec<Constant> {
-    vec![
-        Constant {
-            name: "π",
-            value: std::f64::consts::PI,
-        },
-        Constant {
-            name: "e",
-            value: std::f64::consts::E,
-        },
-        Constant {
-            name: "Φ",
-            value: 1.61803,
-        },
-        Constant {
-            name: "C",
-            value: 299792458.0
-        },
-        Constant {
-            name: "ℎ",
-            value: 6.626e-34
-        },
-        Constant {
-            name: "G",
-            value: 6.674e-11
-        },
-
-    ]
+pub(crate) fn get_all() -> Vec<&'static Constant> {
+    vec![&Pi, &Euler, &Phi, &C, &Planck, &G]
 }
 
 #[cfg(test)]

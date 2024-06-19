@@ -24,9 +24,8 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
-use iced::{Background, Border, Color, Command, Degrees, Element, Font, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector, window};
+use iced::{Background, Border, Color, Command, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector, window};
 use iced::alignment::{Horizontal, Vertical};
-use iced::font::{Family, Stretch, Style, Weight};
 use iced::theme::palette::Pair;
 use iced::widget::{Button, Column, container, Container, Row, text, text_editor};
 use iced::widget::button::{Appearance, Status};
@@ -114,11 +113,14 @@ impl CalcWindow {
             Message::EditorAction(action) => {
                 match action {
                     Action::Edit(Edit::Enter) => {
-                        self.result = Some(self.calc.evaluate(&self.content.text().trim()))
+                        self.result = Some(self.calc.evaluate(&self.content.text().trim()));
+                        Command::perform(async {}, |_| Message::MoveEnd)
                     }
-                    _ => self.content.perform(action)
+                    _ => {
+                        self.content.perform(action);
+                        Command::none()
+                    }
                 }
-                Command::none()
             }
             Message::Evaluate => {
                 self.result = Some(self.calc.evaluate(&self.content.text().trim()));
@@ -185,14 +187,6 @@ impl CalcWindow {
         }
     }
     pub(super) fn view<'a>(&'a self, _id: Id) -> Element<Message> {
-        // Get the sizes for the major blocks
-        let font1 = Font {
-            family: Family::Name("DejaVu Sans Mono"),
-            weight: Weight::Normal,
-            stretch: Stretch::Normal,
-            style: Style::Normal,
-        };
-
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             // .height(Length::Fill)
@@ -206,15 +200,8 @@ impl CalcWindow {
             .on_action(|action| {
                 Message::EditorAction(action)
             })
-            .font(font1)
             .into();
 
-        let font2 = Font {
-            family: Family::Name("DejaVu Sans"),
-            weight: Weight::Bold,
-            stretch: Stretch::Normal,
-            style: Style::Normal,
-        };
         let result = text(match &self.result {
             Some(r) => {
                 match r {
@@ -233,9 +220,7 @@ impl CalcWindow {
         })
             .width(Length::Fill)
             .horizontal_alignment(Horizontal::Right)
-            .font(font2)
             .into();
-
 
         let mode: Element<Message> = Button::new(text(self.calc.angle_mode()))
             .style(|theme: &Theme, _status| {

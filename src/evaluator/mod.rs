@@ -34,7 +34,7 @@ use crate::history;
 mod functions;
 pub(crate) mod parser;
 pub(crate) mod tokeniser;
-mod constants;
+pub(crate) mod constants;
 
 #[derive(Clone, Debug)]
 pub(crate) enum Token {
@@ -144,7 +144,7 @@ impl AngleMode {
 pub(crate) struct Evaluator<'a> {
     angle_mode: &'a AngleMode,
     function_register: Vec<Function>,
-    constant_register: Vec<Constant>,
+    constant_register: Vec<&'static Constant>,
 }
 
 impl<'a> Evaluator<'a> {
@@ -188,7 +188,7 @@ impl<'a> Evaluator<'a> {
     pub fn function_register(&self) -> &Vec<Function> {
         &self.function_register
     }
-    pub fn constant_register(&self) -> &Vec<Constant> {
+    pub fn constant_register(&self) -> &Vec<&'static Constant> {
         &self.constant_register
     }
 }

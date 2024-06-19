@@ -29,7 +29,9 @@ use std::ops::Deref;
 use iced::{Background, Command, Element, Length, Theme, window};
 use iced::widget::{Column, container, horizontal_rule, pick_list};
 use iced::widget::pick_list::{Appearance, DefaultStyle, Status, Style};
+use iced::widget::text::Shaping;
 use iced::window::Id;
+use crate::evaluator::constants::{Pi, Euler, Phi, C, Planck, G};
 use crate::ui;
 
 use crate::ui::messages::Message;
@@ -85,12 +87,12 @@ impl FuncPopup {
                     ];
 
         let constants = vec![
-            ConstantDef{name: "π".to_string(), description: "Pi".to_string()},
-            ConstantDef{name: "e".to_string(), description: "Euler's number".to_string()},
-            ConstantDef{name: "Φ".to_string(), description: "Golden Ratio".to_string()},
-            ConstantDef{name: "C".to_string(), description: "Speed of light".to_string()},
-            ConstantDef{name: "ℎ".to_string(), description: "Plank's constant".to_string()},
-            ConstantDef{name: "G".to_string(), description: "Gravitational Const".to_string()},
+            ConstantDef{name: Pi.name.to_string(), description: "Pi".to_string()},
+            ConstantDef{name: Euler.name.to_string(), description: "Euler's number".to_string()},
+            ConstantDef{name: Phi.name.to_string(), description: "Golden Ratio".to_string()},
+            ConstantDef{name: C.name.to_string(), description: "Speed of light".to_string()},
+            ConstantDef{name: Planck.name.to_string(), description: "Plank's constant".to_string()},
+            ConstantDef{name: G.name.to_string(), description: "Gravitational Const".to_string()},
         ];
 
         let conversions = vec!["Miles -> Kilometres".to_string(), "Lbs -> Kgs".to_string(), "X -Y".to_string()];
@@ -101,6 +103,7 @@ impl FuncPopup {
                 })
                 .placeholder("functions -- select")
                 .width(Length::Fill)
+                .text_shaping(Shaping::Advanced)
                 .style(Style {
                     field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
                     ..Theme::default_style()
@@ -111,6 +114,7 @@ impl FuncPopup {
                 })
                 .placeholder("constants -- select")
                 .width(Length::Fill)
+                .text_shaping(Shaping::Advanced)
                 .style(Style {
                     field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
                     ..Theme::default_style()
@@ -121,6 +125,7 @@ impl FuncPopup {
                 })
                 .placeholder("conversions -- select")
                 .width(Length::Fill)
+                .text_shaping(Shaping::Advanced)
                 .style(Style {
                     field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
                     ..Theme::default_style()
