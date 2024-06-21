@@ -26,13 +26,14 @@
 
 use std::ops::Deref;
 
-use iced::{Background, Command, Element, Length, Theme, window};
+use iced::{Background, Command, Element, Length, Renderer, Theme, window};
 use iced::widget::{Column, container, horizontal_rule, pick_list};
 use iced::widget::pick_list::{Appearance, DefaultStyle, Status, Style};
 use iced::widget::text::Shaping;
 use iced::window::Id;
+use log::error;
 use crate::evaluator::constants::{Pi, Euler, Phi, C, Planck, G};
-use crate::ui;
+use crate::{history, ui};
 
 use crate::ui::messages::Message;
 
@@ -51,6 +52,24 @@ impl ToString for ConstantDef {
 impl PartialEq for ConstantDef {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
+    }
+}
+
+#[derive(Clone)]
+pub struct HistoryDef {
+    expr: String,
+    value: f64,
+}
+
+impl ToString for HistoryDef {
+    fn to_string(&self) -> String {
+        format!("{} = {}", self.expr, self.value)
+    }
+}
+
+impl PartialEq for HistoryDef {
+    fn eq(&self, other: &Self) -> bool {
+        self.expr == other.expr
     }
 }
 
@@ -78,72 +97,13 @@ impl FuncPopup {
     }
     pub(super) fn view(&self, id: Id) -> Element<Message> {
 
-        let functions = vec![
-                    "asin".to_string(), "acos".to_string(), "atan".to_string(),
-                    "cosec".to_string(), "sec".to_string(), "cot".to_string(),
-                    "acosec".to_string(), "asec".to_string(), "acot".to_string(),
-                    "sinh".to_string(), "cosh".to_string(), "tanh".to_string(),
-                    "asinh".to_string(), "acosh".to_string(), "atanh".to_string(),
-                    ];
-
-        let constants = vec![
-            ConstantDef{name: Pi.name.to_string(), description: "Pi".to_string()},
-            ConstantDef{name: Euler.name.to_string(), description: "Euler's number".to_string()},
-            ConstantDef{name: Phi.name.to_string(), description: "Golden Ratio".to_string()},
-            ConstantDef{name: C.name.to_string(), description: "Speed of light".to_string()},
-            ConstantDef{name: Planck.name.to_string(), description: "Plank's constant".to_string()},
-            ConstantDef{name: G.name.to_string(), description: "Gravitational Const".to_string()},
-        ];
-
-        let conversions = vec!["Miles -> Kilometres".to_string(), "Lbs -> Kgs".to_string(), "X -Y".to_string()];
-
         let col: Element<Message> = Column::with_children([
-            pick_list(functions, None::<String>, move |selected| {
-                    Message::CloseAndSend(id, Box::new(Message::Func(selected)))
-                })
-                .placeholder("functions -- select")
-                .width(Length::Fill)
-                .text_shaping(Shaping::Advanced)
-                .style(Style {
-                    field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
-                    ..Theme::default_style()
-                })
-                .into(),
-            pick_list(constants, None::<ConstantDef>, move |selected| {
-                    Message::CloseAndSend(id, Box::new(Message::Constant(selected.name)))
-                })
-                .placeholder("constants -- select")
-                .width(Length::Fill)
-                .text_shaping(Shaping::Advanced)
-                .style(Style {
-                    field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
-                    ..Theme::default_style()
-                })
-                .into(),
-            pick_list(conversions, None::<String>, move |selected| {
-                    Message::CloseAndSend(id, Box::new(Message::Func(selected)))
-                })
-                .placeholder("conversions -- select")
-                .width(Length::Fill)
-                .text_shaping(Shaping::Advanced)
-                .style(Style {
-                    field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
-                    ..Theme::default_style()
-                })
-                .into(),
-
-            horizontal_rule(2).into(),
-
-            pick_list(Self::get_all_themes(), None::<Theme>, move |selected| {
-                    Message::CloseAndSend(id, Box::new(Message::ThemeChanged(selected)))
-                })
-                .placeholder("Choose your theme")
-                .style(Style {
-                    field: Box::new(move |theme, status| { Self::get_appearance(theme, status)}),
-                    ..Theme::default_style()
-                })
-                .width(Length::Fill).into(),
-
+                Self::themes(id),
+                horizontal_rule(2).into(),
+                Self::functions(id),
+                Self::constants(id),
+                Self::conversions(id),
+                Self::history(id),
             ]).spacing(4).into();
 
         container(col)
@@ -158,6 +118,110 @@ impl FuncPopup {
             .padding(4).into()
     }
 
+    fn themes(id: Id) -> Element<'static, Message> {
+
+        pick_list(Self::get_all_themes(), None::<Theme>, move |selected| {
+            Message::CloseAndSend(id, Box::new(Message::ThemeChanged(selected)))
+        })
+            .placeholder("Choose your theme")
+            .style(Style {
+                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
+                ..Theme::default_style()
+            })
+            .width(Length::Fill).into()
+    }
+
+    fn functions(id: Id) -> Element<'static, Message, Theme, Renderer> {
+
+        let functions = vec![
+            "asin".to_string(), "acos".to_string(), "atan".to_string(),
+            "cosec".to_string(), "sec".to_string(), "cot".to_string(),
+            "acosec".to_string(), "asec".to_string(), "acot".to_string(),
+            "sinh".to_string(), "cosh".to_string(), "tanh".to_string(),
+            "asinh".to_string(), "acosh".to_string(), "atanh".to_string(),
+        ];
+
+        pick_list(functions, None::<String>, move |selected| {
+            Message::CloseAndSend(id, Box::new(Message::Func(selected)))
+        })
+            .placeholder("functions -- select")
+            .width(Length::Fill)
+            .text_shaping(Shaping::Advanced)
+            .style(Style {
+                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
+                ..Theme::default_style()
+            })
+            .into()
+    }
+
+    fn constants(id: Id) -> Element<'static, Message> {
+
+        let constants = vec![
+            ConstantDef{name: Pi.name.to_string(), description: "Pi".to_string()},
+            ConstantDef{name: Euler.name.to_string(), description: "Euler's number".to_string()},
+            ConstantDef{name: Phi.name.to_string(), description: "Golden Ratio".to_string()},
+            ConstantDef{name: C.name.to_string(), description: "Speed of light".to_string()},
+            ConstantDef{name: Planck.name.to_string(), description: "Plank's constant".to_string()},
+            ConstantDef{name: G.name.to_string(), description: "Gravitational Const".to_string()},
+        ];
+
+        pick_list(constants, None::<ConstantDef>, move |selected| {
+            Message::CloseAndSend(id, Box::new(Message::Constant(selected.name)))
+        })
+            .placeholder("constants -- select")
+            .width(Length::Fill)
+            .text_shaping(Shaping::Advanced)
+            .style(Style {
+                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
+                ..Theme::default_style()
+            })
+            .into()
+    }
+
+    fn conversions(id: Id) -> Element<'static, Message> {
+        let conversions = vec!["To do ..........".to_string()];
+
+        pick_list(conversions, None::<String>, move |selected| {
+            Message::CloseAndSend(id, Box::new(Message::Func(selected)))
+        })
+            .placeholder("conversions -- select")
+            .width(Length::Fill)
+            .text_shaping(Shaping::Advanced)
+            .style(Style {
+                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
+                ..Theme::default_style()
+            })
+            .into()
+    }
+
+
+    fn history(id: Id) -> Element<'static, Message> {
+        // Get a readlock on the history.  This should always work
+        let history: Vec<HistoryDef> = match history::manager().history().entries().read().as_deref() {
+            Ok(queue) => {
+                queue.iter().map( | e | {
+                    HistoryDef{expr: e.0.clone(), value: e.1}
+                }).collect()
+            }
+            Err(e) => {
+                error!("Unabel to access history - {}", e);
+                Vec::<HistoryDef>::new()
+            }
+        };
+
+        pick_list(history, None::<HistoryDef>, move |selected| {
+            Message::CloseAndSend(id, Box::new(Message::History(selected.expr, selected.value)))
+        })
+            .placeholder("history")
+            .width(Length::Fill)
+            .text_shaping(Shaping::Advanced)
+            .style(Style {
+                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
+                ..Theme::default_style()
+            })
+            .into()
+    }
+
     fn get_all_themes() -> Vec<Theme> {
         let mut themes: Vec<Theme> = Vec::new();
 
@@ -170,8 +234,6 @@ impl FuncPopup {
     }
     fn get_appearance(theme: &Theme, status: Status) -> Appearance {
             Appearance {
-                background: Background::from(theme.extended_palette().secondary.strong.color),
-                text_color: theme.extended_palette().secondary.strong.text,
                 placeholder_color: theme.extended_palette().secondary.base.text,
                 .. pick_list::default(theme, status)
             }

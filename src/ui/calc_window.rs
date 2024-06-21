@@ -122,6 +122,17 @@ impl CalcWindow {
                     }
                 }
             }
+            Message::History(expr, value) => {
+                self.content.perform(Action::Move(Motion::DocumentStart));
+                self.content.perform(Action::Select(Motion::DocumentEnd));
+                self.content.perform(Action::Edit(Edit::Delete));
+                for c in expr.chars() {
+                    self.content.perform(Action::Edit(Edit::Insert(c)));
+                }
+                self.result = Some(Ok(value));
+                Command::none()
+            }
+
             Message::Evaluate => {
                 self.result = Some(self.calc.evaluate(&self.content.text().trim()));
                 Command::none()

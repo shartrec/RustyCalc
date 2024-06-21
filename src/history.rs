@@ -27,7 +27,7 @@ use std::path::PathBuf;
 use std::sync::RwLock;
 
 use lazy_static::lazy_static;
-use log::warn;
+use log::{error, warn};
 use serde::{Deserialize, Serialize};
 
 const HISTORY_FILE: &str = "rusty-calc-history.json";
@@ -36,17 +36,22 @@ const HISTORY_SIZE: usize = 100;
 lazy_static! {
 static ref HISTORY_MANAGER: HistoryManager = {
         let mut contents = String::new();
-        let history  = match File::open(HISTORY_FILE)
+        let history = if let Some(path) = get_history_path() {
+            match File::open(path)
                 .and_then(|mut f| {
                     f.read_to_string(&mut contents)
                 })
-            {
-            Ok(_s) => {
-                serde_json::from_str(&contents).unwrap_or(History::new(HISTORY_SIZE))
-            }
-            Err(_e) => {
-                History::new(HISTORY_SIZE)
-            }
+                {
+                    Ok(_s) => {
+                        serde_json::from_str(&contents).unwrap_or(History::new(HISTORY_SIZE))
+                    }
+                    Err(e) => {
+                        error!("Unable to open history file: {}", e);
+                        History::new(HISTORY_SIZE)
+                    }
+                }
+        } else {
+            History::new(HISTORY_SIZE)
         };
 
         HistoryManager { history }
@@ -77,6 +82,10 @@ impl HistoryManager {
         self.history.add(entry);
     }
 
+    pub fn history(&self) -> &History {
+        &self.history
+    }
+
 }
 
 pub fn manager() -> &'static HistoryManager {
@@ -89,7 +98,7 @@ fn get_history_path() -> Option<PathBuf> {
     })
 }
 #[derive(Serialize, Deserialize, Debug)]
-struct History {
+pub struct History {
     entries: RwLock<VecDeque<(String, f64)>>,
     max_size: usize,
 }
@@ -115,6 +124,10 @@ impl History {
                 warn!("Failed to write history.")
             }
         }
+    }
+
+    pub fn entries(&self) -> &RwLock<VecDeque<(String, f64)>> {
+        &self.entries
     }
 
 }
