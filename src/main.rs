@@ -35,6 +35,7 @@ mod evaluator;
 mod test;
 mod ui;
 pub(crate) mod history;
+pub(crate) mod conversions;
 
 /// Calculate.
 fn main() -> iced::Result {

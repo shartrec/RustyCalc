@@ -39,6 +39,7 @@ pub const APP_INFO: AppInfo = AppInfo {
 
 // Preference constants
 pub const ANGLE_MODE: &str = "angle-mode";
+pub const THEME: &str = "theme";
 
 lazy_static! {
     static ref MANAGER: PreferenceManager = PreferenceManager {

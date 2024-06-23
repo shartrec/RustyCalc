@@ -38,10 +38,11 @@ pub(crate) struct CalculatorApp {
 
 impl Default for CalculatorApp {
     fn default() -> Self {
+        let pref = ui::preferences::manager();
         Self {
             main_window: CalcWindow::default(),
             pick_window: None,
-            theme: ui::lcd_theme().clone(),
+            theme: theme_by_name(pref.get::<String>(ui::preferences::THEME)).clone(),
         }
     }
 }
@@ -127,6 +128,8 @@ impl multi_window::Application for CalculatorApp {
             }
             Message::ThemeChanged(t) => {
                 self.theme = t;
+                let pref = ui::preferences::manager();
+                pref.put(ui::preferences::THEME, format!("{}", &self.theme));
                 Command::none()
             }
             _ => {
@@ -150,5 +153,16 @@ impl multi_window::Application for CalculatorApp {
     fn theme(&self, _window: Id) -> Self::Theme {
         self.theme.clone()
     }
-}
 
+
+}
+fn theme_by_name(name: Option<String>) -> &'static Theme {
+    if let Some(name) = name {
+        for t in Theme::ALL.iter() {
+            if format!("{}", t) == name {
+                return &t
+            }
+        }
+    }
+    &ui::lcd_theme()
+}

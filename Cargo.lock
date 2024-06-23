@@ -1448,21 +1448,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "my_calculator"
-version = "0.1.0"
-dependencies = [
- "home",
- "iced",
- "lazy_static",
- "log",
- "palette",
- "preferences",
- "serde 1.0.203",
- "serde_json 1.0.117",
- "simplelog",
-]
-
-[[package]]
 name = "naga"
 version = "0.19.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2110,6 +2095,21 @@ dependencies = [
  "libc",
  "linux-raw-sys 0.4.14",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rusty_calc"
+version = "0.1.0"
+dependencies = [
+ "home",
+ "iced",
+ "lazy_static",
+ "log",
+ "palette",
+ "preferences",
+ "serde 1.0.203",
+ "serde_json 1.0.117",
+ "simplelog",
 ]
 
 [[package]]
