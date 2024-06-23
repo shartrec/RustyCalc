@@ -29,7 +29,7 @@ use crate::conversions::length::*;
 
 pub const SQ_METRE: Unit = Unit {
     name: "sq_metre",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Metric,
     to_base: None,
     from_base: None,
@@ -38,7 +38,7 @@ pub const SQ_METRE: Unit = Unit {
 };
 pub const SQ_CENTIMETRE: Unit = Unit {
     name: "sq_centimetre",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| CENTIMETRE.to_base.unwrap()(CENTIMETRE.to_base.unwrap()(v))),
     from_base: Some(|v| CENTIMETRE.from_base.unwrap()(CENTIMETRE.from_base.unwrap()(v))),
@@ -47,7 +47,7 @@ pub const SQ_CENTIMETRE: Unit = Unit {
 };
 pub const SQ_MILLIMETRE: Unit = Unit {
     name: "sq_millimetre",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| MILLIMETRE.to_base.unwrap()(MILLIMETRE.to_base.unwrap()(v))),
     from_base: Some(|v| MILLIMETRE.from_base.unwrap()(MILLIMETRE.from_base.unwrap()(v))),
@@ -56,7 +56,7 @@ pub const SQ_MILLIMETRE: Unit = Unit {
 };
 pub const SQ_MICROMETRE: Unit = Unit {
     name: "sq_micrometre",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| MICROMETRE.to_base.unwrap()(MICROMETRE.to_base.unwrap()(v))),
     from_base: Some(|v| MICROMETRE.from_base.unwrap()(MICROMETRE.from_base.unwrap()(v))),
@@ -65,7 +65,7 @@ pub const SQ_MICROMETRE: Unit = Unit {
 };
 pub const HECTARE: Unit = Unit {
     name: "hectare",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| v * 10000.0),
     from_base: Some(|v| v / 10000.0),
@@ -75,7 +75,7 @@ pub const HECTARE: Unit = Unit {
 
 pub const SQ_KILOMETRE: Unit = Unit {
     name: "sq_kilometre",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| KILOMETRE.to_base.unwrap()(KILOMETRE.to_base.unwrap()(v))),
     from_base: Some(|v| KILOMETRE.from_base.unwrap()(KILOMETRE.from_base.unwrap()(v))),
@@ -87,7 +87,7 @@ pub const SQ_KILOMETRE: Unit = Unit {
 
 pub const SQ_YARD: Unit = Unit {
     name: "sq_yard",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| YARD.to_base.unwrap()(YARD.to_base.unwrap()(v))),
     from_base: Some(|v| YARD.from_base.unwrap()(YARD.from_base.unwrap()(v))),
@@ -96,39 +96,39 @@ pub const SQ_YARD: Unit = Unit {
 };
 pub const SQ_FOOT: Unit = Unit {
     name: "sq_foot",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| FOOT.to_base.unwrap()(FOOT.to_base.unwrap()(v))),
     from_base: Some(|v| FOOT.from_base.unwrap()(FOOT.from_base.unwrap()(v))),
     to_system_base: Some(|v| FOOT.to_system_base.unwrap()(FOOT.to_system_base.unwrap()(v))),
-    from_system_base: Some(|v| FOOT.to_system_base.unwrap()(FOOT.to_system_base.unwrap()(v))),
+    from_system_base: Some(|v| FOOT.from_system_base.unwrap()(FOOT.from_system_base.unwrap()(v))),
 };
 pub const SQ_INCH: Unit = Unit {
     name: "sq_inch",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| INCH.to_base.unwrap()(INCH.to_base.unwrap()(v))),
     from_base: Some(|v| INCH.from_base.unwrap()(INCH.from_base.unwrap()(v))),
     to_system_base: Some(|v| INCH.to_system_base.unwrap()(INCH.to_system_base.unwrap()(v))),
-    from_system_base: Some(|v| INCH.to_system_base.unwrap()(INCH.to_system_base.unwrap()(v))),
+    from_system_base: Some(|v| INCH.from_system_base.unwrap()(INCH.from_system_base.unwrap()(v))),
 };
 pub const SQ_MILE: Unit = Unit {
     name: "sq_mile",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| MILE.to_base.unwrap()(MILE.to_base.unwrap()(v))),
     from_base: Some(|v| MILE.from_base.unwrap()(MILE.from_base.unwrap()(v))),
     to_system_base: Some(|v| MILE.to_system_base.unwrap()(MILE.to_system_base.unwrap()(v))),
-    from_system_base: Some(|v| MILE.to_system_base.unwrap()(MILE.to_system_base.unwrap()(v))),
+    from_system_base: Some(|v| MILE.from_system_base.unwrap()(MILE.from_system_base.unwrap()(v))),
 };
 pub const SQ_NAUTICAL_MILE: Unit = Unit {
     name: "sq_nm",
-    dimension: Dimension::Length,
+    dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| NAUTICAL_MILE.to_base.unwrap()(NAUTICAL_MILE.to_base.unwrap()(v))),
     from_base: Some(|v| NAUTICAL_MILE.from_base.unwrap()(NAUTICAL_MILE.from_base.unwrap()(v))),
     to_system_base: Some(|v| NAUTICAL_MILE.to_system_base.unwrap()(NAUTICAL_MILE.to_system_base.unwrap()(v))),
-    from_system_base: Some(|v| NAUTICAL_MILE.to_system_base.unwrap()(NAUTICAL_MILE.to_system_base.unwrap()(v))),
+    from_system_base: Some(|v| NAUTICAL_MILE.from_system_base.unwrap()(NAUTICAL_MILE.from_system_base.unwrap()(v))),
 };
 
 #[cfg(test)]
@@ -158,12 +158,11 @@ mod tests {
     #[test]
     fn test_all_imperial_areas() {
         assert_eq!(convert(&23.66, &SQ_YARD, &SQ_FOOT), 23.66 * 9.0);
-        assert_eq!(convert(&23.66, &SQ_INCH, &SQ_FOOT), 23.66 / 1144.0);
+        assert_eq!(convert(&23.66, &SQ_INCH, &SQ_FOOT), 23.66 / 144.0);
         assert_eq!(convert(&23.66, &SQ_FOOT, &SQ_INCH), 23.66 * 144.0);
-        assert_eq!(convert(&23.66, &SQ_INCH, &SQ_FOOT), 23.66 / 1144.0);
         assert_eq!(convert(&23.66, &SQ_YARD, &SQ_INCH), 23.66 * 1296.0);
-        assert_near!(convert(&23.66, &SQ_YARD, &SQ_MILE), 0.01344318_f64.powf(2.0));
-        assert_near!(convert(&23.66, &SQ_MILE, &SQ_INCH), 1499097.6_f64.powf(2.0));
+        assert_near!(convert(&23.66, &SQ_YARD, &SQ_MILE), 23.66 * (1.0 / 1760.0_f64).powf(2.0));
+        assert_near!(convert(&23.66, &SQ_MILE, &SQ_INCH), 23.66 * (36.0 * 1760.0_f64).powf(2.0));
 
     }
     #[test]
