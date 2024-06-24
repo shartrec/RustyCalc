@@ -24,8 +24,14 @@ use std::cmp::PartialEq;
 use crate::conversions::System::Metric;
 
 pub(crate) mod mass;
-mod length;
-mod area;
+pub(crate) mod length;
+pub(crate) mod area;
+pub(crate) mod temperature;
+pub(crate) mod volume;
+mod power;
+mod torque;
+mod force;
+mod energy;
 
 /// There are multiple measurement systems.
 /// You can convert both within and between measurement systems.
@@ -33,11 +39,12 @@ mod area;
 /// conversions between system are often not exact, and require many decimal places.
 /// We acknowledge this difference and so convert between units of the same system using a base within
 /// that system, otherwise we use a common SI base if possible.
-#[derive(Default, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub(crate) enum System {
     #[default]
     Metric,
     Imperial,
+    US, // Only used for Volume
 }
 
 impl System {
@@ -47,22 +54,25 @@ impl System {
 }
 /// Dimension describe the physical attribute that can be measured.
 /// You can only convert from one unit to another if it is in the same dimension
-#[derive(Default, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub(crate) enum Dimension {
     #[default]
     Length,
     Area,
     Mass,
+    Volume,
     Temperature,
     Power,
-    Torque
+    Torque,
+    Force,
+    Energy
 }
 
 /// A unit is the basic unit that can be converted to or from
 ///
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Unit {
-    name: &'static str,
+    pub(crate) name: &'static str,
     /// The dimension the unit measures
     dimension: Dimension,
     /// The system the unit belongs to

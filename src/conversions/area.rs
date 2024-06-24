@@ -112,6 +112,15 @@ pub const SQ_INCH: Unit = Unit {
     to_system_base: Some(|v| INCH.to_system_base.unwrap()(INCH.to_system_base.unwrap()(v))),
     from_system_base: Some(|v| INCH.from_system_base.unwrap()(INCH.from_system_base.unwrap()(v))),
 };
+pub const ACRE: Unit = Unit {
+    name: "acre",
+    dimension: Dimension::Area,
+    system: System::Imperial,
+    to_base: Some(|v| v * 4046.856422),
+    from_base: Some(|v| v / 4046.856422),
+    to_system_base: Some(|v| v * 4840.0),
+    from_system_base: Some(|v| v / 4840.0),
+};
 pub const SQ_MILE: Unit = Unit {
     name: "sq_mile",
     dimension: Dimension::Area,
@@ -163,7 +172,7 @@ mod tests {
         assert_eq!(convert(&23.66, &SQ_YARD, &SQ_INCH), 23.66 * 1296.0);
         assert_near!(convert(&23.66, &SQ_YARD, &SQ_MILE), 23.66 * (1.0 / 1760.0_f64).powf(2.0));
         assert_near!(convert(&23.66, &SQ_MILE, &SQ_INCH), 23.66 * (36.0 * 1760.0_f64).powf(2.0));
-
+        assert_eq!(convert(&640.0, &ACRE, &SQ_MILE), 1.0);
     }
     #[test]
     fn test_all_imperial_to_metre() {
@@ -172,11 +181,13 @@ mod tests {
         assert_near!(convert(&23.66, &SQ_YARD, &SQ_METRE), 23.66 / YARDS_PER_METRE.powf(2.0));
         assert_near!(convert(&23.66, &SQ_MILE, &SQ_KILOMETRE), 23.66 * 1.609344439_f64.powf(2.0));
         assert_near!(convert(&23.66, &SQ_NAUTICAL_MILE, &SQ_KILOMETRE), 23.66 * 1.852001576_f64.powf(2.0));
+        assert_near!(convert(&1.0, &ACRE, &HECTARE), 0.40468564);
         // and back
         assert_near!(convert(&23.66, &SQ_METRE, &SQ_INCH), 23.66 * (YARDS_PER_METRE * 36.0).powf(2.0));
         assert_near!(convert(&23.66, &SQ_METRE, &SQ_FOOT), 23.66 * (YARDS_PER_METRE * 3.0).powf(2.0));
         assert_near!(convert(&23.66, &SQ_METRE, &SQ_YARD), 23.66 * YARDS_PER_METRE.powf(2.0));
         assert_near!(convert(&23.66, &SQ_KILOMETRE, &SQ_MILE), 23.66 / 1.609344439_f64.powf(2.0));
         assert_near!(convert(&23.66, &SQ_KILOMETRE, &SQ_NAUTICAL_MILE), 23.66 / 1.852001576_f64.powf(2.0));
+        assert_near!(convert(&1.0, &HECTARE, &ACRE), 2.4710538);
     }
 }
