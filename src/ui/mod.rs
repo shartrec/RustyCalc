@@ -35,7 +35,7 @@ mod func_popup;
 mod calc_window;
 pub(super) mod preferences;
 
-pub const PALETT_LCD: Palette = Palette {
+pub static PALETT_LCD: Palette = Palette {
     background: Color::from_rgb(  // LCD Green background
         0xd4 as f32 / 255.0,
         0xed as f32 / 255.0,

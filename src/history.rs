@@ -30,8 +30,8 @@ use lazy_static::lazy_static;
 use log::{error, warn};
 use serde::{Deserialize, Serialize};
 
-const HISTORY_FILE: &str = "rusty-calc-history.json";
-const HISTORY_SIZE: usize = 100;
+static HISTORY_FILE: &str = "rusty-calc-history.json";
+static HISTORY_SIZE: usize = 100;
 
 lazy_static! {
 static ref HISTORY_MANAGER: HistoryManager = {

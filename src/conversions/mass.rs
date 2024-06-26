@@ -26,7 +26,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// We define each of these as static constants for ease of use elsewhere and because they are
 /// intrinsically immutable
 
-pub const KILOGRAM: Unit = Unit {
+pub static KILOGRAM: Unit = Unit {
     name: "Kilogram",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -35,7 +35,7 @@ pub const KILOGRAM: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const GRAM: Unit = Unit {
+pub static GRAM: Unit = Unit {
     name: "Gram",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -44,7 +44,7 @@ pub const GRAM: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MILLIGRAM: Unit = Unit {
+pub static MILLIGRAM: Unit = Unit {
     name: "Milligram",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -53,7 +53,7 @@ pub const MILLIGRAM: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MICROGRAM: Unit = Unit {
+pub static MICROGRAM: Unit = Unit {
     name: "Microgram",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -62,7 +62,7 @@ pub const MICROGRAM: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const TONNE: Unit = Unit {
+pub static TONNE: Unit = Unit {
     name: "Ton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -71,7 +71,7 @@ pub const TONNE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const KILOTONNE: Unit = Unit {
+pub static KILOTONNE: Unit = Unit {
     name: "Kiloton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -80,7 +80,7 @@ pub const KILOTONNE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MEGATONNE: Unit = Unit {
+pub static MEGATONNE: Unit = Unit {
     name: "Megaton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -89,7 +89,7 @@ pub const MEGATONNE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const GIGATONNE: Unit = Unit {
+pub static GIGATONNE: Unit = Unit {
     name: "Gigaton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
@@ -101,8 +101,8 @@ pub const GIGATONNE: Unit = Unit {
 
 // Imperial
 
-pub const OUNCES_PER_KILO: f64 = 35.2739619495804;
-pub const OUNCE: Unit = Unit {
+pub static OUNCES_PER_KILO: f64 = 35.2739619495804;
+pub static OUNCE: Unit = Unit {
     name: "Ounce",
     dimension: Dimension::Mass,
     system: System::Imperial,
@@ -111,7 +111,7 @@ pub const OUNCE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const POUND: Unit = Unit {
+pub static POUND: Unit = Unit {
     name: "Pound",
     dimension: Dimension::Mass,
     system: System::Imperial,
@@ -120,7 +120,7 @@ pub const POUND: Unit = Unit {
     to_system_base: Some(|v| v * 16.0),
     from_system_base: Some(|v| v / 16.0),
 };
-pub const TON: Unit = Unit {
+pub static TON: Unit = Unit {
     name: "Long Ton",
     dimension: Dimension::Mass,
     system: System::Imperial,
@@ -129,7 +129,7 @@ pub const TON: Unit = Unit {
     to_system_base: Some(|v| v * 2240.0 * 16.0),
     from_system_base: Some(|v| v / (2240.0 * 16.0)),
 };
-pub const TON_SHORT: Unit = Unit {
+pub static TON_SHORT: Unit = Unit {
     name: "Short Ton",
     dimension: Dimension::Mass,
     system: System::Imperial,

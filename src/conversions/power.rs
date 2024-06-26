@@ -23,7 +23,7 @@
 use crate::conversions::{Dimension, System, Unit};
 
 // Power unit constants
-pub const WATT: Unit = Unit {
+pub static WATT: Unit = Unit {
     name: "Watt",
     dimension: Dimension::Power,
     system: System::Metric,
@@ -32,7 +32,7 @@ pub const WATT: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const KILOWATT: Unit = Unit {
+pub static KILOWATT: Unit = Unit {
     name: "Kilowatt",
     dimension: Dimension::Power,
     system: System::Metric,
@@ -41,7 +41,7 @@ pub const KILOWATT: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MEGAWATT: Unit = Unit {
+pub static MEGAWATT: Unit = Unit {
     name: "Megawatt",
     dimension: Dimension::Power,
     system: System::Metric,
@@ -50,7 +50,7 @@ pub const MEGAWATT: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const GIGAWATT: Unit = Unit {
+pub static GIGAWATT: Unit = Unit {
     name: "Gigawatt",
     dimension: Dimension::Power,
     system: System::Metric,
@@ -61,7 +61,7 @@ pub const GIGAWATT: Unit = Unit {
 };
 
 // Imperial units
-pub const HORSEPOWER: Unit = Unit {
+pub static HORSEPOWER: Unit = Unit {
     name: "Horsepower",
     dimension: Dimension::Power,
     system: System::Imperial,

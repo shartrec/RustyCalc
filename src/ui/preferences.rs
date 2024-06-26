@@ -31,15 +31,15 @@ use lazy_static::lazy_static;
 use log::error;
 use preferences::{AppInfo, Preferences, PreferencesMap};
 
-const PREFS_PATH: &str = "rusty-calc.config";
-pub const APP_INFO: AppInfo = AppInfo {
+static PREFS_PATH: &str = "rusty-calc.config";
+pub static APP_INFO: AppInfo = AppInfo {
     name: "kelpie-rust-calculator",
     author: "shartrec.com",
 };
 
 // Preference constants
-pub const ANGLE_MODE: &str = "angle-mode";
-pub const THEME: &str = "theme";
+pub static ANGLE_MODE: &str = "angle-mode";
+pub static THEME: &str = "theme";
 
 lazy_static! {
     static ref MANAGER: PreferenceManager = PreferenceManager {

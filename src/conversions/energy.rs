@@ -23,7 +23,7 @@
 use crate::conversions::{Dimension, System, Unit};
 
 // Energy unit constants
-pub const JOULE: Unit = Unit {
+pub static JOULE: Unit = Unit {
     name: "Joule",
     dimension: Dimension::Energy,
     system: System::Metric,
@@ -32,7 +32,7 @@ pub const JOULE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const KILOJOULE: Unit = Unit {
+pub static KILOJOULE: Unit = Unit {
     name: "Kilojoule",
     dimension: Dimension::Energy,
     system: System::Metric,
@@ -41,7 +41,7 @@ pub const KILOJOULE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MEGAJOULE: Unit = Unit {
+pub static MEGAJOULE: Unit = Unit {
     name: "Megajoule",
     dimension: Dimension::Energy,
     system: System::Metric,
@@ -50,7 +50,7 @@ pub const MEGAJOULE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const GIGAJOULE: Unit = Unit {
+pub static GIGAJOULE: Unit = Unit {
     name: "Gigajoule",
     dimension: Dimension::Energy,
     system: System::Metric,
@@ -61,7 +61,7 @@ pub const GIGAJOULE: Unit = Unit {
 };
 
 // Imperial units
-pub const BRITISH_THERMAL_UNIT: Unit = Unit {
+pub static BRITISH_THERMAL_UNIT: Unit = Unit {
     name: "British thermal unit",
     dimension: Dimension::Energy,
     system: System::Imperial,
@@ -70,7 +70,7 @@ pub const BRITISH_THERMAL_UNIT: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const CALORIE: Unit = Unit {
+pub static CALORIE: Unit = Unit {
     name: "Calorie",
     dimension: Dimension::Energy,
     system: System::Imperial,

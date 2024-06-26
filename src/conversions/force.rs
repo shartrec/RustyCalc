@@ -23,7 +23,7 @@
 use crate::conversions::{Dimension, System, Unit};
 
 // Force unit constants
-pub const NEWTON: Unit = Unit {
+pub static NEWTON: Unit = Unit {
     name: "Newton",
     dimension: Dimension::Force,
     system: System::Metric,
@@ -32,7 +32,7 @@ pub const NEWTON: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const KILONEWTON: Unit = Unit {
+pub static KILONEWTON: Unit = Unit {
     name: "Kilonewton",
     dimension: Dimension::Force,
     system: System::Metric,
@@ -41,7 +41,7 @@ pub const KILONEWTON: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MEGANEWTON: Unit = Unit {
+pub static MEGANEWTON: Unit = Unit {
     name: "Meganewton",
     dimension: Dimension::Force,
     system: System::Metric,
@@ -50,7 +50,7 @@ pub const MEGANEWTON: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const GIGANEWTON: Unit = Unit {
+pub static GIGANEWTON: Unit = Unit {
     name: "Giganewton",
     dimension: Dimension::Force,
     system: System::Metric,
@@ -61,7 +61,7 @@ pub const GIGANEWTON: Unit = Unit {
 };
 
 // Imperial units
-pub const POUND_FORCE: Unit = Unit {
+pub static POUND_FORCE: Unit = Unit {
     name: "Pound",
     dimension: Dimension::Force,
     system: System::Imperial,
@@ -70,7 +70,7 @@ pub const POUND_FORCE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const OUNCE_FORCE: Unit = Unit {
+pub static OUNCE_FORCE: Unit = Unit {
     name: "Ounce",
     dimension: Dimension::Force,
     system: System::Imperial,

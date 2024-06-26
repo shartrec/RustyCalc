@@ -26,7 +26,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// We define each of these as static constants for ease of use elsewhere and because they are
 /// intrinsically immutable
 
-pub const METRE: Unit = Unit {
+pub static METRE: Unit = Unit {
     name: "Metre",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -35,7 +35,7 @@ pub const METRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const CENTIMETRE: Unit = Unit {
+pub static CENTIMETRE: Unit = Unit {
     name: "Centimetre",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -44,7 +44,7 @@ pub const CENTIMETRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MILLIMETRE: Unit = Unit {
+pub static MILLIMETRE: Unit = Unit {
     name: "Millimetre",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -53,7 +53,7 @@ pub const MILLIMETRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MICROMETRE: Unit = Unit {
+pub static MICROMETRE: Unit = Unit {
     name: "Micrometre",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -62,7 +62,7 @@ pub const MICROMETRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const KILOMETRE: Unit = Unit {
+pub static KILOMETRE: Unit = Unit {
     name: "Kilometre",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -71,8 +71,8 @@ pub const KILOMETRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-const METRES_PER_LIGHTYEAR: f64 = 9460730472580800.0;
-pub const LIGHTYEAR: Unit = Unit {
+static METRES_PER_LIGHTYEAR: f64 = 9460730472580800.0;
+pub static LIGHTYEAR: Unit = Unit {
     name: "Lightyear",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -81,8 +81,8 @@ pub const LIGHTYEAR: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-const METRES_PER_PARSEC: f64 = 30856775814913670.0;
-pub const PARSEC: Unit = Unit {
+static METRES_PER_PARSEC: f64 = 30856775814913670.0;
+pub static PARSEC: Unit = Unit {
     name: "Parsec",
     dimension: Dimension::Length,
     system: System::Metric,
@@ -94,8 +94,8 @@ pub const PARSEC: Unit = Unit {
 
 // Imperial units
 
-pub const YARDS_PER_METRE: f64 = 1.093613;
-pub const YARD: Unit = Unit {
+static YARDS_PER_METRE: f64 = 1.093613;
+pub static YARD: Unit = Unit {
     name: "Yard",
     dimension: Dimension::Length,
     system: System::Imperial,
@@ -104,7 +104,7 @@ pub const YARD: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const FOOT: Unit = Unit {
+pub static FOOT: Unit = Unit {
     name: "Foot",
     dimension: Dimension::Length,
     system: System::Imperial,
@@ -113,7 +113,7 @@ pub const FOOT: Unit = Unit {
     to_system_base: Some(|v| v / 3.0),
     from_system_base: Some(|v| v * 3.0),
 };
-pub const INCH: Unit = Unit {
+pub static INCH: Unit = Unit {
     name: "Inch",
     dimension: Dimension::Length,
     system: System::Imperial,
@@ -122,7 +122,7 @@ pub const INCH: Unit = Unit {
     to_system_base: Some(|v| v / 36.0),
     from_system_base: Some(|v| v * 36.0),
 };
-pub const MILE: Unit = Unit {
+pub static MILE: Unit = Unit {
     name: "Mile",
     dimension: Dimension::Length,
     system: System::Imperial,
@@ -131,7 +131,7 @@ pub const MILE: Unit = Unit {
     to_system_base: Some(|v| v * 1760.0),
     from_system_base: Some(|v| v / 1760.0),
 };
-pub const NAUTICAL_MILE: Unit = Unit {
+pub static NAUTICAL_MILE: Unit = Unit {
     name: "Nm",
     dimension: Dimension::Length,
     system: System::Imperial,

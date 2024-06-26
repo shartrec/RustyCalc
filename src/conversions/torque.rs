@@ -23,7 +23,7 @@
 use crate::conversions::{Dimension, System, Unit};
 
 // Torque unit constants
-pub const NEWTON_METRE: Unit = Unit {
+pub static NEWTON_METRE: Unit = Unit {
     name: "newton_metre",
     dimension: Dimension::Torque,
     system: System::Metric,
@@ -32,7 +32,7 @@ pub const NEWTON_METRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const KILONEWTON_METRE: Unit = Unit {
+pub static KILONEWTON_METRE: Unit = Unit {
     name: "kilonewton_metre",
     dimension: Dimension::Torque,
     system: System::Metric,
@@ -41,7 +41,7 @@ pub const KILONEWTON_METRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const MEGANEWTON_METRE: Unit = Unit {
+pub static MEGANEWTON_METRE: Unit = Unit {
     name: "meganewton_metre",
     dimension: Dimension::Torque,
     system: System::Metric,
@@ -50,7 +50,7 @@ pub const MEGANEWTON_METRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const GIGANEWTON_METRE: Unit = Unit {
+pub static GIGANEWTON_METRE: Unit = Unit {
     name: "giganewton_metre",
     dimension: Dimension::Torque,
     system: System::Metric,
@@ -61,7 +61,7 @@ pub const GIGANEWTON_METRE: Unit = Unit {
 };
 
 // Imperial units
-pub const FOOT_POUND: Unit = Unit {
+pub static FOOT_POUND: Unit = Unit {
     name: "foot_pound_force",
     dimension: Dimension::Torque,
     system: System::Imperial,
@@ -70,7 +70,7 @@ pub const FOOT_POUND: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const INCH_POUND: Unit = Unit {
+pub static INCH_POUND: Unit = Unit {
     name: "inch_pound_force",
     dimension: Dimension::Torque,
     system: System::Imperial,

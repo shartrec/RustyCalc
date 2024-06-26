@@ -25,7 +25,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// We define each of these as static constants for ease of use elsewhere and because they are
 /// intrinsically immutable
 
-pub const CELSIUS: Unit = Unit {
+pub static CELSIUS: Unit = Unit {
     name: "Celsius",
     dimension: Dimension::Temperature,
     system: System::Metric,
@@ -35,7 +35,7 @@ pub const CELSIUS: Unit = Unit {
     from_system_base: None,
 };
 
-pub const KELVIN: Unit = Unit {
+pub static KELVIN: Unit = Unit {
     name: "Kelvin",
     dimension: Dimension::Temperature,
     system: System::Metric,
@@ -45,7 +45,7 @@ pub const KELVIN: Unit = Unit {
     from_system_base: None,
 };
 
-pub const FAHRENHEIT: Unit = Unit {
+pub static FAHRENHEIT: Unit = Unit {
     name: "Fahrenheit",
     dimension: Dimension::Temperature,
     system: System::Metric,

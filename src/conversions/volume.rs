@@ -26,7 +26,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// We define each of these as static constants for ease of use elsewhere and because they are
 /// intrinsically immutable
 
-pub const LITRE: Unit = Unit {
+pub static LITRE: Unit = Unit {
     name: "Litre",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -35,7 +35,7 @@ pub const LITRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const CU_METRE: Unit = Unit {
+pub static CU_METRE: Unit = Unit {
     name: "Cubic Metre",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -44,7 +44,7 @@ pub const CU_METRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const CUBIC_CENTIMETRE: Unit = Unit {
+pub static CUBIC_CENTIMETRE: Unit = Unit {
     name: "CC",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -53,7 +53,7 @@ pub const CUBIC_CENTIMETRE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const CUBIC_KILOMETRE: Unit = Unit {
+pub static CUBIC_KILOMETRE: Unit = Unit {
     name: "Cubic Kilometre",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -63,7 +63,7 @@ pub const CUBIC_KILOMETRE: Unit = Unit {
     from_system_base: None,
 };
 
-pub const KILO_LITRE: Unit = Unit {
+pub static KILO_LITRE: Unit = Unit {
     name: "Kilo Litre",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -73,7 +73,7 @@ pub const KILO_LITRE: Unit = Unit {
     from_system_base: None,
 };
 
-pub const MEGA_LITRE: Unit = Unit {
+pub static MEGA_LITRE: Unit = Unit {
     name: "Mega Litre",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -83,7 +83,7 @@ pub const MEGA_LITRE: Unit = Unit {
     from_system_base: None,
 };
 
-pub const GIGA_LITRE: Unit = Unit {
+pub static GIGA_LITRE: Unit = Unit {
     name: "Giga Litre",
     dimension: Dimension::Volume,
     system: System::Metric,
@@ -95,7 +95,7 @@ pub const GIGA_LITRE: Unit = Unit {
 
 // Imperial units
 
-pub const IMP_FL_OUNCE: Unit = Unit {
+pub static IMP_FL_OUNCE: Unit = Unit {
     name: "Imp Fl Ounce",
     dimension: Dimension::Volume,
     system: System::Imperial,
@@ -104,7 +104,7 @@ pub const IMP_FL_OUNCE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const IMP_CUBIC_INCH: Unit = Unit {
+pub static IMP_CUBIC_INCH: Unit = Unit {
     name: "Cubic Inch",
     dimension: Dimension::Volume,
     system: System::Imperial,
@@ -113,7 +113,7 @@ pub const IMP_CUBIC_INCH: Unit = Unit {
     to_system_base: Some(|v| v * 1.733871455),
     from_system_base: Some(|v| v * 1.733871455),
 };
-pub const IMP_PINT: Unit = Unit {
+pub static IMP_PINT: Unit = Unit {
     name: "Imp Pint",
     dimension: Dimension::Volume,
     system: System::Imperial,
@@ -122,7 +122,7 @@ pub const IMP_PINT: Unit = Unit {
     to_system_base: Some(|v| v * 20.0),
     from_system_base: Some(|v| v / 20.0),
 };
-pub const IMP_QUART: Unit = Unit {
+pub static IMP_QUART: Unit = Unit {
     name: "Imp Quart",
     dimension: Dimension::Volume,
     system: System::Imperial,
@@ -131,7 +131,7 @@ pub const IMP_QUART: Unit = Unit {
     to_system_base: Some(|v| v * 40.0),
     from_system_base: Some(|v| v / 40.0),
 };
-pub const IMP_GALLON: Unit = Unit {
+pub static IMP_GALLON: Unit = Unit {
     name: "Imp Gallon",
     dimension: Dimension::Volume,
     system: System::Imperial,
@@ -142,7 +142,7 @@ pub const IMP_GALLON: Unit = Unit {
 };
 
 // US units
-pub const US_FL_OUNCE: Unit = Unit {
+pub static US_FL_OUNCE: Unit = Unit {
     name: "US Fl Ounce",
     dimension: Dimension::Volume,
     system: System::US,
@@ -151,7 +151,7 @@ pub const US_FL_OUNCE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const US_PINT: Unit = Unit {
+pub static US_PINT: Unit = Unit {
     name: "US Pint",
     dimension: Dimension::Volume,
     system: System::US,
@@ -160,7 +160,7 @@ pub const US_PINT: Unit = Unit {
     to_system_base: Some(|v| v * 16.0),
     from_system_base: Some(|v| v / 16.0),
 };
-pub const US_QUART: Unit = Unit {
+pub static US_QUART: Unit = Unit {
     name: "US Quart",
     dimension: Dimension::Volume,
     system: System::US,
@@ -169,7 +169,7 @@ pub const US_QUART: Unit = Unit {
     to_system_base: Some(|v| v * 32.0),
     from_system_base: Some(|v| v / 32.0),
 };
-pub const US_GALLON: Unit = Unit {
+pub static US_GALLON: Unit = Unit {
     name: "US Gallon",
     dimension: Dimension::Volume,
     system: System::US,
