@@ -27,7 +27,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// intrinsically immutable
 
 pub const KILOGRAM: Unit = Unit {
-    name: "kilogram",
+    name: "Kilogram",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: None,
@@ -36,7 +36,7 @@ pub const KILOGRAM: Unit = Unit {
     from_system_base: None,
 };
 pub const GRAM: Unit = Unit {
-    name: "gram",
+    name: "Gram",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(Unit::to_kilo),
@@ -45,7 +45,7 @@ pub const GRAM: Unit = Unit {
     from_system_base: None,
 };
 pub const MILLIGRAM: Unit = Unit {
-    name: "milligram",
+    name: "Milligram",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(|v| GRAM.to_base.unwrap()(Unit::from_milli(v))),
@@ -54,7 +54,7 @@ pub const MILLIGRAM: Unit = Unit {
     from_system_base: None,
 };
 pub const MICROGRAM: Unit = Unit {
-    name: "microgram",
+    name: "Microgram",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(|v| GRAM.to_base.unwrap()(Unit::from_micro(v))),
@@ -63,7 +63,7 @@ pub const MICROGRAM: Unit = Unit {
     from_system_base: None,
 };
 pub const TONNE: Unit = Unit {
-    name: "ton (metric)",
+    name: "Ton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(Unit::from_kilo),
@@ -72,7 +72,7 @@ pub const TONNE: Unit = Unit {
     from_system_base: None,
 };
 pub const KILOTONNE: Unit = Unit {
-    name: "kiloton (metric)",
+    name: "Kiloton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(|v| TONNE.to_base.unwrap()(Unit::from_kilo(v))),
@@ -81,7 +81,7 @@ pub const KILOTONNE: Unit = Unit {
     from_system_base: None,
 };
 pub const MEGATONNE: Unit = Unit {
-    name: "ton (metric)",
+    name: "Megaton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(|v| TONNE.to_base.unwrap()(Unit::from_mega(v))),
@@ -90,7 +90,7 @@ pub const MEGATONNE: Unit = Unit {
     from_system_base: None,
 };
 pub const GIGATONNE: Unit = Unit {
-    name: "ton (metric)",
+    name: "Gigaton (metric)",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(|v| TONNE.to_base.unwrap()(Unit::from_giga(v))),
@@ -103,7 +103,7 @@ pub const GIGATONNE: Unit = Unit {
 
 pub const OUNCES_PER_KILO: f64 = 35.2739619495804;
 pub const OUNCE: Unit = Unit {
-    name: "ounce",
+    name: "Ounce",
     dimension: Dimension::Mass,
     system: System::Imperial,
     to_base: Some(|v| v / OUNCES_PER_KILO),
@@ -112,7 +112,7 @@ pub const OUNCE: Unit = Unit {
     from_system_base: None,
 };
 pub const POUND: Unit = Unit {
-    name: "pound",
+    name: "Pound",
     dimension: Dimension::Mass,
     system: System::Imperial,
     to_base: Some( |v| v * 16.0 / OUNCES_PER_KILO),
@@ -138,6 +138,13 @@ pub const TON_SHORT: Unit = Unit {
     to_system_base: Some(|v| v * 2000.0 * 16.0),
     from_system_base: Some(|v| v / (2000.0 * 16.0)),
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&KILOGRAM, &GRAM, &MILLIGRAM, &MICROGRAM,
+         &TONNE, &KILOTONNE, &MEGATONNE, &GIGATONNE,
+         &OUNCE, &POUND, &TON, &TON_SHORT
+    ]
+}
 
 #[cfg(test)]
 mod tests {

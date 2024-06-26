@@ -27,12 +27,13 @@
 use iced::{Background, Border, Color, Command, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector, window};
 use iced::alignment::{Horizontal, Vertical};
 use iced::theme::palette::Pair;
-use iced::widget::{Button, Column, container, Container, Row, text, text_editor};
+use iced::widget::{Button, Column, container, Container, horizontal_rule, Row, rule, text, text_editor};
 use iced::widget::button::{Appearance, Status};
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::window::Id;
 use palette::{convert::FromColor, Hsl};
 use palette::rgb::Rgb;
+use crate::conversions::{convert, Unit, length::METRE};
 
 use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
@@ -43,6 +44,9 @@ pub(super) struct CalcWindow {
     content: Content,
     result: Option<Result<f64, String>>,
     calc: Calc,
+    is_converting: bool,
+    convert_from: Option<Unit>,
+    convert_to: Option<Unit>,
     window_width: u32,
     window_height: u32,
     window_x: i32,
@@ -62,6 +66,9 @@ impl Default for CalcWindow {
             content: Default::default(),
             result: None,
             calc: calc,
+            is_converting: false,
+            convert_from: None,
+            convert_to: None,
             window_width: 0,
             window_height: 0,
             window_x: 0,
@@ -141,6 +148,9 @@ impl CalcWindow {
                 self.content.perform(Action::Move(Motion::DocumentStart));
                 self.content.perform(Action::Select(Motion::DocumentEnd));
                 self.content.perform(Action::Edit(Edit::Delete));
+                self.is_converting = false;
+                self.convert_from = None;
+                self.convert_to = None;
                 self.result = None;
                 Command::none()
             }
@@ -159,6 +169,16 @@ impl CalcWindow {
             Message::BackSpace => {
                 self.content.perform(Action::Edit(Edit::Backspace));
                 Command::none()
+            }
+            Message::ConvertPerform(from_unit, to_unit) => {
+                self.is_converting = true;
+                self.convert_from = Some(from_unit);
+                self.convert_to = Some(to_unit);
+                if self.content.text().trim().len() > 0 {
+                    Command::perform(async {}, |_| Message::Evaluate)
+                } else {
+                    Command::none()
+                }
             }
             Message::WindowResized(id, w, h) => {
                 if id == Id::MAIN {
@@ -197,14 +217,13 @@ impl CalcWindow {
             }
         }
     }
-    pub(super) fn view<'a>(&'a self, _id: Id) -> Element<Message> {
+    pub(super) fn view<'a>(&'a self, _id: &Id) -> Element<Message> {
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
-            // .height(Length::Fill)
             .style(|_theme, _status| {
                 text_editor::Appearance {
                     background: Background::Color(Color::TRANSPARENT),
-                    border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
+                    border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x35, 0x3f, 0x3f)),
                     .. text_editor::default(_theme, _status)
                 }
             })
@@ -213,16 +232,12 @@ impl CalcWindow {
             })
             .into();
 
-        let result = text(match &self.result {
+        let r64 = &self.result;
+        let result = text(match r64 {
             Some(r) => {
                 match r {
                     Ok(v) => {
-                        if *v < 0.001 || *v > 10000000.0 {
-                            format!("= {:+e}", v)
-                        } else {
-                            let formatted = format!("= {0:.1$}", v, 10);
-                            formatted.trim_end_matches('0').trim_end_matches('.').to_string()
-                        }
+                        Self::format_result(v)
                     }
                     Err(e) => e.clone()
                 }
@@ -252,12 +267,52 @@ impl CalcWindow {
             .clip(false)
             .into();
 
-        let top = Column::with_children([con_mode, lcd, result]).spacing(5);
+        let top =
+            if !self.is_converting {
+                Column::with_children([con_mode, lcd, result]).spacing(2)
+            } else {
+                let conv_from = text(self.convert_from.as_ref().unwrap_or(&METRE).name)
+                                         .horizontal_alignment(Horizontal::Left)
+                                         .into();
+                let conv_to = text(self.convert_to.as_ref().unwrap_or(&METRE).name)
+                                         .horizontal_alignment(Horizontal::Left)
+                                         .into();
+
+            let converted_result = text(match &self.result {
+                    Some(r) => {
+                        match r {
+                            Ok(v) => {
+                                let cv = convert(v, &self.convert_from.as_ref().unwrap_or(&METRE), &self.convert_to.as_ref().unwrap_or(&METRE));
+                                Self::format_result(&cv)
+                            }
+                            Err(e) => e.clone()
+                        }
+                    }
+                    None => String::from("")
+                })
+                .width(Length::FillPortion(1))
+                .horizontal_alignment(Horizontal::Right)
+                .into();
+
+                let r1 = Row::with_children([conv_from, result]).into();
+                let r2 = Row::with_children([conv_to, converted_result]).into();
+
+                let rule1:Element<Message> = horizontal_rule(1)
+                    .style(|theme| {
+                        iced::widget::rule::Appearance {
+                                color: Color::from_rgb8(0x35, 0x3f, 0x3f),
+                                .. rule::default(theme)
+                            }
+                        })
+                    .into();
+                Column::with_children([con_mode, lcd, r1, rule1, r2]).spacing(2)
+            };
         let lcd_container = container(top)
             .width(Length::Fill)
             .style(move |_theme, _status| {
                 container::Appearance {
                     background: Some(Background::Color(_theme.extended_palette().background.strong.color)),
+                    border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
                     ..Default::default()
                 }
             })
@@ -314,7 +369,7 @@ impl CalcWindow {
         let b_more = ButtonBuilder::new("more..", w, h).msg(Message::FuncPopup).make();
 
         let col_all = Column::with_children([
-            lcd_container.height(Length::FillPortion(2)).into(),
+            lcd_container.height(Length::FillPortion(3)).into(),
             Row::with_children([
                 Column::with_children([
                     Row::with_children([b_back, b_left, b_right, b_more, b_clear]).spacing(2).into(),
@@ -343,6 +398,15 @@ impl CalcWindow {
                 }
             })
             .padding(10).into()
+    }
+
+    fn format_result(v: &f64) -> String {
+        if *v < 0.001 || *v > 10000000.0 {
+            format!("= {:+e}", v)
+        } else {
+            let formatted = format!("= {0:.1$}", v, 10);
+            formatted.trim_end_matches('0').trim_end_matches('.').to_string()
+        }
     }
 
     pub(crate) fn position(&self) -> (i32, i32) {

@@ -29,7 +29,7 @@ use crate::ui::calc_window::CalcWindow;
 use crate::ui::func_popup::FuncPopup;
 use crate::ui::messages::Message;
 
-#[derive(Debug)]
+// #[derive(Debug)]
 pub(crate) struct CalculatorApp {
     main_window: CalcWindow,
     pick_window: Option<(Id, FuncPopup)>,
@@ -61,33 +61,14 @@ impl multi_window::Application for CalculatorApp {
         )
     }
 
-    fn subscription(&self) -> Subscription<Message> {
-        event::listen_with(|event, _status| {
-            match event {
-                Event::Window(id, window::Event::Resized { width, height}) => {
-                    Some(Message::WindowResized(id, width, height))
-                }
-                Event::Window(id, window::Event::Moved { x, y}) => {
-                    Some(Message::WindowMoved(id, x, y))
-                }
-                Event::Window(id, window::Event::CloseRequested {}) => {
-                    Some(Message::WindowClose(id))
-                }
-                _ => None
-            }
-        })
-    }
-
-    fn view(&self, id: Id) -> Element<Message> {
-
+    fn title(&self, id: Id) -> String {
         match id {
-            Id::MAIN => self.main_window.view(id),
+            Id::MAIN => self.main_window.title(),
             _ => match &self.pick_window {
-                Some((id_settings, settings)) if id == *id_settings => settings.view(id),
-                _ => text("WE HAVE A PROBLEM").into(),
+                Some((id_settings, settings)) if id == *id_settings => settings.title(),
+                _ => "Unknown".to_string(),
             }
         }
-
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {
@@ -140,18 +121,37 @@ impl multi_window::Application for CalculatorApp {
         Command::batch(commands)
     }
 
-    fn title(&self, id: Id) -> String {
+    fn view(&self, id: Id) -> Element<Message> {
+
         match id {
-            Id::MAIN => self.main_window.title(),
+            Id::MAIN => self.main_window.view(&id),
             _ => match &self.pick_window {
-                Some((id_settings, settings)) if id == *id_settings => settings.title(),
-                _ => "Unknown".to_string(),
+                Some((id_settings, settings)) if id == *id_settings => settings.view(&id),
+                _ => text("WE HAVE A PROBLEM").into(),
             }
         }
+
     }
 
     fn theme(&self, _window: Id) -> Self::Theme {
         self.theme.clone()
+    }
+
+    fn subscription(&self) -> Subscription<Message> {
+        event::listen_with(|event, _status| {
+            match event {
+                Event::Window(id, window::Event::Resized { width, height}) => {
+                    Some(Message::WindowResized(id, width, height))
+                }
+                Event::Window(id, window::Event::Moved { x, y}) => {
+                    Some(Message::WindowMoved(id, x, y))
+                }
+                Event::Window(id, window::Event::CloseRequested {}) => {
+                    Some(Message::WindowClose(id))
+                }
+                _ => None
+            }
+        })
     }
 
 

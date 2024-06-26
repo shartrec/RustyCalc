@@ -24,7 +24,7 @@ use crate::conversions::{Dimension, System, Unit};
 
 // Energy unit constants
 pub const JOULE: Unit = Unit {
-    name: "joule",
+    name: "Joule",
     dimension: Dimension::Energy,
     system: System::Metric,
     to_base: None,
@@ -33,7 +33,7 @@ pub const JOULE: Unit = Unit {
     from_system_base: None,
 };
 pub const KILOJOULE: Unit = Unit {
-    name: "kilojoule",
+    name: "Kilojoule",
     dimension: Dimension::Energy,
     system: System::Metric,
     to_base: Some(Unit::from_kilo),
@@ -42,7 +42,7 @@ pub const KILOJOULE: Unit = Unit {
     from_system_base: None,
 };
 pub const MEGAJOULE: Unit = Unit {
-    name: "megajoule",
+    name: "Megajoule",
     dimension: Dimension::Energy,
     system: System::Metric,
     to_base: Some(Unit::from_mega),
@@ -51,7 +51,7 @@ pub const MEGAJOULE: Unit = Unit {
     from_system_base: None,
 };
 pub const GIGAJOULE: Unit = Unit {
-    name: "gigajoule",
+    name: "Gigajoule",
     dimension: Dimension::Energy,
     system: System::Metric,
     to_base: Some(Unit::from_giga),
@@ -62,7 +62,7 @@ pub const GIGAJOULE: Unit = Unit {
 
 // Imperial units
 pub const BRITISH_THERMAL_UNIT: Unit = Unit {
-    name: "british_thermal_unit",
+    name: "British thermal unit",
     dimension: Dimension::Energy,
     system: System::Imperial,
     to_base: Some(|v| v * 1055.05585262),
@@ -71,7 +71,7 @@ pub const BRITISH_THERMAL_UNIT: Unit = Unit {
     from_system_base: None,
 };
 pub const CALORIE: Unit = Unit {
-    name: "calorie",
+    name: "Calorie",
     dimension: Dimension::Energy,
     system: System::Imperial,
     to_base: Some(|v| v * 4.184),
@@ -79,6 +79,12 @@ pub const CALORIE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&JOULE, &KILOJOULE, &MEGAJOULE, &GIGAJOULE,
+         &BRITISH_THERMAL_UNIT, &CALORIE,
+    ]
+}
 
 #[cfg(test)]
 mod tests {

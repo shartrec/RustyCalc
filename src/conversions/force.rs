@@ -24,7 +24,7 @@ use crate::conversions::{Dimension, System, Unit};
 
 // Force unit constants
 pub const NEWTON: Unit = Unit {
-    name: "newton",
+    name: "Newton",
     dimension: Dimension::Force,
     system: System::Metric,
     to_base: None,
@@ -33,7 +33,7 @@ pub const NEWTON: Unit = Unit {
     from_system_base: None,
 };
 pub const KILONEWTON: Unit = Unit {
-    name: "kilonewton",
+    name: "Kilonewton",
     dimension: Dimension::Force,
     system: System::Metric,
     to_base: Some(Unit::from_kilo),
@@ -42,7 +42,7 @@ pub const KILONEWTON: Unit = Unit {
     from_system_base: None,
 };
 pub const MEGANEWTON: Unit = Unit {
-    name: "meganewton",
+    name: "Meganewton",
     dimension: Dimension::Force,
     system: System::Metric,
     to_base: Some(Unit::from_mega),
@@ -51,7 +51,7 @@ pub const MEGANEWTON: Unit = Unit {
     from_system_base: None,
 };
 pub const GIGANEWTON: Unit = Unit {
-    name: "giganewton",
+    name: "Giganewton",
     dimension: Dimension::Force,
     system: System::Metric,
     to_base: Some(Unit::from_giga),
@@ -62,7 +62,7 @@ pub const GIGANEWTON: Unit = Unit {
 
 // Imperial units
 pub const POUND_FORCE: Unit = Unit {
-    name: "pound_force",
+    name: "Pound",
     dimension: Dimension::Force,
     system: System::Imperial,
     to_base: Some(|v| v * 4.4482216152605),
@@ -71,7 +71,7 @@ pub const POUND_FORCE: Unit = Unit {
     from_system_base: None,
 };
 pub const OUNCE_FORCE: Unit = Unit {
-    name: "ounce_force",
+    name: "Ounce",
     dimension: Dimension::Force,
     system: System::Imperial,
     to_base: Some(|v| v * 0.278013851),
@@ -79,6 +79,12 @@ pub const OUNCE_FORCE: Unit = Unit {
     to_system_base: Some(|v| v / 16.0),
     from_system_base: Some(|v| v * 16.0),
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&NEWTON, &KILONEWTON, &MEGANEWTON, &GIGANEWTON,
+         &POUND_FORCE, &OUNCE_FORCE,
+    ]
+}
 
 #[cfg(test)]
 mod tests {

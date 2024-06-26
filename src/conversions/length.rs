@@ -27,7 +27,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// intrinsically immutable
 
 pub const METRE: Unit = Unit {
-    name: "metre",
+    name: "Metre",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: None,
@@ -36,7 +36,7 @@ pub const METRE: Unit = Unit {
     from_system_base: None,
 };
 pub const CENTIMETRE: Unit = Unit {
-    name: "centimetre",
+    name: "Centimetre",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: Some(|v| v / 100.0),
@@ -45,7 +45,7 @@ pub const CENTIMETRE: Unit = Unit {
     from_system_base: None,
 };
 pub const MILLIMETRE: Unit = Unit {
-    name: "millimetre",
+    name: "Millimetre",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: Some(Unit::from_milli),
@@ -54,7 +54,7 @@ pub const MILLIMETRE: Unit = Unit {
     from_system_base: None,
 };
 pub const MICROMETRE: Unit = Unit {
-    name: "micrometre",
+    name: "Micrometre",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: Some(Unit::from_micro),
@@ -63,7 +63,7 @@ pub const MICROMETRE: Unit = Unit {
     from_system_base: None,
 };
 pub const KILOMETRE: Unit = Unit {
-    name: "kilometre",
+    name: "Kilometre",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: Some(Unit::from_kilo),
@@ -73,7 +73,7 @@ pub const KILOMETRE: Unit = Unit {
 };
 const METRES_PER_LIGHTYEAR: f64 = 9460730472580800.0;
 pub const LIGHTYEAR: Unit = Unit {
-    name: "lightyear",
+    name: "Lightyear",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: Some(|v| v * METRES_PER_LIGHTYEAR),
@@ -83,7 +83,7 @@ pub const LIGHTYEAR: Unit = Unit {
 };
 const METRES_PER_PARSEC: f64 = 30856775814913670.0;
 pub const PARSEC: Unit = Unit {
-    name: "parsec",
+    name: "Parsec",
     dimension: Dimension::Length,
     system: System::Metric,
     to_base: Some(|v| v * METRES_PER_PARSEC),
@@ -96,7 +96,7 @@ pub const PARSEC: Unit = Unit {
 
 pub const YARDS_PER_METRE: f64 = 1.093613;
 pub const YARD: Unit = Unit {
-    name: "yard",
+    name: "Yard",
     dimension: Dimension::Length,
     system: System::Imperial,
     to_base: Some(|v| v / YARDS_PER_METRE),
@@ -105,7 +105,7 @@ pub const YARD: Unit = Unit {
     from_system_base: None,
 };
 pub const FOOT: Unit = Unit {
-    name: "foot",
+    name: "Foot",
     dimension: Dimension::Length,
     system: System::Imperial,
     to_base: Some(|v| v / (YARDS_PER_METRE * 3.0)),
@@ -114,7 +114,7 @@ pub const FOOT: Unit = Unit {
     from_system_base: Some(|v| v * 3.0),
 };
 pub const INCH: Unit = Unit {
-    name: "inch",
+    name: "Inch",
     dimension: Dimension::Length,
     system: System::Imperial,
     to_base: Some(|v| v / (YARDS_PER_METRE * 36.0)),
@@ -123,7 +123,7 @@ pub const INCH: Unit = Unit {
     from_system_base: Some(|v| v * 36.0),
 };
 pub const MILE: Unit = Unit {
-    name: "mile",
+    name: "Mile",
     dimension: Dimension::Length,
     system: System::Imperial,
     to_base: Some(|v| v / (YARDS_PER_METRE / 1760.0)),
@@ -132,7 +132,7 @@ pub const MILE: Unit = Unit {
     from_system_base: Some(|v| v / 1760.0),
 };
 pub const NAUTICAL_MILE: Unit = Unit {
-    name: "nm",
+    name: "Nm",
     dimension: Dimension::Length,
     system: System::Imperial,
     to_base: Some(|v| v / (YARDS_PER_METRE / 2025.373)),
@@ -140,6 +140,13 @@ pub const NAUTICAL_MILE: Unit = Unit {
     to_system_base: Some(|v| v * 2025.373),
     from_system_base: Some(|v| v / 2025.373),
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&METRE, &CENTIMETRE, &MILLIMETRE, &MICROMETRE,
+         &KILOMETRE, &LIGHTYEAR, &PARSEC, &YARD,
+         &FOOT, &INCH, &MILE, &NAUTICAL_MILE
+    ]
+}
 
 #[cfg(test)]
 mod tests {

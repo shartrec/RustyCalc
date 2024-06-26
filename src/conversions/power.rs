@@ -24,7 +24,7 @@ use crate::conversions::{Dimension, System, Unit};
 
 // Power unit constants
 pub const WATT: Unit = Unit {
-    name: "watt",
+    name: "Watt",
     dimension: Dimension::Power,
     system: System::Metric,
     to_base: None,
@@ -33,7 +33,7 @@ pub const WATT: Unit = Unit {
     from_system_base: None,
 };
 pub const KILOWATT: Unit = Unit {
-    name: "kilowatt",
+    name: "Kilowatt",
     dimension: Dimension::Power,
     system: System::Metric,
     to_base: Some(Unit::from_kilo),
@@ -42,7 +42,7 @@ pub const KILOWATT: Unit = Unit {
     from_system_base: None,
 };
 pub const MEGAWATT: Unit = Unit {
-    name: "megawatt",
+    name: "Megawatt",
     dimension: Dimension::Power,
     system: System::Metric,
     to_base: Some(Unit::from_mega),
@@ -51,7 +51,7 @@ pub const MEGAWATT: Unit = Unit {
     from_system_base: None,
 };
 pub const GIGAWATT: Unit = Unit {
-    name: "gigawatt",
+    name: "Gigawatt",
     dimension: Dimension::Power,
     system: System::Metric,
     to_base: Some(Unit::from_giga),
@@ -62,7 +62,7 @@ pub const GIGAWATT: Unit = Unit {
 
 // Imperial units
 pub const HORSEPOWER: Unit = Unit {
-    name: "horsepower",
+    name: "Horsepower",
     dimension: Dimension::Power,
     system: System::Imperial,
     to_base: Some(|v| v * 745.699872),
@@ -70,6 +70,12 @@ pub const HORSEPOWER: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&WATT, &KILOWATT, &MEGAWATT, &GIGAWATT,
+         &HORSEPOWER,
+    ]
+}
 
 #[cfg(test)]
 mod tests {

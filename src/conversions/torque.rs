@@ -61,7 +61,7 @@ pub const GIGANEWTON_METRE: Unit = Unit {
 };
 
 // Imperial units
-pub const FOOT_POUND_FORCE: Unit = Unit {
+pub const FOOT_POUND: Unit = Unit {
     name: "foot_pound_force",
     dimension: Dimension::Torque,
     system: System::Imperial,
@@ -70,7 +70,7 @@ pub const FOOT_POUND_FORCE: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
-pub const INCH_POUND_FORCE: Unit = Unit {
+pub const INCH_POUND: Unit = Unit {
     name: "inch_pound_force",
     dimension: Dimension::Torque,
     system: System::Imperial,
@@ -80,11 +80,17 @@ pub const INCH_POUND_FORCE: Unit = Unit {
     from_system_base: Some(|v| v * 12.0),
 };
 
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&NEWTON_METRE, &KILONEWTON_METRE, &MEGANEWTON_METRE, &GIGANEWTON_METRE,
+         &FOOT_POUND, &INCH_POUND,
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assert_near;
     use crate::conversions::convert;
-    use crate::conversions::torque::{NEWTON_METRE, KILONEWTON_METRE, MEGANEWTON_METRE, GIGANEWTON_METRE, FOOT_POUND_FORCE, INCH_POUND_FORCE};
+    use crate::conversions::torque::{NEWTON_METRE, KILONEWTON_METRE, MEGANEWTON_METRE, GIGANEWTON_METRE, FOOT_POUND, INCH_POUND};
 
     #[test]
     fn test_metric_torque_units() {
@@ -95,21 +101,21 @@ mod tests {
 
     #[test]
     fn test_imperial_torque_units() {
-        assert_near!(convert(&1.0, &FOOT_POUND_FORCE, &NEWTON_METRE), 1.3558179483314);
-        assert_near!(convert(&12.0, &INCH_POUND_FORCE, &FOOT_POUND_FORCE), 1.0);
+        assert_near!(convert(&1.0, &FOOT_POUND, &NEWTON_METRE), 1.3558179483314);
+        assert_near!(convert(&12.0, &INCH_POUND, &FOOT_POUND), 1.0);
     }
 
     #[test]
     fn test_metric_to_imperial_torque_units() {
-        assert_near!(convert(&1.0, &NEWTON_METRE, &FOOT_POUND_FORCE), 0.7375621492772656);
-        assert_near!(convert(&1000.0, &NEWTON_METRE, &FOOT_POUND_FORCE), 737.5621492772656);
-        assert_near!(convert(&1.0, &KILONEWTON_METRE, &FOOT_POUND_FORCE), 737.5621492772656);
+        assert_near!(convert(&1.0, &NEWTON_METRE, &FOOT_POUND), 0.7375621492772656);
+        assert_near!(convert(&1000.0, &NEWTON_METRE, &FOOT_POUND), 737.5621492772656);
+        assert_near!(convert(&1.0, &KILONEWTON_METRE, &FOOT_POUND), 737.5621492772656);
     }
 
     #[test]
     fn test_imperial_to_metric_torque_units() {
-        assert_near!(convert(&1.0, &FOOT_POUND_FORCE, &NEWTON_METRE), 1.3558179483314);
-        assert_near!(convert(&10.0, &FOOT_POUND_FORCE, &KILONEWTON_METRE), 0.013558179483314);
-        assert_near!(convert(&100.0, &FOOT_POUND_FORCE, &MEGANEWTON_METRE), 0.00013558179483314);
+        assert_near!(convert(&1.0, &FOOT_POUND, &NEWTON_METRE), 1.3558179483314);
+        assert_near!(convert(&10.0, &FOOT_POUND, &KILONEWTON_METRE), 0.013558179483314);
+        assert_near!(convert(&100.0, &FOOT_POUND, &MEGANEWTON_METRE), 0.00013558179483314);
     }
 }

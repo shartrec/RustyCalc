@@ -28,7 +28,7 @@ use crate::conversions::length::*;
 /// intrinsically immutable
 
 pub const SQ_METRE: Unit = Unit {
-    name: "sq_metre",
+    name: "Sq_Metre",
     dimension: Dimension::Area,
     system: System::Metric,
     to_base: None,
@@ -37,7 +37,7 @@ pub const SQ_METRE: Unit = Unit {
     from_system_base: None,
 };
 pub const SQ_CENTIMETRE: Unit = Unit {
-    name: "sq_centimetre",
+    name: "Sq_Centimetre",
     dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| CENTIMETRE.to_base.unwrap()(CENTIMETRE.to_base.unwrap()(v))),
@@ -46,7 +46,7 @@ pub const SQ_CENTIMETRE: Unit = Unit {
     from_system_base: None,
 };
 pub const SQ_MILLIMETRE: Unit = Unit {
-    name: "sq_millimetre",
+    name: "Sq_Millimetre",
     dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| MILLIMETRE.to_base.unwrap()(MILLIMETRE.to_base.unwrap()(v))),
@@ -55,7 +55,7 @@ pub const SQ_MILLIMETRE: Unit = Unit {
     from_system_base: None,
 };
 pub const SQ_MICROMETRE: Unit = Unit {
-    name: "sq_micrometre",
+    name: "Sq_Micrometre",
     dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| MICROMETRE.to_base.unwrap()(MICROMETRE.to_base.unwrap()(v))),
@@ -64,7 +64,7 @@ pub const SQ_MICROMETRE: Unit = Unit {
     from_system_base: None,
 };
 pub const HECTARE: Unit = Unit {
-    name: "hectare",
+    name: "Hectare",
     dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| v * 10000.0),
@@ -74,7 +74,7 @@ pub const HECTARE: Unit = Unit {
 };
 
 pub const SQ_KILOMETRE: Unit = Unit {
-    name: "sq_kilometre",
+    name: "Sq_Kilometre",
     dimension: Dimension::Area,
     system: System::Metric,
     to_base: Some(|v| KILOMETRE.to_base.unwrap()(KILOMETRE.to_base.unwrap()(v))),
@@ -86,7 +86,7 @@ pub const SQ_KILOMETRE: Unit = Unit {
 // Imperial units
 
 pub const SQ_YARD: Unit = Unit {
-    name: "sq_yard",
+    name: "Sq_Yard",
     dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| YARD.to_base.unwrap()(YARD.to_base.unwrap()(v))),
@@ -95,7 +95,7 @@ pub const SQ_YARD: Unit = Unit {
     from_system_base: None,
 };
 pub const SQ_FOOT: Unit = Unit {
-    name: "sq_foot",
+    name: "Sq_Foot",
     dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| FOOT.to_base.unwrap()(FOOT.to_base.unwrap()(v))),
@@ -104,7 +104,7 @@ pub const SQ_FOOT: Unit = Unit {
     from_system_base: Some(|v| FOOT.from_system_base.unwrap()(FOOT.from_system_base.unwrap()(v))),
 };
 pub const SQ_INCH: Unit = Unit {
-    name: "sq_inch",
+    name: "Sq_Inch",
     dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| INCH.to_base.unwrap()(INCH.to_base.unwrap()(v))),
@@ -113,7 +113,7 @@ pub const SQ_INCH: Unit = Unit {
     from_system_base: Some(|v| INCH.from_system_base.unwrap()(INCH.from_system_base.unwrap()(v))),
 };
 pub const ACRE: Unit = Unit {
-    name: "acre",
+    name: "Acre",
     dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| v * 4046.856422),
@@ -122,7 +122,7 @@ pub const ACRE: Unit = Unit {
     from_system_base: Some(|v| v / 4840.0),
 };
 pub const SQ_MILE: Unit = Unit {
-    name: "sq_mile",
+    name: "Sq_Mile",
     dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| MILE.to_base.unwrap()(MILE.to_base.unwrap()(v))),
@@ -131,7 +131,7 @@ pub const SQ_MILE: Unit = Unit {
     from_system_base: Some(|v| MILE.from_system_base.unwrap()(MILE.from_system_base.unwrap()(v))),
 };
 pub const SQ_NAUTICAL_MILE: Unit = Unit {
-    name: "sq_nm",
+    name: "Sq_Nm",
     dimension: Dimension::Area,
     system: System::Imperial,
     to_base: Some(|v| NAUTICAL_MILE.to_base.unwrap()(NAUTICAL_MILE.to_base.unwrap()(v))),
@@ -139,6 +139,13 @@ pub const SQ_NAUTICAL_MILE: Unit = Unit {
     to_system_base: Some(|v| NAUTICAL_MILE.to_system_base.unwrap()(NAUTICAL_MILE.to_system_base.unwrap()(v))),
     from_system_base: Some(|v| NAUTICAL_MILE.from_system_base.unwrap()(NAUTICAL_MILE.from_system_base.unwrap()(v))),
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&SQ_METRE, &SQ_CENTIMETRE, &SQ_MILLIMETRE, &SQ_MICROMETRE,
+         &HECTARE, &SQ_KILOMETRE, &SQ_YARD, &SQ_FOOT,
+         &SQ_INCH, &ACRE, &SQ_MILE, &SQ_NAUTICAL_MILE
+    ]
+}
 
 #[cfg(test)]
 mod tests {

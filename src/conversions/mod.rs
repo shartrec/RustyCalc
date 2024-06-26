@@ -19,8 +19,12 @@
  * OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+#![allow(dead_code)]
 
 use std::cmp::PartialEq;
+use std::fmt::{Display, Formatter};
+use log::warn;
+use strum_macros::{Display, EnumIter};
 use crate::conversions::System::Metric;
 
 pub(crate) mod mass;
@@ -39,7 +43,7 @@ mod energy;
 /// conversions between system are often not exact, and require many decimal places.
 /// We acknowledge this difference and so convert between units of the same system using a base within
 /// that system, otherwise we use a common SI base if possible.
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Clone)]
 pub(crate) enum System {
     #[default]
     Metric,
@@ -54,7 +58,7 @@ impl System {
 }
 /// Dimension describe the physical attribute that can be measured.
 /// You can only convert from one unit to another if it is in the same dimension
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Display, EnumIter, PartialEq)]
 pub(crate) enum Dimension {
     #[default]
     Length,
@@ -68,9 +72,16 @@ pub(crate) enum Dimension {
     Energy
 }
 
+#[derive(Debug, Default, PartialEq, Clone, Copy)]
+pub(crate) enum ConversionDirection {
+    #[default]
+    From,
+    To,
+}
+
 /// A unit is the basic unit that can be converted to or from
 ///
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Unit {
     pub(crate) name: &'static str,
     /// The dimension the unit measures
@@ -128,6 +139,11 @@ impl Unit {
     }
 }
 
+impl Display for Unit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.name)
+    }
+}
 impl PartialEq for Unit {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
@@ -160,6 +176,42 @@ pub(crate) fn convert(value: &f64, from: &Unit, to: &Unit) -> f64 {
     }
     result
 
+}
+
+pub(crate) fn get_units(dimension: &Option<Dimension>) -> Vec<&'static Unit> {
+    match dimension {
+        Some(Dimension::Length) => {
+            length::get_all()
+        }
+        Some(Dimension::Area) => {
+            area::get_all()
+        }
+        Some(Dimension::Mass) => {
+            mass::get_all()
+        }
+        Some(Dimension::Volume) => {
+            volume::get_all()
+        }
+        Some(Dimension::Temperature) => {
+            temperature::get_all()
+        }
+        Some(Dimension::Power) => {
+            power::get_all()
+        }
+        Some(Dimension::Torque) => {
+            torque::get_all()
+        }
+        Some(Dimension::Force) => {
+            force::get_all()
+        }
+        Some(Dimension::Energy) => {
+            energy::get_all()
+        }
+        None => {
+            warn!("Trying to convert, but no dimension set");
+            vec![]
+        }
+    }
 }
 
 #[cfg(test)]

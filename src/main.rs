@@ -49,8 +49,8 @@ fn main() -> iced::Result {
     //     .with_window_class("KelpieCalcClass", "KelpieCalcIcon");
     //
     let window_settings = iced::window::Settings {
-        size: load_window_size().unwrap_or(Size::new(330.0, 420.0)),
-        min_size: Some(Size::new(300.0, 420.0)),
+        size: load_window_size().unwrap_or(Size::new(330.0, 450.0)),
+        min_size: Some(Size::new(330.0, 450.0)),
         exit_on_close_request: false,
         ..iced::window::Settings::default()
     };

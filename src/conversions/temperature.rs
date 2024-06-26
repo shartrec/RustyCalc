@@ -26,7 +26,7 @@ use crate::conversions::{Dimension, System, Unit};
 /// intrinsically immutable
 
 pub const CELSIUS: Unit = Unit {
-    name: "celsius",
+    name: "Celsius",
     dimension: Dimension::Temperature,
     system: System::Metric,
     to_base: None,
@@ -36,7 +36,7 @@ pub const CELSIUS: Unit = Unit {
 };
 
 pub const KELVIN: Unit = Unit {
-    name: "kelvin",
+    name: "Kelvin",
     dimension: Dimension::Temperature,
     system: System::Metric,
     to_base: Some(|v| v - 273.15),
@@ -46,7 +46,7 @@ pub const KELVIN: Unit = Unit {
 };
 
 pub const FAHRENHEIT: Unit = Unit {
-    name: "fahrenheit",
+    name: "Fahrenheit",
     dimension: Dimension::Temperature,
     system: System::Metric,
     to_base: Some(|v| (v - 32.0) / 9.0 * 5.0),
@@ -54,6 +54,11 @@ pub const FAHRENHEIT: Unit = Unit {
     to_system_base: None,
     from_system_base: None,
 };
+
+pub(crate) fn get_all() -> Vec<&'static Unit> {
+    vec![&CELSIUS, &KELVIN, &FAHRENHEIT,
+    ]
+}
 
 #[cfg(test)]
 mod tests {

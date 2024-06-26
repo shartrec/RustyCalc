@@ -24,16 +24,20 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
+use std::cell::RefCell;
 use std::ops::Deref;
-
 use iced::{Background, Command, Element, Length, Renderer, Theme, window};
+
 use iced::widget::{Column, container, horizontal_rule, pick_list};
 use iced::widget::pick_list::{Appearance, DefaultStyle, Status, Style};
 use iced::widget::text::Shaping;
 use iced::window::Id;
 use log::error;
+use strum::IntoEnumIterator;
+
+use crate::conversions::{ConversionDirection, Dimension, Unit};
 use crate::evaluator::constants::{Pi, Euler, Phi, C, Planck, G};
-use crate::{history, ui};
+use crate::{conversions, history, ui};
 
 use crate::ui::messages::Message;
 
@@ -73,10 +77,12 @@ impl PartialEq for HistoryDef {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub(super) struct FuncPopup {
-
-
+    show_convert: RefCell<bool>,
+    conversion_dimension: RefCell<Option<Dimension>>,
+    conversion_direction: RefCell<Option<ConversionDirection>>,
+    conversion_from: RefCell<Option<Unit>>,
 }
 
 impl FuncPopup {
@@ -92,17 +98,52 @@ impl FuncPopup {
                     Command::perform(async {}, move |_| message.deref().clone()),
                 ])
             }
+            Message::ConvertDimension(dimension) => {
+                self.conversion_dimension.replace(Some(dimension));
+                self.conversion_direction.replace(Some(ConversionDirection::From));
+                self.show_convert.replace(true);
+                Command::none()
+            }
+            Message::Convert(unit, direction) => {
+                match direction {
+                    ConversionDirection::From => {
+                        self.conversion_from.replace(Some(unit));
+                        self.conversion_direction.replace(Some(ConversionDirection::To));
+                        self.show_convert.replace(true);
+                        Command::none()
+                    }
+                    ConversionDirection::To => {
+                        let unit_from = self.conversion_from.take().unwrap().clone();
+                        let unit_to = unit.clone();
+                        self.show_convert.replace(false);
+
+                        Command::batch([
+                            window::close::<Message>(id.clone()),
+                            Command::perform(async {}, move |_| {
+                                Message::ConvertPerform(unit_from, unit_to)
+                            })
+                        ])
+                    }
+                }
+
+
+            }
             _ => Command::none(),
         }
     }
-    pub(super) fn view(&self, id: Id) -> Element<Message> {
+    pub(super) fn view(&self, id: &Id) -> Element<Message> {
 
+        let id = id.clone();
         let col: Element<Message> = Column::with_children([
                 Self::themes(id),
                 horizontal_rule(2).into(),
                 Self::functions(id),
                 Self::constants(id),
-                Self::conversions(id),
+                if *self.show_convert.borrow() {
+                    Self::conversion_unit(self.conversion_dimension.borrow().deref(), self.conversion_direction.borrow().deref())
+                } else {
+                    Self::conversion_dimension()
+                },
                 Self::history(id),
             ]).spacing(4).into();
 
@@ -178,13 +219,35 @@ impl FuncPopup {
             .into()
     }
 
-    fn conversions(id: Id) -> Element<'static, Message> {
-        let conversions = vec!["To do ..........".to_string()];
+    fn conversion_dimension() -> Element<'static, Message> {
+        let conversions: Vec<_> = conversions::Dimension::iter().collect();
 
-        pick_list(conversions, None::<String>, move |selected| {
-            Message::CloseAndSend(id, Box::new(Message::Func(selected)))
+        pick_list(conversions, None::<Dimension>, move |selected| {
+            Message::ConvertDimension(selected)
         })
-            .placeholder("conversions -- select")
+            .placeholder("convert -- select")
+            .width(Length::Fill)
+            .text_shaping(Shaping::Advanced)
+            .style(Style {
+                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
+                ..Theme::default_style()
+            })
+            .into()
+    }
+
+    fn conversion_unit(dimension: &Option<Dimension>, direction:  &Option<ConversionDirection>) -> Element<'static, Message> {
+
+        let conversions: Vec<_> = conversions::get_units(&dimension);
+        let d = direction.as_ref().unwrap().clone();
+        let place_holder = match d {
+            ConversionDirection::From => "convert from",
+            ConversionDirection::To => "convert to",
+        };
+
+        pick_list(conversions, None::<&Unit>, move |selected| {
+            Message::Convert(selected.clone(), d)
+        })
+            .placeholder(place_holder)
             .width(Length::Fill)
             .text_shaping(Shaping::Advanced)
             .style(Style {
