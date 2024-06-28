@@ -24,11 +24,11 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
-use iced::{Background, Border, Color, Command, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Theme, Vector, window};
+use iced::{Background, Border, Color, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Task, Theme, Vector};
 use iced::alignment::{Horizontal, Vertical};
 use iced::theme::palette::Pair;
-use iced::widget::{Button, Column, container, Container, horizontal_rule, Row, rule, text, text_editor};
-use iced::widget::button::{Appearance, Status};
+use iced::widget::{Button, button, Column, container, Container, horizontal_rule, Row, rule, text, text_editor};
+use iced::widget::button::Status;
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::window::Id;
 use palette::{convert::FromColor, Hsl};
@@ -82,19 +82,19 @@ impl CalcWindow {
     pub fn title(&self) -> String {
         "Rusty Calculator".to_string()
     }
-    pub fn update(&mut self, message: Message) -> Command<Message> {
+    pub fn update(&mut self, id: &Id, message: Message) -> Task<Message> {
         match message {
             Message::Char(s) => {
                 for c in s.chars() {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
-                Command::none()
+                Task::none()
             }
             Message::Constant(s) => {
                 for c in s.chars() {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
-                Command::none()
+                Task::none()
             }
             Message::Func(s) => {
                 // If we have a selection, we want to surround it with the function
@@ -107,25 +107,25 @@ impl CalcWindow {
                         self.content.perform(Action::Edit(Edit::Insert(c)));
                     }
                     self.content.perform(Action::Edit(Edit::Insert(')')));
-                    Command::none()
+                    Task::none()
                 } else {  //otherwise insert the function and move cursor between the parentheses
                     for c in s.chars() {
                         self.content.perform(Action::Edit(Edit::Insert(c)));
                     }
                     self.content.perform(Action::Edit(Edit::Insert('(')));
                     self.content.perform(Action::Edit(Edit::Insert(')')));
-                    Command::perform(async {}, |_| Message::MoveLeft)
+                    Task::perform(async {}, |_| Message::MoveLeft)
                 }
             }
             Message::EditorAction(action) => {
                 match action {
                     Action::Edit(Edit::Enter) => {
                         self.result = Some(self.calc.evaluate(&self.content.text().trim()));
-                        Command::perform(async {}, |_| Message::MoveEnd)
+                        Task::perform(async {}, |_| Message::MoveEnd)
                     }
                     _ => {
                         self.content.perform(action);
-                        Command::none()
+                        Task::none()
                     }
                 }
             }
@@ -137,12 +137,12 @@ impl CalcWindow {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
                 self.result = Some(Ok(value));
-                Command::none()
+                Task::none()
             }
 
             Message::Evaluate => {
                 self.result = Some(self.calc.evaluate(&self.content.text().trim()));
-                Command::none()
+                Task::none()
             }
             Message::Clear => {
                 self.content.perform(Action::Move(Motion::DocumentStart));
@@ -152,54 +152,54 @@ impl CalcWindow {
                 self.convert_from = None;
                 self.convert_to = None;
                 self.result = None;
-                Command::none()
+                Task::none()
             }
             Message::MoveLeft => {
                 self.content.perform(Action::Move(Motion::Left));
-                Command::none()
+                Task::none()
             }
             Message::MoveRight => {
                 self.content.perform(Action::Move(Motion::Right));
-                Command::none()
+                Task::none()
             }
             Message::MoveEnd => {
                 self.content.perform(Action::Move(Motion::DocumentEnd));
-                Command::none()
+                Task::none()
             }
             Message::BackSpace => {
                 self.content.perform(Action::Edit(Edit::Backspace));
-                Command::none()
+                Task::none()
             }
             Message::ConvertPerform(from_unit, to_unit) => {
                 self.is_converting = true;
                 self.convert_from = Some(from_unit);
                 self.convert_to = Some(to_unit);
                 if self.content.text().trim().len() > 0 {
-                    Command::perform(async {}, |_| Message::Evaluate)
+                    Task::perform(async {}, |_| Message::Evaluate)
                 } else {
-                    Command::none()
+                    Task::none()
                 }
             }
-            Message::WindowResized(id, w, h) => {
-                if id == Id::MAIN {
+            Message::WindowResized(window_id, w, h) => {
+                if window_id == *id {
                     self.window_width = w.clone();
                     self.window_height = h.clone();
                 }
-                Command::none()
+                Task::none()
             }
-            Message::WindowMoved(id, x, y) => {
-                if id == Id::MAIN {
+            Message::WindowMoved(window_id, x, y) => {
+                if window_id == *id {
                     self.window_x = x.clone();
                     self.window_y = y.clone();
                 }
-                Command::none()
+                Task::none()
             }
-           Message::WindowClose(id) => {
-                if id == Id::MAIN {
+            Message::WindowClosed(window_id) => {
+                if window_id == *id {
                     let _ = save_window_size(self.window_width, self.window_height);
-                    window::close::<Message>(id)
+                    iced::exit()
                 } else {
-                    Command::none()
+                    Task::none()
                 }
             }
             Message::ToggleMode => {
@@ -210,10 +210,10 @@ impl CalcWindow {
                 });
                 let pref = crate::ui::preferences::manager();
                 pref.put(crate::ui::preferences::ANGLE_MODE, self.calc.angle_mode());
-                Command::none()
+                Task::none()
             }
             _ => {
-                Command::none()
+                Task::none()
             }
         }
     }
@@ -221,7 +221,7 @@ impl CalcWindow {
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             .style(|_theme, _status| {
-                text_editor::Appearance {
+                text_editor::Style {
                     background: Background::Color(Color::TRANSPARENT),
                     border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x35, 0x3f, 0x3f)),
                     .. text_editor::default(_theme, _status)
@@ -248,12 +248,12 @@ impl CalcWindow {
             .horizontal_alignment(Horizontal::Right)
             .into();
 
-        let mode: Element<Message> = Button::new(text(self.calc.angle_mode()))
+        let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
             .style(|theme: &Theme, _status| {
-                Appearance {
+                button::Style {
                     background: Some(Background::Color(Color::TRANSPARENT)),
                     text_color: theme.extended_palette().background.base.text,
-                    .. Appearance::default()
+                    .. button::Style::default()
                 }
             })
             .padding(Padding::from(0))
@@ -299,7 +299,7 @@ impl CalcWindow {
 
                 let rule1:Element<Message> = horizontal_rule(1)
                     .style(|theme| {
-                        iced::widget::rule::Appearance {
+                        iced::widget::rule::Style {
                                 color: Color::from_rgb8(0x35, 0x3f, 0x3f),
                                 .. rule::default(theme)
                             }
@@ -309,8 +309,8 @@ impl CalcWindow {
             };
         let lcd_container = container(top)
             .width(Length::Fill)
-            .style(move |_theme, _status| {
-                container::Appearance {
+            .style(move |_theme| {
+                container::Style {
                     background: Some(Background::Color(_theme.extended_palette().background.strong.color)),
                     border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
                     ..Default::default()
@@ -391,8 +391,8 @@ impl CalcWindow {
         container(col_all)
             .width(Length::Fill)
             .height(Length::Fill)
-            .style(move |_theme, _status| {
-                container::Appearance {
+            .style(move |_theme| {
+                container::Style {
                     background: Some(Background::Color(_theme.extended_palette().background.weak.color)),
                     ..Default::default()
                 }
@@ -549,7 +549,7 @@ impl <'a> ButtonBuilder<'a> {
     }
 }
 
-fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> Appearance {
+fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button::Style {
     // make a gradient from the palette
     let c1 = lighten(active.color, 0.20);
     let c2 = darken(active.color, 0.05);
@@ -566,7 +566,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> Appear
                 .add_stop(0.0, c1)
                 .add_stop(1.0, c2);
 
-            Appearance {
+            button::Style {
                 background: Some(Background::from(g)),
                 text_color: active.text,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::from_rgb8(0x20, 0x20, 0x20)),
@@ -578,7 +578,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> Appear
                 .add_stop(0.0, c3)
                 .add_stop(1.0, c4);
 
-            Appearance {
+            button::Style {
                 background: Some(Background::from(g)),
                 text_color: hover.text,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
@@ -590,7 +590,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> Appear
                 .add_stop(0.0, c5)
                 .add_stop(1.0, c6);
 
-            Appearance {
+            button::Style {
                 background: Some(Background::from(g)),
                 text_color: pressed.text,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
@@ -598,7 +598,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> Appear
             }
         }
         Status::Disabled => {
-            Appearance {
+            button::Style {
                 background: None,
                 text_color: Color::BLACK,
                 border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
