@@ -19,5 +19,9 @@ strum_macros = "0.26.4"
 
 [dependencies.iced]
 git = "https://github.com/iced-rs/iced.git"
-rev = "cdb18e610a72b4a025d7e1890140393adee5b087"
+version = "0.13.0-dev"
 features = ["canvas", "multi-window"]
+[dependencies.iced_aw]
+git = "https://github.com/iced-rs/iced_aw.git"
+rev = "2eef5041848917607a745e654a49a65bbc68744f"
+features = ["menu"]

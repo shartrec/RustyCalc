@@ -20,7 +20,7 @@
  *
  */
 
-use iced::{Command, Element, event, Event, executor, multi_window, Point, Size, Subscription, Theme, window};
+use iced::{Element, event, Event, Point, Size, Subscription, Task, Theme, window};
 use iced::widget::text;
 use iced::window::{Id, Level, Position};
 
@@ -32,7 +32,8 @@ use crate::ui::messages::Message;
 // #[derive(Debug)]
 pub(crate) struct CalculatorApp {
     main_window: CalcWindow,
-    pick_window: Option<(Id, FuncPopup)>,
+    main_window_id: Option<Id>,
+    popup: Option<(Id, FuncPopup)>,
     theme: Theme
 }
 
@@ -41,48 +42,45 @@ impl Default for CalculatorApp {
         let pref = ui::preferences::manager();
         Self {
             main_window: CalcWindow::default(),
-            pick_window: None,
+            main_window_id: None,
+            popup: None,
             theme: theme_by_name(pref.get::<String>(ui::preferences::THEME)).clone(),
         }
     }
 }
 
+impl CalculatorApp {
+      pub(crate) fn title(&self, id: Id) -> String {
+          if let Some(main_id) = &self.main_window_id {
+              if id == *main_id {
+                  return self.main_window.title()
+              }
+          }
+          if let Some((popup_id, popup)) = &self.popup {
+              if id == *popup_id {
+                  return popup.title()
+              }
+          }
+          "Unknown".to_string()
+      }
 
-impl multi_window::Application for CalculatorApp {
-    type Executor = executor::Default;
-    type Message = Message;
-    type Theme = Theme;
-    type Flags = ();
+    pub(crate) fn update(&mut self, message: Message) -> Task<Message> {
 
-    fn new(_flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        (
-            CalculatorApp::default(),
-            Command::none(),
-        )
-    }
+        let mut task: Vec<Task<Message>> = vec![];
 
-    fn title(&self, id: Id) -> String {
-        match id {
-            Id::MAIN => self.main_window.title(),
-            _ => match &self.pick_window {
-                Some((id_settings, settings)) if id == *id_settings => settings.title(),
-                _ => "Unknown".to_string(),
+        if let Some((id, window)) = &self.popup {
+            task.push(window.update(id, message.clone()));
+        }
+        if let Some(main_id) = &self.main_window_id {
+            task.push(self.main_window.update(main_id, message.clone()));
+        }
+
+        task.push(match message {
+
+            Message::MainWindowOpened(id) => {
+                self.main_window_id = Some(id);
+                Task::none()
             }
-        }
-    }
-
-    fn update(&mut self, message: Message) -> Command<Message> {
-
-        let mut commands: Vec<Command<Message>> = vec![];
-
-        if let Some((id, window)) = &self.pick_window {
-            commands.push(window.update(id, message.clone()));
-        }
-        commands.push(self.main_window.update(message.clone()));
-
-
-        commands.push(match message {
-
             Message::FuncPopup => {
                 // Get the position of the main window
                 let (x, y) = self.main_window.position();
@@ -95,7 +93,7 @@ impl multi_window::Application for CalculatorApp {
                 };
 
                 // Open a settings window and store a reference to it
-                let (id, spawn_window) = window::spawn(window::Settings {
+                let task = window::open(window::Settings {
                     level: Level::AlwaysOnTop,
                     position: new_pos,
                     exit_on_close_request: true,
@@ -103,59 +101,63 @@ impl multi_window::Application for CalculatorApp {
                     decorations: true,
                     ..Default::default()
                 });
-
-                self.pick_window = Some((id, FuncPopup::default()));
-                spawn_window
+                task.map(|id| Message::PopupWindowOpened(id))
+            }
+            Message::PopupWindowOpened(id) => {
+                self.popup = Some((id, FuncPopup::default()));
+                Task::none()
             }
             Message::ThemeChanged(t) => {
                 self.theme = t;
                 let pref = ui::preferences::manager();
                 pref.put(ui::preferences::THEME, format!("{}", &self.theme));
-                Command::none()
+                Task::none()
             }
             _ => {
-                Command::none()
+                Task::none()
             }
         });
 
-        Command::batch(commands)
+        Task::batch(task)
     }
 
-    fn view(&self, id: Id) -> Element<Message> {
+    pub(crate) fn view(&self, id: Id) -> Element<Message> {
 
-        match id {
-            Id::MAIN => self.main_window.view(&id),
-            _ => match &self.pick_window {
-                Some((id_settings, settings)) if id == *id_settings => settings.view(&id),
-                _ => text("WE HAVE A PROBLEM").into(),
+        if let Some(main_id) = &self.main_window_id {
+            if id == *main_id {
+                return self.main_window.view(&id)
             }
         }
-
+        if let Some((popup_id, popup)) = &self.popup {
+            if id == *popup_id {
+                return popup.view(&id)
+            }
+        }
+        text("WE HAVE A PROBLEM").into()
     }
 
-    fn theme(&self, _window: Id) -> Self::Theme {
+    pub(crate) fn theme(&self, _window: Id) -> Theme {
         self.theme.clone()
     }
 
-    fn subscription(&self) -> Subscription<Message> {
-        event::listen_with(|event, _status| {
+    pub(crate) fn subscription(&self) -> Subscription<Message> {
+        event::listen_with(|event, _status, id| {
             match event {
-                Event::Window(id, window::Event::Resized { width, height}) => {
+                Event::Window(window::Event::Resized { width, height}) => {
                     Some(Message::WindowResized(id, width, height))
                 }
-                Event::Window(id, window::Event::Moved { x, y}) => {
+                Event::Window(window::Event::Moved { x, y}) => {
                     Some(Message::WindowMoved(id, x, y))
                 }
-                Event::Window(id, window::Event::CloseRequested {}) => {
-                    Some(Message::WindowClose(id))
+                Event::Window(window::Event::Closed {}) => {
+                    Some(Message::WindowClosed(id))
                 }
                 _ => None
             }
         })
     }
-
-
 }
+
 fn theme_by_name(name: Option<String>) -> &'static Theme {
     if let Some(name) = name {
         for t in Theme::ALL.iter() {

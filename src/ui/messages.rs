@@ -29,7 +29,9 @@ use crate::conversions::{ConversionDirection, Dimension, Unit};
 pub enum Message {
     WindowResized(Id, u32, u32),
     WindowMoved(Id, i32, i32),
-    WindowClose(Id),
+    MainWindowOpened(Id),
+    PopupWindowOpened(Id),
+    WindowClosed(Id),
     EditorAction(Action),
     Char(String),
     Constant(String),

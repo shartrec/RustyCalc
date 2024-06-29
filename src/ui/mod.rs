@@ -29,7 +29,7 @@ use iced::theme::palette::{Background, Danger, Extended, Pair, Primary, Secondar
 use lazy_static::lazy_static;
 
 pub(crate) mod calculator;
-mod messages;
+pub(crate) mod messages;
 pub(crate) mod calculator_app;
 mod func_popup;
 mod calc_window;

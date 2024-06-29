@@ -20,14 +20,15 @@
  *
  */
 
-use iced::multi_window::Application;
-use iced::Settings;
+use iced::window;
+use iced::settings::Settings;
 use iced::Size;
 use std::fs::File;
 use log::info;
 use simplelog::*;
 
 use crate::ui::calculator_app::CalculatorApp;
+use crate::ui::messages::Message;
 
 mod evaluator;
 
@@ -41,32 +42,30 @@ pub(crate) mod conversions;
 fn main() -> iced::Result {
 
     init_logger();
-
     info!("Calculator started");
-    // let event_loop = EventLoop::new();
-    // let window_builder = WindowBuilder::new()
-    //     .with_title("KelpieCalc")
-    //     .with_window_class("KelpieCalcClass", "KelpieCalcIcon");
-    //
+
     let window_settings = iced::window::Settings {
         size: load_window_size().unwrap_or(Size::new(330.0, 450.0)),
         min_size: Some(Size::new(330.0, 450.0)),
-        exit_on_close_request: false,
         ..iced::window::Settings::default()
     };
 
-    let settings = Settings {
+    let settings: Settings = Settings {
         id: Some(String::from("RustyCalc")),
-        window: window_settings,
         .. Settings::default()
     };
 
-    let r = CalculatorApp::run(settings);
+    let result = iced::daemon(CalculatorApp::title, CalculatorApp::update, CalculatorApp::view)
+        .load(move || {
+            window::open(window_settings.clone()).map(Message::MainWindowOpened)
+        })
+        .settings(settings)
+        .subscription(CalculatorApp::subscription)
+        .theme(CalculatorApp::theme)
+        .run();
 
     info!("Calculator shutdown");
-
-    r
-
+    result
 }
 
 fn init_logger() {

@@ -26,10 +26,10 @@
 
 use std::cell::RefCell;
 use std::ops::Deref;
-use iced::{Background, Command, Element, Length, Renderer, Theme, window};
+use iced::{Background, Element, Length, Renderer, Task, Theme, window};
 
 use iced::widget::{Column, container, horizontal_rule, pick_list};
-use iced::widget::pick_list::{Appearance, DefaultStyle, Status, Style};
+use iced::widget::pick_list::{Status, Style};
 use iced::widget::text::Shaping;
 use iced::window::Id;
 use log::error;
@@ -90,19 +90,19 @@ impl FuncPopup {
     pub fn title(&self) -> String {
         "Functions".to_string()
     }
-    pub(super) fn update(&self, id: &Id, message: Message) -> Command<Message> {
+    pub(super) fn update(&self, id: &Id, message: Message) -> Task<Message> {
         match message {
             Message::CloseAndSend(id_msg, message) if id_msg == *id => {
-                Command::batch([
+                Task::batch([
                     window::close::<Message>(id.clone()),
-                    Command::perform(async {}, move |_| message.deref().clone()),
+                    Task::perform(async {}, move |_| message.deref().clone()),
                 ])
             }
             Message::ConvertDimension(dimension) => {
                 self.conversion_dimension.replace(Some(dimension));
                 self.conversion_direction.replace(Some(ConversionDirection::From));
                 self.show_convert.replace(true);
-                Command::none()
+                Task::none()
             }
             Message::Convert(unit, direction) => {
                 match direction {
@@ -110,17 +110,17 @@ impl FuncPopup {
                         self.conversion_from.replace(Some(unit));
                         self.conversion_direction.replace(Some(ConversionDirection::To));
                         self.show_convert.replace(true);
-                        Command::none()
+                        Task::none()
                     }
                     ConversionDirection::To => {
                         let unit_from = self.conversion_from.take().unwrap().clone();
                         let unit_to = unit.clone();
                         self.show_convert.replace(false);
 
-                        Command::batch([
+                        Task::batch([
                             window::close::<Message>(id.clone()),
-                            Command::perform(async {}, move |_| {
-                                Message::ConvertPerform(unit_from, unit_to)
+                            Task::perform(async {}, move |_| {
+                                Message::ConvertPerform(unit_from.clone(), unit_to.clone())
                             })
                         ])
                     }
@@ -128,7 +128,7 @@ impl FuncPopup {
 
 
             }
-            _ => Command::none(),
+            _ => Task::none(),
         }
     }
     pub(super) fn view(&self, id: &Id) -> Element<Message> {
@@ -150,8 +150,8 @@ impl FuncPopup {
         container(col)
             .width(Length::Fill)
             .height(Length::Fill)
-            .style(move |_theme, _status| {
-                container::Appearance {
+            .style(move |_theme| {
+                container::Style {
                     background: Some(Background::Color(_theme.extended_palette().background.weak.color)),
                     ..Default::default()
                 }
@@ -165,10 +165,7 @@ impl FuncPopup {
             Message::CloseAndSend(id, Box::new(Message::ThemeChanged(selected)))
         })
             .placeholder("Choose your theme")
-            .style(Style {
-                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
-                ..Theme::default_style()
-            })
+            .style(|theme, status| { Self::get_appearance(theme, status) })
             .width(Length::Fill).into()
     }
 
@@ -188,10 +185,7 @@ impl FuncPopup {
             .placeholder("functions -- select")
             .width(Length::Fill)
             .text_shaping(Shaping::Advanced)
-            .style(Style {
-                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
-                ..Theme::default_style()
-            })
+            .style(|theme, status| { Self::get_appearance(theme, status) })
             .into()
     }
 
@@ -212,10 +206,7 @@ impl FuncPopup {
             .placeholder("constants -- select")
             .width(Length::Fill)
             .text_shaping(Shaping::Advanced)
-            .style(Style {
-                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
-                ..Theme::default_style()
-            })
+            .style(|theme, status| { Self::get_appearance(theme, status) })
             .into()
     }
 
@@ -228,10 +219,7 @@ impl FuncPopup {
             .placeholder("convert -- select")
             .width(Length::Fill)
             .text_shaping(Shaping::Advanced)
-            .style(Style {
-                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
-                ..Theme::default_style()
-            })
+            .style(|theme, status| { Self::get_appearance(theme, status) })
             .into()
     }
 
@@ -250,10 +238,7 @@ impl FuncPopup {
             .placeholder(place_holder)
             .width(Length::Fill)
             .text_shaping(Shaping::Advanced)
-            .style(Style {
-                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
-                ..Theme::default_style()
-            })
+            .style(|theme, status| { Self::get_appearance(theme, status) })
             .into()
     }
 
@@ -278,10 +263,7 @@ impl FuncPopup {
             .placeholder("history")
             .width(Length::Fill)
             .text_shaping(Shaping::Advanced)
-            .style(Style {
-                field: Box::new(move |theme, status| { Self::get_appearance(theme, status) }),
-                ..Theme::default_style()
-            })
+            .style(|theme, status| { Self::get_appearance(theme, status) })
             .into()
     }
 
@@ -295,8 +277,8 @@ impl FuncPopup {
 
         themes
     }
-    fn get_appearance(theme: &Theme, status: Status) -> Appearance {
-            Appearance {
+    fn get_appearance(theme: &Theme, status: Status) -> Style {
+            Style {
                 placeholder_color: theme.extended_palette().secondary.base.text,
                 .. pick_list::default(theme, status)
             }
