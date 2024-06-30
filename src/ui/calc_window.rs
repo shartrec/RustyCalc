@@ -366,7 +366,7 @@ impl CalcWindow {
         let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
         let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
         let b_back = ButtonBuilder::new("<del", w, h).msg(Message::BackSpace).make();
-        let b_more = ButtonBuilder::new("more..", w, h).msg(Message::FuncPopup).make();
+        let b_more = ButtonBuilder::new("more...", w, h).msg(Message::FuncPopup).make();
 
         let col_all = Column::with_children([
             lcd_container.height(Length::FillPortion(3)).into(),
@@ -397,7 +397,7 @@ impl CalcWindow {
                     ..Default::default()
                 }
             })
-            .padding(10).into()
+            .padding(5).into()
     }
 
     fn format_result(v: &f64) -> String {

@@ -279,7 +279,7 @@ impl FuncPopup {
     }
     fn get_appearance(theme: &Theme, status: Status) -> Style {
             Style {
-                placeholder_color: theme.extended_palette().secondary.base.text,
+                placeholder_color: theme.extended_palette().background.weak.text,
                 .. pick_list::default(theme, status)
             }
     }
