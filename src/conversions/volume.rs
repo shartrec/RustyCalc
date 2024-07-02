@@ -191,9 +191,9 @@ pub(crate) fn get_all() -> Vec<&'static Unit> {
 mod tests {
     use crate::assert_near;
     use crate::conversions::convert;
-    use crate::conversions::volume::{LITRE, CU_METRE, CUBIC_CENTIMETRE, CUBIC_KILOMETRE, KILO_LITRE, MEGA_LITRE, GIGA_LITRE};
-    use crate::conversions::volume::{IMP_FL_OUNCE, IMP_CUBIC_INCH, IMP_PINT, IMP_QUART, IMP_GALLON};
-    use crate::conversions::volume::{US_FL_OUNCE, US_PINT, US_QUART, US_GALLON};
+    use crate::conversions::volume::{CU_METRE, CUBIC_CENTIMETRE, CUBIC_KILOMETRE, GIGA_LITRE, KILO_LITRE, LITRE, MEGA_LITRE};
+    use crate::conversions::volume::{IMP_CUBIC_INCH, IMP_FL_OUNCE, IMP_GALLON, IMP_PINT, IMP_QUART};
+    use crate::conversions::volume::{US_FL_OUNCE, US_GALLON, US_PINT, US_QUART};
 
     #[test]
     fn test_all_metric_volumes() {

@@ -26,8 +26,8 @@
 
 use std::cell::RefCell;
 use std::ops::Deref;
-use iced::{Background, Element, Length, Renderer, Task, Theme, window};
 
+use iced::{Background, Element, Length, Renderer, Task, Theme, window};
 use iced::widget::{Column, container, horizontal_rule, pick_list};
 use iced::widget::pick_list::{Status, Style};
 use iced::widget::text::Shaping;
@@ -35,10 +35,9 @@ use iced::window::Id;
 use log::error;
 use strum::IntoEnumIterator;
 
-use crate::conversions::{ConversionDirection, Dimension, Unit};
-use crate::evaluator::constants::{Pi, Euler, Phi, C, Planck, G};
 use crate::{conversions, history, ui};
-
+use crate::conversions::{ConversionDirection, Dimension, Unit};
+use crate::evaluator::constants::{C, Euler, G, Phi, Pi, Planck};
 use crate::ui::messages::Message;
 
 #[derive(Clone)]

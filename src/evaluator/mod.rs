@@ -23,6 +23,7 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
 use std::time::Instant;
+
 use log::info;
 
 use crate::evaluator::constants::Constant;

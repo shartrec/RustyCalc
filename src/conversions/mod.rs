@@ -23,8 +23,10 @@
 
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
+
 use log::warn;
 use strum_macros::{Display, EnumIter};
+
 use crate::conversions::System::Metric;
 
 pub(crate) mod mass;

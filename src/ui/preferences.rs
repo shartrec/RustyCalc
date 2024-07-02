@@ -110,6 +110,7 @@ mod tests {
     use std::sync::{Arc, RwLock};
 
     use preferences::PreferencesMap;
+
     use crate::ui::preferences::PreferenceManager;
 
     #[test]

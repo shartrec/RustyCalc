@@ -63,8 +63,8 @@ pub(crate) fn get_all() -> Vec<&'static Unit> {
 #[cfg(test)]
 mod tests {
     use crate::assert_near;
-    use crate::conversions::temperature::*;
     use crate::conversions::convert;
+    use crate::conversions::temperature::*;
 
     #[test]
     fn test_all_metric_areas() {

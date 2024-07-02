@@ -81,7 +81,7 @@ pub(crate) fn get_all() -> Vec<&'static Unit> {
 mod tests {
     use crate::assert_near;
     use crate::conversions::convert;
-    use crate::conversions::power::{WATT, KILOWATT, MEGAWATT, GIGAWATT, HORSEPOWER};
+    use crate::conversions::power::{GIGAWATT, HORSEPOWER, KILOWATT, MEGAWATT, WATT};
 
     #[test]
     fn test_metric_power_units() {

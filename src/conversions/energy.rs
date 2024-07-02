@@ -90,7 +90,7 @@ pub(crate) fn get_all() -> Vec<&'static Unit> {
 mod tests {
     use crate::assert_near;
     use crate::conversions::convert;
-    use crate::conversions::energy::{JOULE, KILOJOULE, MEGAJOULE, GIGAJOULE, BRITISH_THERMAL_UNIT, CALORIE};
+    use crate::conversions::energy::{BRITISH_THERMAL_UNIT, CALORIE, GIGAJOULE, JOULE, KILOJOULE, MEGAJOULE};
 
     #[test]
     fn test_metric_energy_units() {

@@ -33,8 +33,8 @@ use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::window::Id;
 use palette::{convert::FromColor, Hsl};
 use palette::rgb::Rgb;
-use crate::conversions::{convert, Unit, length::METRE};
 
+use crate::conversions::{convert, length::METRE, Unit};
 use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
 use crate::ui::messages::Message;

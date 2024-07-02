@@ -20,10 +20,11 @@
  *
  */
 
-use iced::window;
+use std::fs::File;
+
 use iced::settings::Settings;
 use iced::Size;
-use std::fs::File;
+use iced::window;
 use log::info;
 use simplelog::*;
 

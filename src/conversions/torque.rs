@@ -90,7 +90,7 @@ pub(crate) fn get_all() -> Vec<&'static Unit> {
 mod tests {
     use crate::assert_near;
     use crate::conversions::convert;
-    use crate::conversions::torque::{NEWTON_METRE, KILONEWTON_METRE, MEGANEWTON_METRE, GIGANEWTON_METRE, FOOT_POUND, INCH_POUND};
+    use crate::conversions::torque::{FOOT_POUND, GIGANEWTON_METRE, INCH_POUND, KILONEWTON_METRE, MEGANEWTON_METRE, NEWTON_METRE};
 
     #[test]
     fn test_metric_torque_units() {

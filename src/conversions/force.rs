@@ -90,7 +90,7 @@ pub(crate) fn get_all() -> Vec<&'static Unit> {
 mod tests {
     use crate::assert_near;
     use crate::conversions::convert;
-    use crate::conversions::force::{NEWTON, KILONEWTON, MEGANEWTON, GIGANEWTON, POUND_FORCE, OUNCE_FORCE};
+    use crate::conversions::force::{GIGANEWTON, KILONEWTON, MEGANEWTON, NEWTON, OUNCE_FORCE, POUND_FORCE};
 
     #[test]
     fn test_metric_force_units() {
