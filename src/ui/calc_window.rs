@@ -31,10 +31,11 @@ use iced::widget::{Button, button, Column, container, Container, horizontal_rule
 use iced::widget::button::Status;
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::window::Id;
+use log::warn;
 use palette::{convert::FromColor, Hsl};
 use palette::rgb::Rgb;
 
-use crate::conversions::{convert, length::METRE, Unit};
+use crate::conversions::{try_convert, Unit};
 use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
 use crate::ui::messages::Message;
@@ -271,18 +272,28 @@ impl CalcWindow {
             if !self.is_converting {
                 Column::with_children([con_mode, lcd, result]).spacing(2)
             } else {
-                let conv_from = text(self.convert_from.as_ref().unwrap_or(&METRE).name)
-                                         .horizontal_alignment(Horizontal::Left)
-                                         .into();
-                let conv_to = text(self.convert_to.as_ref().unwrap_or(&METRE).name)
-                                         .horizontal_alignment(Horizontal::Left)
-                                         .into();
 
-            let converted_result = text(match &self.result {
+                let conv_from = if let Some(unit_from) = &self.convert_from {
+                    text(unit_from.name)
+
+                } else {
+                    warn!("Converting units, but no 'from' unit set");
+                    text("")
+                }.horizontal_alignment(Horizontal::Left).into();
+
+                let conv_to = if let Some(unit_to) = &self.convert_to {
+                    text(unit_to.name)
+
+                } else {
+                    warn!("Converting units, but no 'to' unit set");
+                    text("")
+                }.horizontal_alignment(Horizontal::Left)
+                    .into();
+                let converted_result = text(match &self.result {
                     Some(r) => {
                         match r {
                             Ok(v) => {
-                                let cv = convert(v, &self.convert_from.as_ref().unwrap_or(&METRE), &self.convert_to.as_ref().unwrap_or(&METRE));
+                                let cv = try_convert(v, &self.convert_from.as_ref(), &self.convert_to.as_ref());
                                 Self::format_result(&cv)
                             }
                             Err(e) => e.clone()

@@ -20,6 +20,7 @@
  *
  */
 
+use log::warn;
 use crate::evaluator::{Evaluator, Token};
 
 pub(crate) fn tokenize(expression: &str, evaluator: &Evaluator) -> Result<Vec<Token>, String> {
@@ -35,7 +36,10 @@ pub(crate) fn tokenize(expression: &str, evaluator: &Evaluator) -> Result<Vec<To
                     num_str.push(chars[i]);
                     i += 1;
                 }
-                let number = num_str.parse::<f64>().unwrap();
+                let number = num_str.parse::<f64>().unwrap_or_else(|e| {
+                    warn!("{}", e);
+                    0.0
+                });
                 tokens.push(Token::Number(number));
                 continue; // Skip the increment below because it's already done
             }

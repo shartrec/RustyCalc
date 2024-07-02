@@ -29,11 +29,11 @@ use strum_macros::{Display, EnumIter};
 
 use crate::conversions::System::Metric;
 
-pub(crate) mod mass;
-pub(crate) mod length;
-pub(crate) mod area;
-pub(crate) mod temperature;
-pub(crate) mod volume;
+mod mass;
+mod length;
+mod area;
+mod temperature;
+mod volume;
 mod power;
 mod torque;
 mod force;
@@ -152,32 +152,40 @@ impl PartialEq for Unit {
     }
 }
 
+pub(crate) fn try_convert(value: &f64, from: &Option<&Unit>, to: &Option<&Unit>) -> f64 {
+    if let (Some(from), Some(to)) = (from, to) {
+        convert(value, from, to)
+    } else {
+        // Doing a conversion with no unit set
+        warn!("Doing a conversion, but units not set");
+        0.0
+    }
+}
 pub(crate) fn convert(value: &f64, from: &Unit, to: &Unit) -> f64 {
-    if from == to {
-        return value.clone()
-    }
-
-    // Let's get the functions we need to convert the value to and from the base unit
-    // Funtions may be None if the unit is the base
-    let (to_base, from_base) =
-
-        // We need to see if these are of the same system and have a system base unit.
-        if from.system == to.system && from.dimension == to.dimension && !from.system.is_default() {
-            (&from.to_system_base, &to.from_system_base)
-        } else {
-            (&from.to_base, &to.from_base)
+        if from == to {
+            return value.clone()
         }
-    ;
 
-    let mut result = *value;
-    if let Some(f) = to_base {
-        result = f(result);
-    }
-    if let Some(f) = from_base {
-        result = f(result);
-    }
-    result
+        // Let's get the functions we need to convert the value to and from the base unit
+        // Funtions may be None if the unit is the base
+        let (to_base, from_base) =
 
+            // We need to see if these are of the same system and have a system base unit.
+            if from.system == to.system && from.dimension == to.dimension && !from.system.is_default() {
+                (&from.to_system_base, &to.from_system_base)
+            } else {
+                (&from.to_base, &to.from_base)
+            }
+            ;
+
+        let mut result = *value;
+        if let Some(f) = to_base {
+            result = f(result);
+        }
+        if let Some(f) = from_base {
+            result = f(result);
+        }
+        result
 }
 
 pub(crate) fn get_units(dimension: &Option<Dimension>) -> Vec<&'static Unit> {
