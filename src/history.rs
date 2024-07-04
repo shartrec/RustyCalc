@@ -27,7 +27,7 @@ use std::path::PathBuf;
 use std::sync::RwLock;
 
 use lazy_static::lazy_static;
-use log::{error, warn};
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
 static HISTORY_FILE: &str = "rusty-calc-history.json";
@@ -46,7 +46,8 @@ static ref HISTORY_MANAGER: HistoryManager = {
                         serde_json::from_str(&contents).unwrap_or(History::new(HISTORY_SIZE))
                     }
                     Err(e) => {
-                        error!("Unable to open history file: {}", e);
+                        warn!("Unable to open history file: {}", e);
+                        info!("A new history file will be created");
                         History::new(HISTORY_SIZE)
                     }
                 }

@@ -28,7 +28,7 @@ use std::{
 };
 
 use lazy_static::lazy_static;
-use log::error;
+use log::{error, info, warn};
 use preferences::{AppInfo, Preferences, PreferencesMap};
 
 static PREFS_PATH: &str = "rusty-calc.config";
@@ -47,7 +47,8 @@ lazy_static! {
             match PreferencesMap::<String>::load(&APP_INFO, PREFS_PATH) {
                 Ok(map) => Arc::new(RwLock::new(map)),
                 Err(e) => {
-                    error!("Error opening preferences {}", e);
+                    warn!("Error opening preferences {}", e);
+                    info!("A new preferences file will be created");
                     Arc::new(RwLock::new(PreferencesMap::new()))
                 }
             }
