@@ -143,6 +143,7 @@ impl CalcWindow {
 
             Message::Evaluate => {
                 self.result = Some(self.calc.evaluate(&self.content.text().trim()));
+                println!("Evaluate");
                 Task::none()
             }
             Message::Clear => {
@@ -219,6 +220,7 @@ impl CalcWindow {
         }
     }
     pub(super) fn view<'a>(&'a self, _id: &Id) -> Element<Message> {
+        println!("View called {:?}", _id);
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             .style(|_theme, _status| {
@@ -234,19 +236,19 @@ impl CalcWindow {
             .into();
 
         let r64 = &self.result;
-        let result = text(match r64 {
-            Some(r) => {
-                match r {
-                    Ok(v) => {
-                        Self::format_result(v)
+        let result: Element<Message> = text(match r64 {
+                Some(r) => {
+                    match r {
+                        Ok(v) => {
+                            let s = Self::format_result(v);
+                            println!("Result = {}", s);
+                            s
+                        }
+                        Err(e) => e.clone()
                     }
-                    Err(e) => e.clone()
                 }
-            }
-            None => String::from(""),
-        })
-            .width(Length::Fill)
-            .horizontal_alignment(Horizontal::Right)
+                None => String::from(""),
+            })
             .into();
 
         let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
@@ -268,9 +270,15 @@ impl CalcWindow {
             .clip(false)
             .into();
 
+        let con_result = Container::new(result)
+            .width(Length::Fill)
+            .align_x(Horizontal::Right)
+            .clip(false)
+            .into();
+
         let top =
             if !self.is_converting {
-                Column::with_children([con_mode, lcd, result]).spacing(2)
+                Column::with_children([con_mode, lcd, con_result]).spacing(2)
             } else {
 
                 let conv_from = if let Some(unit_from) = &self.convert_from {
@@ -305,7 +313,7 @@ impl CalcWindow {
                 .horizontal_alignment(Horizontal::Right)
                 .into();
 
-                let r1 = Row::with_children([conv_from, result]).into();
+                let r1 = Row::with_children([conv_from, con_result]).into();
                 let r2 = Row::with_children([conv_to, converted_result]).into();
 
                 let rule1:Element<Message> = horizontal_rule(1)
