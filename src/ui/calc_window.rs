@@ -143,7 +143,6 @@ impl CalcWindow {
 
             Message::Evaluate => {
                 self.result = Some(self.calc.evaluate(&self.content.text().trim()));
-                println!("Evaluate");
                 Task::none()
             }
             Message::Clear => {
@@ -220,7 +219,6 @@ impl CalcWindow {
         }
     }
     pub(super) fn view<'a>(&'a self, _id: &Id) -> Element<Message> {
-        println!("View called {:?}", _id);
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             .style(|_theme, _status| {
@@ -240,9 +238,7 @@ impl CalcWindow {
                 Some(r) => {
                     match r {
                         Ok(v) => {
-                            let s = Self::format_result(v);
-                            println!("Result = {}", s);
-                            s
+                            Self::format_result(v)
                         }
                         Err(e) => e.clone()
                     }
