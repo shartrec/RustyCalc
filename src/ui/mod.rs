@@ -67,13 +67,13 @@ lazy_static! {
                     weak: Pair::new(Color::from_rgb8(0x00,0x50,0x60), palette.text), // Grey Blue
                     .. Background::new(palette.background, palette.text)
                 },
-                primary: Primary::generate (
-                    palette.primary,
-                    Color::BLACK,
-                    Color::WHITE,
-                ),
+                primary: Primary{
+                    base: Pair::new(palette.primary, palette.text),
+                    weak: Pair::new(Color::from_rgb8(0x74,0x8d,0x7e), palette.text),
+                    strong: Pair::new(palette.primary, palette.text)
+                },
                 secondary: Secondary{
-                    strong: Pair::new(Color::from_rgb8(0x04,0x04,0x04,), Color::WHITE),
+                    strong: Pair::new(Color::from_rgb8(0x04,0x04,0x04,), palette.text),
                     .. Secondary::generate(Color::BLACK, Color::WHITE)
                 },
                 success: Success::generate(

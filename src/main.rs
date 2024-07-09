@@ -42,17 +42,22 @@ pub(crate) mod conversions;
 /// Calculate.
 fn main() -> iced::Result {
 
+    // Todo Get rid of this when we can
+    // Force tiny-skia backend
+    // std::env::set_var("ICED_BACKEND", "tiny-skia");
+
     init_logger();
     info!("Calculator started");
 
-    let window_settings = iced::window::Settings {
+    let window_settings = window::Settings {
         size: load_window_size().unwrap_or(Size::new(330.0, 450.0)),
         min_size: Some(Size::new(330.0, 450.0)),
-        ..iced::window::Settings::default()
+        ..window::Settings::default()
     };
 
     let settings: Settings = Settings {
         id: Some(String::from("RustyCalc")),
+        antialiasing: true,
         .. Settings::default()
     };
 
@@ -106,7 +111,7 @@ fn init_logger() {
 
 fn load_window_size() -> Option<Size> {
     // Get the window state from `settings`
-    let pref = crate::ui::preferences::manager();
+    let pref = ui::preferences::manager();
 
     // Set the size of the window
     if let Some(w) = pref.get::<f32>("window-width") {

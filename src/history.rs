@@ -116,10 +116,10 @@ impl History {
         match self.entries.write() {
             Ok(mut vec) => {
                 if vec.len() == self.max_size {
-                    vec.pop_front();
+                    vec.pop_back();
                 }
                 let new_entry = (entry.0.to_string(), entry.1.clone());
-                vec.push_back(new_entry);
+                vec.push_front(new_entry);
             }
             Err(_) => {
                 warn!("Failed to write history.")
