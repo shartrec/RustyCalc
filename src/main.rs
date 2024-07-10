@@ -42,9 +42,10 @@ pub(crate) mod conversions;
 /// Calculate.
 fn main() -> iced::Result {
 
-    // Todo Get rid of this when we can
-    // Force tiny-skia backend
-    // std::env::set_var("ICED_BACKEND", "tiny-skia");
+    #[cfg(target_os = "redox")]
+    {
+        std::env::set_var("ICED_BACKEND", "tiny-skia");
+    }
 
     init_logger();
     info!("Calculator started");
