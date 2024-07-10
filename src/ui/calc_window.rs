@@ -25,11 +25,13 @@
 // the main view / update logic of the main Application for ease of understanding
 
 use iced::{Background, Border, Color, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Task, Theme, Vector};
+use iced::clipboard;
 use iced::alignment::{Horizontal, Vertical};
 use iced::theme::palette::Pair;
-use iced::widget::{Button, button, Column, container, Container, horizontal_rule, Row, rule, text, text_editor};
+use iced::widget::{Button, button, Column, container, Container, horizontal_rule, Row, rule, text, Text, text_editor, tooltip};
 use iced::widget::button::Status;
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
+use iced::widget::tooltip::Position;
 use iced::window::Id;
 use log::warn;
 use palette::{convert::FromColor, Hsl};
@@ -91,11 +93,8 @@ impl CalcWindow {
                 }
                 Task::none()
             }
-            Message::Constant(s) => {
-                for c in s.chars() {
-                    self.content.perform(Action::Edit(Edit::Insert(c)));
-                }
-                Task::none()
+            Message::Copy(v) => {
+                clipboard::write(v.to_string())
             }
             Message::Func(s) => {
                 // If we have a selection, we want to surround it with the function
@@ -234,18 +233,18 @@ impl CalcWindow {
             .into();
 
         let r64 = &self.result;
-        let result: Element<Message> = text(match r64 {
+        let result: Element<Message> = match r64 {
                 Some(r) => {
                     match r {
                         Ok(v) => {
-                            Self::format_result(v)
+                            wrap_with_copy(text(Self::format_result(v)), v.clone())
                         }
-                        Err(e) => e.clone()
+                        Err(e) => text(e.clone()).into()
                     }
                 }
-                None => String::from(""),
-            })
-            .into();
+                None => text("".to_string()).into(),
+            };
+
 
         let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
             .style(|theme: &Theme, _status| {
@@ -293,24 +292,26 @@ impl CalcWindow {
                     text("")
                 }.horizontal_alignment(Horizontal::Left)
                     .into();
-                let converted_result = text(match &self.result {
+                let converted_result = match &self.result {
                     Some(r) => {
                         match r {
                             Ok(v) => {
                                 let cv = try_convert(v, &self.convert_from.as_ref(), &self.convert_to.as_ref());
-                                Self::format_result(&cv)
+                                wrap_with_copy(text(Self::format_result(&cv)), cv)
                             }
-                            Err(e) => e.clone()
+                            Err(e) => text(e.clone()).into()
                         }
                     }
-                    None => String::from("")
-                })
-                .width(Length::FillPortion(1))
-                .horizontal_alignment(Horizontal::Right)
-                .into();
+                    None => text(String::from("")).into()
+                };
+                let con_conv_result = Container::new(converted_result)
+                    .width(Length::Fill)
+                    .align_x(Horizontal::Right)
+                    .clip(false)
+                    .into();
 
                 let r1 = Row::with_children([conv_from, con_result]).into();
-                let r2 = Row::with_children([conv_to, converted_result]).into();
+                let r2 = Row::with_children([conv_to, con_conv_result]).into();
 
                 let rule1:Element<Message> = horizontal_rule(1)
                     .style(|theme| {
@@ -432,6 +433,31 @@ impl CalcWindow {
         (self.window_width, self.window_height)
     }
 
+}
+
+fn wrap_with_copy(text: Text, value: f64) -> Element<Message> {
+    let b= Button::new(text)
+        .style(|theme: &Theme, _status| {
+            button::Style {
+                background: Some(Background::Color(Color::TRANSPARENT)),
+                text_color: theme.extended_palette().background.base.text,
+                .. button::Style::default()
+            }
+        })
+        .padding(Padding::from(0))
+        .on_press(Message::Copy(value))
+        .height(Length::Shrink);
+
+    tooltip(b, "Click to copy", Position::Left)
+        .style(|theme| -> container::Style {
+            container::Style{
+                text_color: Some(theme.extended_palette().primary.weak.text),
+                background: Some(Background::from(theme.extended_palette().primary.weak.color)),
+                border: Default::default(),
+                shadow: Default::default(),
+            }
+        })
+        .into()
 }
 
 /// A builder for making the button widgets.

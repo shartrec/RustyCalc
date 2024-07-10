@@ -24,4 +24,4 @@ strum_macros = "0.26.4"
 [dependencies.iced]
 git = "https://github.com/iced-rs/iced.git"
 version = "0.13.0-dev"
-features = ["multi-window"]
+features = ["advanced", "multi-window"]
