@@ -220,11 +220,12 @@ impl CalcWindow {
     pub(super) fn view<'a>(&'a self, _id: &Id) -> Element<Message> {
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
-            .style(|_theme, _status| {
+            .style(|theme: &Theme, status| {
                 text_editor::Style {
                     background: Background::Color(Color::TRANSPARENT),
-                    border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x35, 0x3f, 0x3f)),
-                    .. text_editor::default(_theme, _status)
+                    border: Border::default().with_width(Pixels::from(1))
+                        .with_color(theme.extended_palette().background.base.text),
+                    .. text_editor::default(theme, status)
                 }
             })
             .on_action(|action| {
