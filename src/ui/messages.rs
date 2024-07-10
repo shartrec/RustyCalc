@@ -43,6 +43,7 @@ pub enum Message {
     MoveEnd,
     BackSpace,
     Clear,
+    Copy(f64),
     Evaluate,
     ToggleMode,
     FuncPopup,
