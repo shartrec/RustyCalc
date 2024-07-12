@@ -42,7 +42,8 @@ pub(crate) mod conversions;
 /// Calculate.
 fn main() -> iced::Result {
 
-    #[cfg(target_os = "redox")]
+    // todo Remove when we can
+    #[cfg(target_os = "x86_64-unknown-redox")]
     {
         std::env::set_var("ICED_BACKEND", "tiny-skia");
     }
