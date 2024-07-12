@@ -93,6 +93,12 @@ impl CalcWindow {
                 }
                 Task::none()
             }
+            Message::Constant(s) => {
+                for c in s.chars() {
+                    self.content.perform(Action::Edit(Edit::Insert(c)));
+                }
+                Task::none()
+            }
             Message::Copy(v) => {
                 clipboard::write(v.to_string())
             }
