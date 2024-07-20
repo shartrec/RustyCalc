@@ -87,7 +87,8 @@ mod tests {
     #[test]
     fn test_const() {
         let f = Constant {
-            name: "Pi",
+            name: "π",
+            long_name: "Pi",
             value: 50.2,
         };
         assert_near!(f.value, 50.2);

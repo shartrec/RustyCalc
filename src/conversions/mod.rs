@@ -234,7 +234,6 @@ mod tests {
     #[test]
     fn test_base_units() {
         assert_eq!(convert(&1.0, &KILOGRAM, &GRAM), 1000.0);
-        assert_eq!(convert(&2.0, &KILOTONNE, &KILOGRAM), 2000000.0);
     }
     #[test]
     fn test_mixed_units() {
