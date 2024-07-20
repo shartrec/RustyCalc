@@ -23,7 +23,7 @@
 /// This module contains the funcrtions to build our menu bar and menus descending from it.
 use iced::{alignment, Background, Border, Color, Element, Length, Padding, Renderer, Theme};
 use iced::border::Radius;
-use iced::widget::{Button, button, Container, row, text};
+use iced::widget::{Button, button, Container, row, Row, text};
 use iced_aw::menu::{Item, Menu, primary};
 use iced_aw::{BOOTSTRAP_FONT, menu, menu_bar, menu_items};
 use iced_aw::Bootstrap;
@@ -47,14 +47,12 @@ pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
 
     let convert_menu = menu_dimension();
     let history_menu = menu_history();
-    let mode_menu = menu_mode();
     let theme_menu = menu_theme();
 
     let mb = menu_bar!(
             (menu_top("Convert"), convert_menu)
             (menu_top("Insert"), insert_menu)
             (menu_top("History"), history_menu)
-            (menu_top("Mode"), mode_menu)
             (menu_top("Theme"), theme_menu)
         )
         .style(|theme:&iced::Theme, status: Status | menu::Style{
@@ -115,7 +113,7 @@ fn menu_functions() -> Menu<'static, Message, Theme, Renderer> {
         items.push(Item::new(menu_item(f.name().to_string(), Message::Func(f.name().to_string()))));
     }
 
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(60.0)
+    Menu::new(items).offset(0.0).spacing(2.0).max_width(75.0)
 
 }
 fn menu_history() -> Menu<'static, Message, Theme, Renderer> {
@@ -133,17 +131,6 @@ fn menu_history() -> Menu<'static, Message, Theme, Renderer> {
 
 }
 
-fn menu_mode() -> Menu<'static, Message, Theme, Renderer> {
-
-    let mut items = Vec::new();
-
-    for f in evaluator::functions::get_all().iter() {
-        items.push(Item::new(menu_item(f.name().to_string(), Message::Func(f.name().to_string()))));
-    }
-
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(60.0)
-
-}
 fn menu_theme() -> Menu<'static, Message, Theme, Renderer> {
 
     let mut items = Vec::new();
@@ -198,36 +185,12 @@ fn menu_unit_to(dimension: &Dimension, from: &Unit) -> Menu<'static, Message, Th
 }
 
 fn menu_item(label: String, msg: Message) -> Element<'static, Message> {
-
-    Button::new(text(label).width(Length::Fill))
-        .style(|theme: &Theme, status| {
-            match status {
-                iced::widget::button::Status::Hovered => {
-                    button::Style {
-                        background: Some(Background::from(theme.extended_palette().background.base.color)),
-                        text_color: theme.extended_palette().background.base.text,
-                        ..button::Style::default()
-                    }
-                }
-                _ => {
-                    button::Style {
-                        background: Some(Background::from(theme.extended_palette().background.strong.color)),
-                        text_color: theme.extended_palette().background.base.text,
-                        ..button::Style::default()
-                    }
-                }
-            }
-        })
-        .padding(Padding::from([0,3,0,3]))
-        .on_press(msg)
-        .height(Length::Shrink)
-        .into()
+    let content = text(label).width(Length::Fill);
+    menu_item_core(msg, content.into())
 }
 
 fn menu_item_sub(label: String, msg: Message) -> Element<'static, Message> {
-
-    Button::new(
-            row![
+    let content = row![
                 text(label)
                     .width(Length::Fill)
                     .vertical_alignment(alignment::Vertical::Center),
@@ -238,8 +201,12 @@ fn menu_item_sub(label: String, msg: Message) -> Element<'static, Message> {
                 .width(Length::Shrink)
                 .vertical_alignment(alignment::Vertical::Center),
             ]
-            .align_items(iced::Alignment::Center)
-        )
+        .align_items(iced::Alignment::Center);
+    menu_item_core(msg, content.into())
+}
+
+fn menu_item_core(msg: Message, content: Element<'static, Message>) -> Element<'static, Message> {
+    Button::new(content)
         .style(|theme: &Theme, status| {
             match status {
                 iced::widget::button::Status::Hovered => {
@@ -258,7 +225,7 @@ fn menu_item_sub(label: String, msg: Message) -> Element<'static, Message> {
                 }
             }
         })
-        .padding(Padding::from([0,3,0,3]))
+        .padding(Padding::from([0, 3, 0, 3]))
         .on_press(msg)
         .height(Length::Shrink)
         .into()

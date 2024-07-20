@@ -253,25 +253,21 @@ impl CalcWindow {
                 None => text("".to_string()).into(),
             };
 
-        //
-        // let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
-        //     .style(|theme: &Theme, _status| {
-        //         button::Style {
-        //             background: Some(Background::Color(Color::TRANSPARENT)),
-        //             text_color: theme.extended_palette().background.base.text,
-        //             .. button::Style::default()
-        //         }
-        //     })
-        //     .padding(Padding::from(0))
-        //     .on_press(Message::ToggleMode)
-        //     .height(Length::Shrink)
-        //     .into();
-        //
-        // let con_mode = Container::new(mode)
-        //     .width(Length::Fill)
-        //     .align_x(Horizontal::Right)
-        //     .clip(false)
-        //     .into();
+
+        let mode: Element<Message> = text(self.calc.angle_mode().to_string())
+            .style(|theme: &Theme| {
+                text::Style {
+                    color: Some(theme.extended_palette().background.base.text),
+                }
+            })
+            .height(Length::Shrink)
+            .into();
+
+        let con_mode = Container::new(mode)
+            .width(Length::Fill)
+            .align_x(Horizontal::Right)
+            .clip(false)
+            .into();
 
         let con_result = Container::new(result)
             .width(Length::Fill)
@@ -279,11 +275,13 @@ impl CalcWindow {
             .clip(false)
             .into();
 
-        let mb = build_menu_bar();
+        let mb = build_menu_bar().into();
+
+        let menu_row = Row::with_children([mb, con_mode]).into();
 
         let top =
             if !self.is_converting {
-                Column::with_children([mb, lcd, con_result]).spacing(2)
+                Column::with_children([menu_row, lcd, con_result]).spacing(2)
             } else {
 
                 let conv_from = if let Some(unit_from) = &self.convert_from {
@@ -331,7 +329,7 @@ impl CalcWindow {
                             }
                         })
                     .into();
-                Column::with_children([mb, lcd, r1, rule1, r2]).spacing(2)
+                Column::with_children([menu_row, lcd, r1, rule1, r2]).spacing(2)
             };
         let lcd_container = container(top)
             .width(Length::Fill)
@@ -392,7 +390,7 @@ impl CalcWindow {
         let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
         let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
         let b_back = ButtonBuilder::new("<del", w, h).msg(Message::BackSpace).make();
-        let b_more = ButtonBuilder::new("more...", w, h).msg(Message::Null).make();
+        let b_more = ButtonBuilder::new("DRG", w, h).msg(Message::ToggleMode).make();
 
         let col_all = Column::with_children([
             lcd_container.height(Length::FillPortion(3)).into(),
