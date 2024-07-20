@@ -86,7 +86,7 @@ impl CalcWindow {
     pub fn title(&self) -> String {
         "Rusty Calculator".to_string()
     }
-    pub fn update(&mut self, id: &Id, message: Message) -> Task<Message> {
+    pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Char(s) => {
                 for c in s.chars() {
@@ -187,27 +187,19 @@ impl CalcWindow {
                     Task::none()
                 }
             }
-            Message::WindowResized(window_id, w, h) => {
-                if window_id == *id {
-                    self.window_width = w.clone();
-                    self.window_height = h.clone();
-                }
+            Message::WindowResized(w, h) => {
+                self.window_width = w.clone();
+                self.window_height = h.clone();
                 Task::none()
             }
-            Message::WindowMoved(window_id, x, y) => {
-                if window_id == *id {
-                    self.window_x = x.clone();
-                    self.window_y = y.clone();
-                }
+            Message::WindowMoved(x, y) => {
+                self.window_x = x.clone();
+                self.window_y = y.clone();
                 Task::none()
             }
-            Message::WindowClosed(window_id) => {
-                if window_id == *id {
-                    let _ = save_window_size(self.window_width, self.window_height);
-                    iced::exit()
-                } else {
-                    Task::none()
-                }
+            Message::WindowClosed() => {
+                let _ = save_window_size(self.window_width, self.window_height);
+                Task::none()
             }
             Message::ToggleMode => {
                 self.calc.set_angle_mode(match self.calc.angle_mode() {
@@ -224,7 +216,7 @@ impl CalcWindow {
             }
         }
     }
-    pub(super) fn view<'a>(&'a self, _id: &Id) -> Element<Message> {
+    pub(super) fn view<'a>(&'a self) -> Element<Message> {
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             .style(|theme: &Theme, status| {

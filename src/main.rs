@@ -60,16 +60,15 @@ fn main() -> iced::Result {
 
     let settings: Settings = Settings {
         id: Some(String::from("RustyCalc")),
+
         fonts: vec![BOOTSTRAP_FONT_BYTES.into()],
         antialiasing: true,
         .. Settings::default()
     };
 
-    let result = iced::daemon(CalculatorApp::title, CalculatorApp::update, CalculatorApp::view)
-        .load(move || {
-            window::open(window_settings.clone()).map(Message::MainWindowOpened)
-        })
+    let result = iced::application(CalculatorApp::title, CalculatorApp::update, CalculatorApp::view)
         .settings(settings)
+        .window(window_settings)
         .subscription(CalculatorApp::subscription)
         .theme(CalculatorApp::theme)
         .run();

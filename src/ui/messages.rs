@@ -28,10 +28,10 @@ use crate::conversions::Unit;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    WindowResized(Id, u32, u32),
-    WindowMoved(Id, i32, i32),
-    MainWindowOpened(Id),
-    WindowClosed(Id),
+    WindowResized(u32, u32),
+    WindowMoved(i32, i32),
+    MainWindowOpened(),
+    WindowClosed(),
     EditorAction(Action),
     Char(String),
     Constant(String),

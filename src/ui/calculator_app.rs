@@ -21,7 +21,6 @@
  */
 
 use iced::{Element, event, Event, Subscription, Task, Theme, window};
-use iced::widget::text;
 use iced::window::Id;
 
 use crate::ui;
@@ -47,7 +46,7 @@ impl Default for CalculatorApp {
 }
 
 impl CalculatorApp {
-      pub(crate) fn title(&self, _id: Id) -> String {
+      pub(crate) fn title(&self) -> String {
           self.main_window.title()
       }
 
@@ -55,14 +54,11 @@ impl CalculatorApp {
 
         let mut task: Vec<Task<Message>> = vec![];
 
-        if let Some(main_id) = &self.main_window_id {
-            task.push(self.main_window.update(main_id, message.clone()));
-        }
+        task.push(self.main_window.update(message.clone()));
 
         task.push(match message {
 
-            Message::MainWindowOpened(id) => {
-                self.main_window_id = Some(id);
+            Message::MainWindowOpened() => {
                 Task::none()
             }
             Message::ThemeChanged(t) => {
@@ -79,31 +75,25 @@ impl CalculatorApp {
         Task::batch(task)
     }
 
-    pub(crate) fn view(&self, id: Id) -> Element<Message> {
-
-        if let Some(main_id) = &self.main_window_id {
-            if id == *main_id {
-                return self.main_window.view(&id)
-            }
-        }
-        text("WE HAVE A PROBLEM").into()
+    pub(crate) fn view(&self) -> Element<Message> {
+        return self.main_window.view()
     }
 
-    pub(crate) fn theme(&self, _window: Id) -> Theme {
+    pub(crate) fn theme(&self) -> Theme {
         self.theme.clone()
     }
 
     pub(crate) fn subscription(&self) -> Subscription<Message> {
-        event::listen_with(|event, _status, id| {
+        event::listen_with(|event, _status, _id| {
             match event {
                 Event::Window(window::Event::Resized { width, height}) => {
-                    Some(Message::WindowResized(id, width, height))
+                    Some(Message::WindowResized(width, height))
                 }
                 Event::Window(window::Event::Moved { x, y}) => {
-                    Some(Message::WindowMoved(id, x, y))
+                    Some(Message::WindowMoved(x, y))
                 }
                 Event::Window(window::Event::Closed {}) => {
-                    Some(Message::WindowClosed(id))
+                    Some(Message::WindowClosed())
                 }
                 _ => None
             }
