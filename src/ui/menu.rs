@@ -162,7 +162,7 @@ fn menu_unit_from(dimension: &Dimension)  -> Menu<'static, Message, Theme, Rende
             menu_unit_to(dimension, *unit)
             ));
     }
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(160.0)
+    Menu::new(items).offset(0.0).spacing(2.0).max_width(150.0)
 
 }
 
@@ -174,7 +174,7 @@ fn menu_unit_to(dimension: &Dimension, from: &'static Unit) -> Menu<'static, Mes
             menu_item(unit.to_string(), Message::ConvertPerform(&from, *to)),
         ));
     }
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(150.0)
+    Menu::new(items).offset(0.0).spacing(2.0).max_width(140.0)
 }
 
 fn menu_item(label: String, msg: Message) -> Element<'static, Message> {

@@ -62,7 +62,7 @@ pub static GIGAJOULE: Unit = Unit {
 
 // Imperial units
 pub static BRITISH_THERMAL_UNIT: Unit = Unit {
-    name: "British thermal unit",
+    name: "BTU",
     dimension: Dimension::Energy,
     system: System::Imperial,
     to_base: Some(|v| v * 1055.05585262),
