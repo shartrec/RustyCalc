@@ -40,6 +40,7 @@ use palette::rgb::Rgb;
 use crate::conversions::{try_convert, Unit};
 use crate::evaluator::AngleMode;
 use crate::ui::calculator::Calc;
+use crate::ui::menu::build_menu_bar;
 use crate::ui::messages::Message;
 
 #[derive(Debug)]
@@ -252,25 +253,25 @@ impl CalcWindow {
                 None => text("".to_string()).into(),
             };
 
-
-        let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
-            .style(|theme: &Theme, _status| {
-                button::Style {
-                    background: Some(Background::Color(Color::TRANSPARENT)),
-                    text_color: theme.extended_palette().background.base.text,
-                    .. button::Style::default()
-                }
-            })
-            .padding(Padding::from(0))
-            .on_press(Message::ToggleMode)
-            .height(Length::Shrink)
-            .into();
-
-        let con_mode = Container::new(mode)
-            .width(Length::Fill)
-            .align_x(Horizontal::Right)
-            .clip(false)
-            .into();
+        //
+        // let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
+        //     .style(|theme: &Theme, _status| {
+        //         button::Style {
+        //             background: Some(Background::Color(Color::TRANSPARENT)),
+        //             text_color: theme.extended_palette().background.base.text,
+        //             .. button::Style::default()
+        //         }
+        //     })
+        //     .padding(Padding::from(0))
+        //     .on_press(Message::ToggleMode)
+        //     .height(Length::Shrink)
+        //     .into();
+        //
+        // let con_mode = Container::new(mode)
+        //     .width(Length::Fill)
+        //     .align_x(Horizontal::Right)
+        //     .clip(false)
+        //     .into();
 
         let con_result = Container::new(result)
             .width(Length::Fill)
@@ -278,9 +279,11 @@ impl CalcWindow {
             .clip(false)
             .into();
 
+        let mb = build_menu_bar();
+
         let top =
             if !self.is_converting {
-                Column::with_children([con_mode, lcd, con_result]).spacing(2)
+                Column::with_children([mb, lcd, con_result]).spacing(2)
             } else {
 
                 let conv_from = if let Some(unit_from) = &self.convert_from {
@@ -328,13 +331,13 @@ impl CalcWindow {
                             }
                         })
                     .into();
-                Column::with_children([con_mode, lcd, r1, rule1, r2]).spacing(2)
+                Column::with_children([mb, lcd, r1, rule1, r2]).spacing(2)
             };
         let lcd_container = container(top)
             .width(Length::Fill)
-            .style(move |_theme| {
+            .style(move |theme| {
                 container::Style {
-                    background: Some(Background::Color(_theme.extended_palette().background.strong.color)),
+                    background: Some(Background::Color(theme.extended_palette().background.strong.color)),
                     border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
                     ..Default::default()
                 }
@@ -389,7 +392,7 @@ impl CalcWindow {
         let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
         let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
         let b_back = ButtonBuilder::new("<del", w, h).msg(Message::BackSpace).make();
-        let b_more = ButtonBuilder::new("more...", w, h).msg(Message::FuncPopup).make();
+        let b_more = ButtonBuilder::new("more...", w, h).msg(Message::Null).make();
 
         let col_all = Column::with_children([
             lcd_container.height(Length::FillPortion(3)).into(),
@@ -424,7 +427,7 @@ impl CalcWindow {
     }
 
     fn format_result(v: &f64) -> String {
-        if *v < 0.001 || *v > 10000000.0 {
+        if v.abs() < 0.001 || v.abs() > 10000000.0 {
             format!("= {:+e}", v)
         } else {
             let formatted = format!("= {0:.1$}", v, 10);

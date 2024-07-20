@@ -27,7 +27,7 @@ use crate::conversions::{Dimension, System, Unit};
 
 pub static CELSIUS: Unit = Unit {
     name: "Celsius",
-    dimension: Dimension::Temperature,
+    dimension: Dimension::Temp,
     system: System::Metric,
     to_base: None,
     from_base: None,
@@ -37,7 +37,7 @@ pub static CELSIUS: Unit = Unit {
 
 pub static KELVIN: Unit = Unit {
     name: "Kelvin",
-    dimension: Dimension::Temperature,
+    dimension: Dimension::Temp,
     system: System::Metric,
     to_base: Some(|v| v - 273.15),
     from_base: Some(|v| v + 273.15),
@@ -47,7 +47,7 @@ pub static KELVIN: Unit = Unit {
 
 pub static FAHRENHEIT: Unit = Unit {
     name: "Fahrenheit",
-    dimension: Dimension::Temperature,
+    dimension: Dimension::Temp,
     system: System::Metric,
     to_base: Some(|v| (v - 32.0) / 9.0 * 5.0),
     from_base: Some(|v| v / 5.0 * 9.0 + 32.0),

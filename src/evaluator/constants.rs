@@ -28,6 +28,7 @@ use crate::evaluator::Token;
 #[derive(Clone, Debug)]
 pub(crate) struct Constant {
     pub name: &'static str,
+    pub long_name: &'static str,
     pub value: f64,
 }
 
@@ -35,6 +36,10 @@ impl Constant {
 
     pub(crate) fn name(&self) -> &'static str {
         &self.name
+    }
+
+    pub(crate) fn long_name(&self) -> &'static str {
+        &self.long_name
     }
 
     pub(crate) fn is_token(
@@ -63,12 +68,12 @@ impl Constant {
 
 }
 
-pub static Pi: Constant =  Constant{name: "π", value: std::f64::consts::PI};
-pub static Euler: Constant =  Constant{name: "ℇ", value: std::f64::consts::E};
-pub static Phi: Constant =  Constant{name: "ɸ", value: 1.618};
-pub static C: Constant =  Constant{name: "C", value: 299792458.0};
-pub static Planck: Constant =  Constant{name: "ℎ", value: 6.626e-34};
-pub static G: Constant =  Constant{name: "G", value: 6.674e-11};
+pub static Pi: Constant =  Constant{name: "π", long_name: "PI", value: std::f64::consts::PI};
+pub static Euler: Constant =  Constant{name: "ℇ", long_name: "Euler's Const", value: std::f64::consts::E};
+pub static Phi: Constant =  Constant{name: "ɸ", long_name: "Golden Ratio", value: 1.618};
+pub static C: Constant =  Constant{name: "C", long_name: "Speed of Light", value: 299792458.0};
+pub static Planck: Constant =  Constant{name: "ℎ", long_name: "Planks Const", value: 6.626e-34};
+pub static G: Constant =  Constant{name: "G", long_name: "Grav Const", value: 6.674e-11};
 
 pub(crate) fn get_all() -> Vec<&'static Constant> {
     vec![&Pi, &Euler, &Phi, &C, &Planck, &G]

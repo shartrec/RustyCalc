@@ -26,14 +26,12 @@ use iced::window::{Id, Level, Position};
 
 use crate::ui;
 use crate::ui::calc_window::CalcWindow;
-use crate::ui::func_popup::FuncPopup;
 use crate::ui::messages::Message;
 
 // #[derive(Debug)]
 pub(crate) struct CalculatorApp {
     main_window: CalcWindow,
     main_window_id: Option<Id>,
-    popup: Option<(Id, FuncPopup)>,
     theme: Theme
 }
 
@@ -43,7 +41,6 @@ impl Default for CalculatorApp {
         Self {
             main_window: CalcWindow::default(),
             main_window_id: None,
-            popup: None,
             theme: theme_by_name(pref.get::<String>(ui::preferences::THEME)).clone(),
         }
     }
@@ -51,26 +48,13 @@ impl Default for CalculatorApp {
 
 impl CalculatorApp {
       pub(crate) fn title(&self, id: Id) -> String {
-          if let Some(main_id) = &self.main_window_id {
-              if id == *main_id {
-                  return self.main_window.title()
-              }
-          }
-          if let Some((popup_id, popup)) = &self.popup {
-              if id == *popup_id {
-                  return popup.title()
-              }
-          }
-          "Unknown".to_string()
+          self.main_window.title()
       }
 
     pub(crate) fn update(&mut self, message: Message) -> Task<Message> {
 
         let mut task: Vec<Task<Message>> = vec![];
 
-        if let Some((id, window)) = &self.popup {
-            task.push(window.update(id, message.clone()));
-        }
         if let Some(main_id) = &self.main_window_id {
             task.push(self.main_window.update(main_id, message.clone()));
         }
@@ -79,32 +63,6 @@ impl CalculatorApp {
 
             Message::MainWindowOpened(id) => {
                 self.main_window_id = Some(id);
-                Task::none()
-            }
-            Message::FuncPopup => {
-                // Get the position of the main window
-                let (x, y) = self.main_window.position();
-                // window moved events only work on some platforms, so if "(0, 0)" use default
-                let (w, _h) = self.main_window.size();
-                let new_pos =  if (x, y) == (0, 0) {
-                    Position::Default
-                } else {
-                    Position::Specific(Point::new((x + w as i32 - 50) as f32, (y + 100) as f32))
-                };
-
-                // Open a settings window and store a reference to it
-                let task = window::open(window::Settings {
-                    level: Level::AlwaysOnTop,
-                    position: new_pos,
-                    exit_on_close_request: true,
-                    size: Size::new(250.0, 450.0),
-                    decorations: true,
-                    ..Default::default()
-                });
-                task.map(|id| Message::PopupWindowOpened(id))
-            }
-            Message::PopupWindowOpened(id) => {
-                self.popup = Some((id, FuncPopup::default()));
                 Task::none()
             }
             Message::ThemeChanged(t) => {
@@ -126,11 +84,6 @@ impl CalculatorApp {
         if let Some(main_id) = &self.main_window_id {
             if id == *main_id {
                 return self.main_window.view(&id)
-            }
-        }
-        if let Some((popup_id, popup)) = &self.popup {
-            if id == *popup_id {
-                return popup.view(&id)
             }
         }
         text("WE HAVE A PROBLEM").into()

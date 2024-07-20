@@ -32,7 +32,7 @@ use crate::evaluator::parser::Parser;
 use crate::evaluator::tokeniser::tokenize;
 use crate::history;
 
-mod functions;
+pub(crate) mod functions;
 pub(crate) mod parser;
 pub(crate) mod tokeniser;
 pub(crate) mod constants;

@@ -67,7 +67,7 @@ pub(crate) enum Dimension {
     Area,
     Mass,
     Volume,
-    Temperature,
+    Temp,
     Power,
     Torque,
     Force,
@@ -188,38 +188,34 @@ pub(crate) fn convert(value: &f64, from: &Unit, to: &Unit) -> f64 {
         result
 }
 
-pub(crate) fn get_units(dimension: &Option<Dimension>) -> Vec<&'static Unit> {
+pub(crate) fn get_units(dimension: &Dimension) -> Vec<&'static Unit> {
     match dimension {
-        Some(Dimension::Length) => {
+        Dimension::Length => {
             length::get_all()
         }
-        Some(Dimension::Area) => {
+        Dimension::Area => {
             area::get_all()
         }
-        Some(Dimension::Mass) => {
+        Dimension::Mass => {
             mass::get_all()
         }
-        Some(Dimension::Volume) => {
+        Dimension::Volume => {
             volume::get_all()
         }
-        Some(Dimension::Temperature) => {
+        Dimension::Temp => {
             temperature::get_all()
         }
-        Some(Dimension::Power) => {
+        Dimension::Power => {
             power::get_all()
         }
-        Some(Dimension::Torque) => {
+        Dimension::Torque => {
             torque::get_all()
         }
-        Some(Dimension::Force) => {
+        Dimension::Force => {
             force::get_all()
         }
-        Some(Dimension::Energy) => {
+        Dimension::Energy => {
             energy::get_all()
-        }
-        None => {
-            warn!("Trying to convert, but no dimension set");
-            vec![]
         }
     }
 }
