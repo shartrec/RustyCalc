@@ -63,38 +63,11 @@ pub static MICROGRAM: Unit = Unit {
     from_system_base: None,
 };
 pub static TONNE: Unit = Unit {
-    name: "Ton (metric)",
+    name: "Tonne",
     dimension: Dimension::Mass,
     system: System::Metric,
     to_base: Some(Unit::from_kilo),
     from_base: Some(Unit::to_kilo),
-    to_system_base: None,
-    from_system_base: None,
-};
-pub static KILOTONNE: Unit = Unit {
-    name: "Kiloton (metric)",
-    dimension: Dimension::Mass,
-    system: System::Metric,
-    to_base: Some(|v| TONNE.to_base.unwrap()(Unit::from_kilo(v))),
-    from_base: Some(|v| Unit::to_kilo(TONNE.from_base.unwrap()(v))),
-    to_system_base: None,
-    from_system_base: None,
-};
-pub static MEGATONNE: Unit = Unit {
-    name: "Megaton (metric)",
-    dimension: Dimension::Mass,
-    system: System::Metric,
-    to_base: Some(|v| TONNE.to_base.unwrap()(Unit::from_mega(v))),
-    from_base: Some(|v| Unit::to_mega(TONNE.from_base.unwrap()(v))),
-    to_system_base: None,
-    from_system_base: None,
-};
-pub static GIGATONNE: Unit = Unit {
-    name: "Gigaton (metric)",
-    dimension: Dimension::Mass,
-    system: System::Metric,
-    to_base: Some(|v| TONNE.to_base.unwrap()(Unit::from_giga(v))),
-    from_base: Some(|v| Unit::to_giga(TONNE.from_base.unwrap()(v))),
     to_system_base: None,
     from_system_base: None,
 };
@@ -140,8 +113,7 @@ pub static TON_SHORT: Unit = Unit {
 };
 
 pub(crate) fn get_all() -> Vec<&'static Unit> {
-    vec![&KILOGRAM, &GRAM, &MILLIGRAM, &MICROGRAM,
-         &TONNE, &KILOTONNE, &MEGATONNE, &GIGATONNE,
+    vec![&KILOGRAM, &GRAM, &MILLIGRAM, &MICROGRAM, &TONNE,
          &OUNCE, &POUND, &TON, &TON_SHORT
     ]
 }
@@ -158,11 +130,7 @@ mod tests {
         assert_eq!(convert(&23.66, &MILLIGRAM, &GRAM), 0.02366);
         assert_eq!(convert(&23.66, &GRAM, &KILOGRAM), 0.02366);
         assert_eq!(convert(&23.66, &KILOGRAM, &TONNE), 0.02366);
-        assert_eq!(convert(&23.66, &TONNE, &KILOTONNE), 0.02366);
-        assert_eq!(convert(&23.66, &KILOTONNE, &MEGATONNE), 0.02366);
         // and back
-        assert_eq!(convert(&23.66, &MEGATONNE, &KILOTONNE), 23660.0);
-        assert_eq!(convert(&23.66, &KILOTONNE, &TONNE), 23660.0);
         assert_eq!(convert(&23.66, &TONNE, &KILOGRAM), 23660.0);
         assert_eq!(convert(&23.66, &KILOGRAM, &GRAM), 23660.0);
         assert_eq!(convert(&23.66, &GRAM, &MILLIGRAM), 23660.0);
