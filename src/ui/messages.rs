@@ -22,17 +22,14 @@
 
 use iced::Theme;
 use iced::widget::text_editor::Action;
-use iced::window::Id;
 
-use crate::conversions::{ConversionDirection, Dimension, Unit};
+use crate::conversions::Unit;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    WindowResized(Id, u32, u32),
-    WindowMoved(Id, i32, i32),
-    MainWindowOpened(Id),
-    PopupWindowOpened(Id),
-    WindowClosed(Id),
+    WindowResized(u32, u32),
+    WindowMoved(i32, i32),
+    WindowClosed(),
     EditorAction(Action),
     Char(String),
     Constant(String),
@@ -46,10 +43,7 @@ pub enum Message {
     Copy(f64),
     Evaluate,
     ToggleMode,
-    FuncPopup,
-    CloseAndSend(Id, Box<Message>),
     ThemeChanged(Theme),
-    ConvertDimension(Dimension),
-    Convert(Unit, ConversionDirection),
-    ConvertPerform(Unit, Unit),
+    ConvertPerform(&'static Unit, &'static Unit),
+    Null,
 }

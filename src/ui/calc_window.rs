@@ -24,7 +24,7 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
-use iced::{Background, Border, Color, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Task, Theme, Vector};
+use iced::{Background, Border, Color, Degrees, Element, event, Event, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Subscription, Task, Theme, Vector, window};
 use iced::clipboard;
 use iced::alignment::{Horizontal, Vertical};
 use iced::theme::palette::Pair;
@@ -32,24 +32,26 @@ use iced::widget::{Button, button, Column, container, Container, horizontal_rule
 use iced::widget::button::Status;
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::widget::tooltip::Position;
-use iced::window::Id;
 use log::warn;
 use palette::{convert::FromColor, Hsl};
 use palette::rgb::Rgb;
 
 use crate::conversions::{try_convert, Unit};
 use crate::evaluator::AngleMode;
+use crate::ui;
 use crate::ui::calculator::Calc;
+use crate::ui::menu::build_menu_bar;
 use crate::ui::messages::Message;
 
 #[derive(Debug)]
-pub(super) struct CalcWindow {
+pub(crate) struct CalcWindow {
+    theme: Theme,
     content: Content,
     result: Option<Result<f64, String>>,
     calc: Calc,
     is_converting: bool,
-    convert_from: Option<Unit>,
-    convert_to: Option<Unit>,
+    convert_from: Option<&'static Unit>,
+    convert_to: Option<&'static Unit>,
     window_width: u32,
     window_height: u32,
     window_x: i32,
@@ -64,8 +66,10 @@ impl Default for CalcWindow {
         if let Some(am) = pref.get::<String>(crate::ui::preferences::ANGLE_MODE) {
             calc.set_angle_mode(AngleMode::get_from_name(am.as_str()));
         }
+        let theme = theme_by_name(pref.get::<String>(ui::preferences::THEME)).clone();
 
         Self {
+            theme: theme,
             content: Default::default(),
             result: None,
             calc: calc,
@@ -85,7 +89,7 @@ impl CalcWindow {
     pub fn title(&self) -> String {
         "Rusty Calculator".to_string()
     }
-    pub fn update(&mut self, id: &Id, message: Message) -> Task<Message> {
+    pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Char(s) => {
                 for c in s.chars() {
@@ -186,27 +190,25 @@ impl CalcWindow {
                     Task::none()
                 }
             }
-            Message::WindowResized(window_id, w, h) => {
-                if window_id == *id {
-                    self.window_width = w.clone();
-                    self.window_height = h.clone();
-                }
+            Message::ThemeChanged(t) => {
+                self.theme = t;
+                let pref = ui::preferences::manager();
+                pref.put(ui::preferences::THEME, format!("{}", &self.theme));
                 Task::none()
             }
-            Message::WindowMoved(window_id, x, y) => {
-                if window_id == *id {
-                    self.window_x = x.clone();
-                    self.window_y = y.clone();
-                }
+            Message::WindowResized(w, h) => {
+                self.window_width = w.clone();
+                self.window_height = h.clone();
                 Task::none()
             }
-            Message::WindowClosed(window_id) => {
-                if window_id == *id {
-                    let _ = save_window_size(self.window_width, self.window_height);
-                    iced::exit()
-                } else {
-                    Task::none()
-                }
+            Message::WindowMoved(x, y) => {
+                self.window_x = x.clone();
+                self.window_y = y.clone();
+                Task::none()
+            }
+            Message::WindowClosed() => {
+                let _ = save_window_size(self.window_width, self.window_height);
+                Task::none()
             }
             Message::ToggleMode => {
                 self.calc.set_angle_mode(match self.calc.angle_mode() {
@@ -218,12 +220,10 @@ impl CalcWindow {
                 pref.put(crate::ui::preferences::ANGLE_MODE, self.calc.angle_mode());
                 Task::none()
             }
-            _ => {
-                Task::none()
-            }
+            Message::Null => Task::none()
         }
     }
-    pub(super) fn view<'a>(&'a self, _id: &Id) -> Element<Message> {
+    pub(crate) fn view<'a>(&'a self) -> Element<Message> {
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             .style(|theme: &Theme, status| {
@@ -253,16 +253,12 @@ impl CalcWindow {
             };
 
 
-        let mode: Element<Message> = Button::new(text(self.calc.angle_mode().to_string()))
-            .style(|theme: &Theme, _status| {
-                button::Style {
-                    background: Some(Background::Color(Color::TRANSPARENT)),
-                    text_color: theme.extended_palette().background.base.text,
-                    .. button::Style::default()
+        let mode: Element<Message> = text(self.calc.angle_mode().to_string())
+            .style(|theme: &Theme| {
+                text::Style {
+                    color: Some(theme.extended_palette().background.base.text),
                 }
             })
-            .padding(Padding::from(0))
-            .on_press(Message::ToggleMode)
             .height(Length::Shrink)
             .into();
 
@@ -278,9 +274,13 @@ impl CalcWindow {
             .clip(false)
             .into();
 
+        let mb = build_menu_bar().into();
+
+        let menu_row = Row::with_children([mb, con_mode]).into();
+
         let top =
             if !self.is_converting {
-                Column::with_children([con_mode, lcd, con_result]).spacing(2)
+                Column::with_children([menu_row, lcd, con_result]).spacing(2)
             } else {
 
                 let conv_from = if let Some(unit_from) = &self.convert_from {
@@ -303,7 +303,7 @@ impl CalcWindow {
                     Some(r) => {
                         match r {
                             Ok(v) => {
-                                let cv = try_convert(v, &self.convert_from.as_ref(), &self.convert_to.as_ref());
+                                let cv = try_convert(v, &self.convert_from, &self.convert_to);
                                 wrap_with_copy(text(Self::format_result(&cv)), cv)
                             }
                             Err(e) => text(e.clone()).into()
@@ -328,13 +328,13 @@ impl CalcWindow {
                             }
                         })
                     .into();
-                Column::with_children([con_mode, lcd, r1, rule1, r2]).spacing(2)
+                Column::with_children([menu_row, lcd, r1, rule1, r2]).spacing(2)
             };
         let lcd_container = container(top)
             .width(Length::Fill)
-            .style(move |_theme| {
+            .style(move |theme| {
                 container::Style {
-                    background: Some(Background::Color(_theme.extended_palette().background.strong.color)),
+                    background: Some(Background::Color(theme.extended_palette().background.strong.color)),
                     border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
                     ..Default::default()
                 }
@@ -389,7 +389,7 @@ impl CalcWindow {
         let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
         let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
         let b_back = ButtonBuilder::new("<del", w, h).msg(Message::BackSpace).make();
-        let b_more = ButtonBuilder::new("more...", w, h).msg(Message::FuncPopup).make();
+        let b_more = ButtonBuilder::new("DRG", w, h).msg(Message::ToggleMode).make();
 
         let col_all = Column::with_children([
             lcd_container.height(Length::FillPortion(3)).into(),
@@ -424,7 +424,7 @@ impl CalcWindow {
     }
 
     fn format_result(v: &f64) -> String {
-        if *v < 0.001 || *v > 10000000.0 {
+        if v.abs() < 0.001 || v.abs() > 10000000.0 {
             format!("= {:+e}", v)
         } else {
             let formatted = format!("= {0:.1$}", v, 10);
@@ -432,14 +432,26 @@ impl CalcWindow {
         }
     }
 
-    pub(crate) fn position(&self) -> (i32, i32) {
-        (self.window_x, self.window_y)
+    pub(crate) fn subscription(&self) -> Subscription<Message> {
+        event::listen_with(|event, _status, _id| {
+            match event {
+                Event::Window(window::Event::Resized { width, height}) => {
+                    Some(Message::WindowResized(width, height))
+                }
+                Event::Window(window::Event::Moved { x, y}) => {
+                    Some(Message::WindowMoved(x, y))
+                }
+                Event::Window(window::Event::Closed {}) => {
+                    Some(Message::WindowClosed())
+                }
+                _ => None
+            }
+        })
     }
 
-    pub(crate) fn size(&self) -> (u32, u32) {
-        (self.window_width, self.window_height)
+    pub(crate) fn theme(&self) -> Theme {
+        self.theme.clone()
     }
-
 }
 
 fn wrap_with_copy(text: Text, value: f64) -> Element<Message> {
@@ -690,4 +702,15 @@ pub fn save_window_size(width: u32, height: u32) -> Result<(), String> {
     pref.put("window-height", height);
 
     Ok(())
+}
+
+fn theme_by_name(name: Option<String>) -> &'static Theme {
+    if let Some(name) = name {
+        for t in Theme::ALL.iter() {
+            if format!("{}", t) == name {
+                return &t
+            }
+        }
+    }
+    &ui::lcd_theme()
 }

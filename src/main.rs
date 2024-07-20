@@ -25,11 +25,11 @@ use std::fs::File;
 use iced::settings::Settings;
 use iced::Size;
 use iced::window;
+use iced_aw::BOOTSTRAP_FONT_BYTES;
 use log::info;
 use simplelog::*;
 
-use crate::ui::calculator_app::CalculatorApp;
-use crate::ui::messages::Message;
+use crate::ui::calc_window::CalcWindow;
 
 mod evaluator;
 
@@ -59,17 +59,17 @@ fn main() -> iced::Result {
 
     let settings: Settings = Settings {
         id: Some(String::from("RustyCalc")),
+
+        fonts: vec![BOOTSTRAP_FONT_BYTES.into()],
         antialiasing: true,
         .. Settings::default()
     };
 
-    let result = iced::daemon(CalculatorApp::title, CalculatorApp::update, CalculatorApp::view)
-        .load(move || {
-            window::open(window_settings.clone()).map(Message::MainWindowOpened)
-        })
+    let result = iced::application(CalcWindow::title, CalcWindow::update, CalcWindow::view)
         .settings(settings)
-        .subscription(CalculatorApp::subscription)
-        .theme(CalculatorApp::theme)
+        .window(window_settings)
+        .subscription(CalcWindow::subscription)
+        .theme(CalcWindow::theme)
         .run();
 
     info!("Calculator shutdown");

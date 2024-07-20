@@ -30,10 +30,9 @@ use lazy_static::lazy_static;
 
 pub(crate) mod calculator;
 pub(crate) mod messages;
-pub(crate) mod calculator_app;
-mod func_popup;
-mod calc_window;
+pub(crate) mod calc_window;
 pub(super) mod preferences;
+mod menu;
 
 pub static PALETT_LCD: Palette = Palette {
     background: Color::from_rgb(  // LCD Green background
