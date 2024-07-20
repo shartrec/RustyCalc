@@ -20,9 +20,9 @@
  *
  */
 
-use iced::{Element, event, Event, Point, Size, Subscription, Task, Theme, window};
+use iced::{Element, event, Event, Subscription, Task, Theme, window};
 use iced::widget::text;
-use iced::window::{Id, Level, Position};
+use iced::window::Id;
 
 use crate::ui;
 use crate::ui::calc_window::CalcWindow;
@@ -47,7 +47,7 @@ impl Default for CalculatorApp {
 }
 
 impl CalculatorApp {
-      pub(crate) fn title(&self, id: Id) -> String {
+      pub(crate) fn title(&self, _id: Id) -> String {
           self.main_window.title()
       }
 

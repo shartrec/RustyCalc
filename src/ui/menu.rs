@@ -21,14 +21,14 @@
  */
 
 /// This module contains the funcrtions to build our menu bar and menus descending from it.
-use iced::{alignment, Background, Border, Color, Element, Length, Padding, Renderer, Theme};
+use iced::{alignment, Background, Border, Element, Length, Padding, Renderer, Theme};
+use iced::advanced::text::Shaping;
 use iced::border::Radius;
-use iced::widget::{Button, button, Container, row, Row, text};
+use iced::widget::{Button, button, Container, row, text};
 use iced_aw::menu::{Item, Menu, primary};
-use iced_aw::{BOOTSTRAP_FONT, menu, menu_bar, menu_items};
+use iced_aw::{BOOTSTRAP_FONT, menu, menu_bar};
 use iced_aw::Bootstrap;
 use iced_aw::style::Status;
-use log::error;
 use strum::IntoEnumIterator;
 use crate::{conversions, evaluator, history, ui};
 use crate::conversions::{Dimension, Unit};
@@ -37,14 +37,7 @@ use crate::ui::messages::Message;
 /// Builds the menus for our calculator
 pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
 
-    let menu_tpl_1 = |items| Menu::new(items).offset(0.0).spacing(2.0);
-
-
-    let insert_menu = menu_tpl_1(menu_items!(
-                    (menu_item("Constants".to_string(), Message::Null), menu_constants())
-                    (menu_item("Functions".to_string(), Message::Null), menu_functions())
-                )).max_width(100.0);
-
+    let insert_menu = menu_insert();
     let convert_menu = menu_dimension();
     let history_menu = menu_history();
     let theme_menu = menu_theme();
@@ -173,19 +166,21 @@ fn menu_unit_from(dimension: &Dimension)  -> Menu<'static, Message, Theme, Rende
 
 }
 
-fn menu_unit_to(dimension: &Dimension, from: &Unit) -> Menu<'static, Message, Theme, Renderer> {
+fn menu_unit_to(dimension: &Dimension, from: &'static Unit) -> Menu<'static, Message, Theme, Renderer> {
     let mut items = Vec::new();
     for unit in conversions::get_units(dimension).iter() {
-        let to = unit.clone();
+        let to = unit;
         items.push(Item::new(
-            menu_item(unit.to_string(), Message::ConvertPerform(from.clone(), to.clone())),
+            menu_item(unit.to_string(), Message::ConvertPerform(&from, *to)),
         ));
     }
     Menu::new(items).offset(0.0).spacing(2.0).max_width(150.0)
 }
 
 fn menu_item(label: String, msg: Message) -> Element<'static, Message> {
-    let content = text(label).width(Length::Fill);
+    let content = text(label)
+        .width(Length::Fill)
+        .shaping(Shaping::Advanced);
     menu_item_core(msg, content.into())
 }
 
@@ -193,6 +188,7 @@ fn menu_item_sub(label: String, msg: Message) -> Element<'static, Message> {
     let content = row![
                 text(label)
                     .width(Length::Fill)
+                    .shaping(Shaping::Advanced)
                     .vertical_alignment(alignment::Vertical::Center),
                 text(iced_aw::bootstrap::icon_to_string(
                     Bootstrap::CaretRightFill

@@ -24,7 +24,7 @@ use iced::Theme;
 use iced::widget::text_editor::Action;
 use iced::window::Id;
 
-use crate::conversions::{ConversionDirection, Dimension, Unit};
+use crate::conversions::Unit;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -46,6 +46,6 @@ pub enum Message {
     Evaluate,
     ToggleMode,
     ThemeChanged(Theme),
-    ConvertPerform(Unit, Unit),
+    ConvertPerform(&'static Unit, &'static Unit),
     Null,
 }

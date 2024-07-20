@@ -20,7 +20,6 @@
  *
  */
 
-use std::borrow::Cow;
 use std::fs::File;
 
 use iced::settings::Settings;

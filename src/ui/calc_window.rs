@@ -49,8 +49,8 @@ pub(super) struct CalcWindow {
     result: Option<Result<f64, String>>,
     calc: Calc,
     is_converting: bool,
-    convert_from: Option<Unit>,
-    convert_to: Option<Unit>,
+    convert_from: Option<&'static Unit>,
+    convert_to: Option<&'static Unit>,
     window_width: u32,
     window_height: u32,
     window_x: i32,
@@ -304,7 +304,7 @@ impl CalcWindow {
                     Some(r) => {
                         match r {
                             Ok(v) => {
-                                let cv = try_convert(v, &self.convert_from.as_ref(), &self.convert_to.as_ref());
+                                let cv = try_convert(v, &self.convert_from, &self.convert_to);
                                 wrap_with_copy(text(Self::format_result(&cv)), cv)
                             }
                             Err(e) => text(e.clone()).into()
@@ -432,15 +432,6 @@ impl CalcWindow {
             formatted.trim_end_matches('0').trim_end_matches('.').to_string()
         }
     }
-
-    pub(crate) fn position(&self) -> (i32, i32) {
-        (self.window_x, self.window_y)
-    }
-
-    pub(crate) fn size(&self) -> (u32, u32) {
-        (self.window_width, self.window_height)
-    }
-
 }
 
 fn wrap_with_copy(text: Text, value: f64) -> Element<Message> {
