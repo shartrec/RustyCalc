@@ -30,8 +30,7 @@ use lazy_static::lazy_static;
 
 pub(crate) mod calculator;
 pub(crate) mod messages;
-pub(crate) mod calculator_app;
-mod calc_window;
+pub(crate) mod calc_window;
 pub(super) mod preferences;
 mod menu;
 

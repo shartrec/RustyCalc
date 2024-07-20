@@ -22,7 +22,6 @@
 
 use iced::Theme;
 use iced::widget::text_editor::Action;
-use iced::window::Id;
 
 use crate::conversions::Unit;
 
@@ -30,7 +29,6 @@ use crate::conversions::Unit;
 pub enum Message {
     WindowResized(u32, u32),
     WindowMoved(i32, i32),
-    MainWindowOpened(),
     WindowClosed(),
     EditorAction(Action),
     Char(String),

@@ -24,7 +24,7 @@
 // It is broken out for the sake of maintainability and follows the same conventions as
 // the main view / update logic of the main Application for ease of understanding
 
-use iced::{Background, Border, Color, Degrees, Element, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Task, Theme, Vector};
+use iced::{Background, Border, Color, Degrees, Element, event, Event, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Subscription, Task, Theme, Vector, window};
 use iced::clipboard;
 use iced::alignment::{Horizontal, Vertical};
 use iced::theme::palette::Pair;
@@ -32,19 +32,20 @@ use iced::widget::{Button, button, Column, container, Container, horizontal_rule
 use iced::widget::button::Status;
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::widget::tooltip::Position;
-use iced::window::Id;
 use log::warn;
 use palette::{convert::FromColor, Hsl};
 use palette::rgb::Rgb;
 
 use crate::conversions::{try_convert, Unit};
 use crate::evaluator::AngleMode;
+use crate::ui;
 use crate::ui::calculator::Calc;
 use crate::ui::menu::build_menu_bar;
 use crate::ui::messages::Message;
 
 #[derive(Debug)]
-pub(super) struct CalcWindow {
+pub(crate) struct CalcWindow {
+    theme: Theme,
     content: Content,
     result: Option<Result<f64, String>>,
     calc: Calc,
@@ -65,8 +66,10 @@ impl Default for CalcWindow {
         if let Some(am) = pref.get::<String>(crate::ui::preferences::ANGLE_MODE) {
             calc.set_angle_mode(AngleMode::get_from_name(am.as_str()));
         }
+        let theme = theme_by_name(pref.get::<String>(ui::preferences::THEME)).clone();
 
         Self {
+            theme: theme,
             content: Default::default(),
             result: None,
             calc: calc,
@@ -187,6 +190,12 @@ impl CalcWindow {
                     Task::none()
                 }
             }
+            Message::ThemeChanged(t) => {
+                self.theme = t;
+                let pref = ui::preferences::manager();
+                pref.put(ui::preferences::THEME, format!("{}", &self.theme));
+                Task::none()
+            }
             Message::WindowResized(w, h) => {
                 self.window_width = w.clone();
                 self.window_height = h.clone();
@@ -211,12 +220,10 @@ impl CalcWindow {
                 pref.put(crate::ui::preferences::ANGLE_MODE, self.calc.angle_mode());
                 Task::none()
             }
-            _ => {
-                Task::none()
-            }
+            Message::Null => Task::none()
         }
     }
-    pub(super) fn view<'a>(&'a self) -> Element<Message> {
+    pub(crate) fn view<'a>(&'a self) -> Element<Message> {
         let lcd = text_editor(&self.content)
             .height(Length::Fill)
             .style(|theme: &Theme, status| {
@@ -423,6 +430,27 @@ impl CalcWindow {
             let formatted = format!("= {0:.1$}", v, 10);
             formatted.trim_end_matches('0').trim_end_matches('.').to_string()
         }
+    }
+
+    pub(crate) fn subscription(&self) -> Subscription<Message> {
+        event::listen_with(|event, _status, _id| {
+            match event {
+                Event::Window(window::Event::Resized { width, height}) => {
+                    Some(Message::WindowResized(width, height))
+                }
+                Event::Window(window::Event::Moved { x, y}) => {
+                    Some(Message::WindowMoved(x, y))
+                }
+                Event::Window(window::Event::Closed {}) => {
+                    Some(Message::WindowClosed())
+                }
+                _ => None
+            }
+        })
+    }
+
+    pub(crate) fn theme(&self) -> Theme {
+        self.theme.clone()
     }
 }
 
@@ -674,4 +702,15 @@ pub fn save_window_size(width: u32, height: u32) -> Result<(), String> {
     pref.put("window-height", height);
 
     Ok(())
+}
+
+fn theme_by_name(name: Option<String>) -> &'static Theme {
+    if let Some(name) = name {
+        for t in Theme::ALL.iter() {
+            if format!("{}", t) == name {
+                return &t
+            }
+        }
+    }
+    &ui::lcd_theme()
 }
