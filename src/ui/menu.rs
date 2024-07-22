@@ -39,16 +39,25 @@ pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
 
     let insert_menu = menu_insert();
     let convert_menu = menu_dimension();
-    let history_menu = menu_history();
     let theme_menu = menu_theme();
 
-    let mb = menu_bar!(
-            (menu_top("Convert"), convert_menu)
-            (menu_top("Insert"), insert_menu)
-            (menu_top("History"), history_menu)
-            (menu_top("Theme"), theme_menu)
-        )
-        .style(|theme:&iced::Theme, status: Status | menu::Style{
+    let mb=
+        if let Some(history_menu) = menu_history() {
+            menu_bar!(
+                (menu_top("Convert"), convert_menu)
+                (menu_top("Insert"), insert_menu)
+                (menu_top("History"), history_menu)
+                (menu_top("Theme"), theme_menu)
+            )
+        } else {
+            menu_bar!(
+                (menu_top("Convert"), convert_menu)
+                (menu_top("Insert"), insert_menu)
+                (menu_top("Theme"), theme_menu)
+            )
+        };
+
+    mb.style(|theme:&Theme, status: Status | menu::Style{
             path_border: Border{
                 radius: Radius::from(1.0),
                 width: 2.0,
@@ -67,8 +76,8 @@ pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
             menu_background: Background::Color(theme.extended_palette().background.strong.color),
             menu_background_expand: Padding::from(0),
             ..primary(theme, status)
-        });
-    mb.into()
+        })
+    .into()
 
 }
 
@@ -86,7 +95,7 @@ fn menu_insert() -> Menu<'static, Message, Theme, Renderer> {
     items.push(Item::with_menu(menu_item("Constants".to_string(), Message::Null), menu_constants()));
     items.push(Item::with_menu(menu_item("Functions".to_string(), Message::Null), menu_functions()));
 
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(150.0)
+    Menu::new(items).offset(0.0).spacing(2.0).max_width(120.0)
 }
 
 fn menu_constants() -> Menu<'static, Message, Theme, Renderer> {
@@ -109,19 +118,22 @@ fn menu_functions() -> Menu<'static, Message, Theme, Renderer> {
     Menu::new(items).offset(0.0).spacing(2.0).max_width(75.0)
 
 }
-fn menu_history() -> Menu<'static, Message, Theme, Renderer> {
+fn menu_history() -> Option<Menu<'static, Message, Theme, Renderer>> {
 
-    let mut items = Vec::new();
     if let Ok(queue) = history::manager().history().entries().read().as_deref() {
-        for history_item in queue.iter() {
-            items.push(Item::new(menu_item(history_item.0.clone(),
-                                           Message::History(history_item.0.clone(), history_item.1.clone()))));
+        if queue.len() == 0 {
+            None
+        } else {
+            let mut items = Vec::new();
+            for history_item in queue.iter() {
+                items.push(Item::new(menu_item(history_item.0.clone(),
+                                               Message::History(history_item.0.clone(), history_item.1.clone()))));
+            }
+            Some(Menu::new(items).offset(0.0).spacing(2.0).max_width(200.0))
         }
+    } else {
+        None
     }
-
-
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(200.0)
-
 }
 
 fn menu_theme() -> Menu<'static, Message, Theme, Renderer> {
@@ -138,13 +150,13 @@ fn menu_theme() -> Menu<'static, Message, Theme, Renderer> {
             Message::ThemeChanged(t.clone())
         )));
     }
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(250.0)
+    Menu::new(items).offset(0.0).spacing(2.0).max_width(200.0)
 
 }
 
 fn menu_dimension()  -> Menu<'static, Message, Theme, Renderer> {
     let mut items = Vec::new();
-    for d in conversions::Dimension::iter() {
+    for d in Dimension::iter() {
         items.push(Item::with_menu(menu_item(
             d.to_string(),
             Message::Null
@@ -205,7 +217,7 @@ fn menu_item_core(msg: Message, content: Element<'static, Message>) -> Element<'
     Button::new(content)
         .style(|theme: &Theme, status| {
             match status {
-                iced::widget::button::Status::Hovered => {
+                button::Status::Hovered => {
                     button::Style {
                         background: Some(Background::from(theme.extended_palette().background.base.color)),
                         text_color: theme.extended_palette().background.base.text,
