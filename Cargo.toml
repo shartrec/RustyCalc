@@ -28,5 +28,6 @@ features = ["advanced"]
 
 [dependencies.iced_aw]
 git = "https://github.com/iced-rs/iced_aw.git"
-rev = "b06b22c6755149545c09f7c2d75e8bf2567415f7"
-features = ["menu", "icons"]
+branch = "main"
+default-features = false
+features = ["menu"]
