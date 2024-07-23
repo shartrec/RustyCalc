@@ -101,10 +101,17 @@ fn get_history_path() -> Option<PathBuf> {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct History {
     entries: RwLock<VecDeque<(String, f64)>>,
+    #[serde(skip_serializing)]
+    #[serde(default="History::defaut_size")]
     max_size: usize,
 }
 
 impl History {
+
+    fn defaut_size() -> usize {
+        HISTORY_SIZE
+    }
+
     fn new(max_size: usize) -> Self {
         Self {
             entries: RwLock::new(VecDeque::with_capacity(max_size)),
@@ -115,7 +122,7 @@ impl History {
     fn add(&self, entry: (&str, &f64)) {
         match self.entries.write() {
             Ok(mut vec) => {
-                if vec.len() == self.max_size {
+                while vec.len() >= self.max_size {
                     vec.pop_back();
                 }
                 let new_entry = (entry.0.to_string(), entry.1.clone());
