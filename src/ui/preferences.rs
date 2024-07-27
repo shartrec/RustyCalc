@@ -26,8 +26,8 @@ use std::{
     str::FromStr,
     sync::{Arc, RwLock},
 };
+use std::sync::LazyLock;
 
-use lazy_static::lazy_static;
 use log::{error, info, warn};
 use preferences::{AppInfo, Preferences, PreferencesMap};
 
@@ -41,8 +41,8 @@ pub static APP_INFO: AppInfo = AppInfo {
 pub static ANGLE_MODE: &str = "angle-mode";
 pub static THEME: &str = "theme";
 
-lazy_static! {
-    static ref MANAGER: PreferenceManager = PreferenceManager {
+static MANAGER: LazyLock<PreferenceManager> = LazyLock::new( || {
+    PreferenceManager {
         preferences: {
             match PreferencesMap::<String>::load(&APP_INFO, PREFS_PATH) {
                 Ok(map) => Arc::new(RwLock::new(map)),
@@ -54,8 +54,8 @@ lazy_static! {
             }
         },
         path: PREFS_PATH,
-    };
-}
+    }
+});
 
 pub struct PreferenceManager {
     preferences: Arc<RwLock<PreferencesMap>>,

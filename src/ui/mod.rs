@@ -20,13 +20,12 @@
  *
  */
 
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 use iced::{Color, Theme};
 use iced::theme::Custom;
 use iced::theme::Palette;
 use iced::theme::palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success};
-use lazy_static::lazy_static;
 
 pub(crate) mod calculator;
 pub(crate) mod messages;
@@ -58,33 +57,32 @@ pub static PALETT_LCD: Palette = Palette {
     ),
 };
 
-lazy_static! {
-    static ref LCD_THEME: Theme =
-        Theme::Custom(Arc::new(Custom::with_fn(String::from("Lcd Calculator"), PALETT_LCD, |palette| -> Extended {
-            Extended {
-                background: Background{
-                    weak: Pair::new(Color::from_rgb8(0x00,0x50,0x60), palette.text), // Grey Blue
-                    .. Background::new(palette.background, palette.text)
-                },
-                primary: Primary::generate(palette.primary, palette.background, palette.text),
-                secondary: Secondary{
-                    strong: Pair::new(Color::from_rgb8(0x04,0x04,0x04,), palette.text),
-                    .. Secondary::generate(Color::BLACK, Color::WHITE)
-                },
-                success: Success::generate(
-                    palette.primary,
-                    Color::BLACK,
-                    Color::WHITE,
-                ),
-                danger: Danger::generate(
-                    palette.danger,
-                    palette.background,
-                    palette.text,
-                ),
-                is_dark: false,
-            }
-        })));
-}
+static LCD_THEME: LazyLock<Theme> = LazyLock::new( || {
+    Theme::Custom(Arc::new(Custom::with_fn(String::from("Lcd Calculator"), PALETT_LCD, |palette| -> Extended {
+        Extended {
+            background: Background {
+                weak: Pair::new(Color::from_rgb8(0x00, 0x50, 0x60), palette.text), // Grey Blue
+                ..Background::new(palette.background, palette.text)
+            },
+            primary: Primary::generate(palette.primary, palette.background, palette.text),
+            secondary: Secondary {
+                strong: Pair::new(Color::from_rgb8(0x04, 0x04, 0x04, ), palette.text),
+                ..Secondary::generate(Color::BLACK, Color::WHITE)
+            },
+            success: Success::generate(
+                palette.primary,
+                Color::BLACK,
+                Color::WHITE,
+            ),
+            danger: Danger::generate(
+                palette.danger,
+                palette.background,
+                palette.text,
+            ),
+            is_dark: true,
+        }
+    })))
+});
 
 fn lcd_theme() -> &'static Theme {
     &LCD_THEME

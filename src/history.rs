@@ -24,17 +24,15 @@ use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{self, Read, Write};
 use std::path::PathBuf;
-use std::sync::RwLock;
+use std::sync::{LazyLock, RwLock};
 
-use lazy_static::lazy_static;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
 static HISTORY_FILE: &str = "rusty-calc-history.json";
 static HISTORY_SIZE: usize = 100;
 
-lazy_static! {
-static ref HISTORY_MANAGER: HistoryManager = {
+static HISTORY_MANAGER: LazyLock<HistoryManager> = LazyLock::new(|| -> HistoryManager{
         let mut contents = String::new();
         let history = if let Some(path) = get_history_path() {
             match File::open(path)
@@ -56,8 +54,8 @@ static ref HISTORY_MANAGER: HistoryManager = {
         };
 
         HistoryManager { history }
-    };
-}
+    });
+
 
 pub struct HistoryManager {
      history: History,
