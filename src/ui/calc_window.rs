@@ -20,9 +20,7 @@
  *
  */
 
-// This module contains the logic for the extras window.
-// It is broken out for the sake of maintainability and follows the same conventions as
-// the main view / update logic of the main Application for ease of understanding
+// This is the main ICED UI Application.
 
 use iced::{Background, Border, Color, Degrees, Element, event, Event, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Subscription, Task, Theme, Vector, window};
 use iced::clipboard;
@@ -278,9 +276,10 @@ impl CalcWindow {
 
         let menu_row = Row::with_children([mb, con_mode]).into();
 
+        let sp = 2;
         let top =
             if !self.is_converting {
-                Column::with_children([menu_row, lcd, con_result]).spacing(2)
+                Column::with_children([menu_row, lcd, con_result]).spacing(sp)
             } else {
 
                 let conv_from = if let Some(unit_from) = &self.convert_from {
@@ -328,7 +327,7 @@ impl CalcWindow {
                             }
                         })
                     .into();
-                Column::with_children([menu_row, lcd, r1, rule1, r2]).spacing(2)
+                Column::with_children([menu_row, lcd, r1, rule1, r2]).spacing(sp)
             };
         let lcd_container = container(top)
             .width(Length::Fill)
@@ -341,75 +340,69 @@ impl CalcWindow {
             })
             .padding(2);
 
-        let w = Length::FillPortion(1);
-        let h = Length::FillPortion(1);
-
         // The standard number buttons
-        let b_one = ButtonBuilder::new("1", w, h).make();
-        let b_two = ButtonBuilder::new("2", w, h).make();
-        let b_three = ButtonBuilder::new("3", w, h).make();
-        let b_four = ButtonBuilder::new("4", w, h).make();
-        let b_five = ButtonBuilder::new("5", w, h).make();
-        let b_six = ButtonBuilder::new("6", w, h).make();
-        let b_seven = ButtonBuilder::new("7", w, h).make();
-        let b_eight = ButtonBuilder::new("8", w, h).make();
-        let b_nine = ButtonBuilder::new("9", w, h).make();
-        let b_zero = ButtonBuilder::new("0", w, h).make();
-        let b_dec = ButtonBuilder::new(".", w, h).make();
+        let b_one = ButtonBuilder::new("1").make();
+        let b_two = ButtonBuilder::new("2").make();
+        let b_three = ButtonBuilder::new("3").make();
+        let b_four = ButtonBuilder::new("4").make();
+        let b_five = ButtonBuilder::new("5").make();
+        let b_six = ButtonBuilder::new("6").make();
+        let b_seven = ButtonBuilder::new("7").make();
+        let b_eight = ButtonBuilder::new("8").make();
+        let b_nine = ButtonBuilder::new("9").make();
+        let b_zero = ButtonBuilder::new("0").make();
+        let b_dec = ButtonBuilder::new(".").make();
         // Basic operations
-        let b_plus = ButtonBuilder::new("+", w, h).make();
-        let b_minus = ButtonBuilder::new("-", w, h).make();
-        let b_mult = ButtonBuilder::new("x", w, h).msg(Message::Char("*".to_string())).make();
-        let b_div = ButtonBuilder::new("/", w, h).make();
-        let b_pow = ButtonBuilder::new("^", Length::FillPortion(1), h).make();
-        let b_lparen = ButtonBuilder::new("(", w, h).msg(Message::Func("".to_string())).make();
-        let b_rparen = ButtonBuilder::new(")", w, h).make();
+        let b_plus = ButtonBuilder::new("+").make();
+        let b_minus = ButtonBuilder::new("-").make();
+        let b_mult = ButtonBuilder::new("x").msg(Message::Char("*".to_string())).make();
+        let b_div = ButtonBuilder::new("/").make();
+        let b_pow = ButtonBuilder::new("^").make();
+        let b_lparen = ButtonBuilder::new("(").msg(Message::Func("".to_string())).make();
+        let b_rparen = ButtonBuilder::new(")").make();
         // Functions
-        let b_sin = ButtonBuilder::for_func("sin", w, h).make();
-        let b_cos = ButtonBuilder::for_func("cos", w, h).make();
-        let b_tan = ButtonBuilder::for_func("tan", w, h).make();
-        let b_asin = ButtonBuilder::for_func("asin", w, h).make();
-        let b_acos = ButtonBuilder::for_func("acos", w, h).make();
-        let b_atan = ButtonBuilder::for_func("atan", w, h).make();
-        let b_exp = ButtonBuilder::for_func("exp", w, h).make();
-        let b_ln = ButtonBuilder::for_func("ln", w, h).make();
-        let b_log = ButtonBuilder::for_func("log", w, h).make();
-        let b_log2 = ButtonBuilder::for_func("log2", w, h).make();
-        let b_sqrt = ButtonBuilder::new("√", w, h).msg(Message::Func("sqrt".to_string())).make();
-        let b_abs = ButtonBuilder::for_func("abs", w, h).make();
-        let b_ceil = ButtonBuilder::for_func("ceil", w, h).make();
-        let b_floor = ButtonBuilder::for_func("floor", w, h).make();
-        let b_fact = ButtonBuilder::for_func("!", w, h).msg(Message::Func("factorial".to_string())).make();
+        let b_sin = ButtonBuilder::for_func("sin").make();
+        let b_cos = ButtonBuilder::for_func("cos").make();
+        let b_tan = ButtonBuilder::for_func("tan").make();
+        let b_asin = ButtonBuilder::for_func("asin").make();
+        let b_acos = ButtonBuilder::for_func("acos").make();
+        let b_atan = ButtonBuilder::for_func("atan").make();
+        let b_exp = ButtonBuilder::for_func("exp").make();
+        let b_ln = ButtonBuilder::for_func("ln").make();
+        let b_log = ButtonBuilder::for_func("log").make();
+        let b_log2 = ButtonBuilder::for_func("log2").make();
+        let b_sqrt = ButtonBuilder::new("√").msg(Message::Func("sqrt".to_string())).make();
+        let b_abs = ButtonBuilder::for_func("abs").make();
+        let b_ceil = ButtonBuilder::for_func("ceil").make();
+        let b_floor = ButtonBuilder::for_func("floor").make();
+        let b_fact = ButtonBuilder::for_func("!").msg(Message::Func("factorial".to_string())).make();
         // Command buttons
-        let b_equals = ButtonBuilder::new("=", Length::FillPortion(2), h).msg(Message::Evaluate).make();
-        let b_clear = ButtonBuilder::new("AC", w, h)
+        let b_equals = ButtonBuilder::new("=").msg(Message::Evaluate).span(2).make();
+        let b_clear = ButtonBuilder::new("AC")
             .msg(Message::Clear)
             .danger(true)
             .make();
-        let b_left = ButtonBuilder::new("<-", w, h).msg(Message::MoveLeft).make();
-        let b_right = ButtonBuilder::new("->", w, h).msg(Message::MoveRight).make();
-        let b_back = ButtonBuilder::new("<del", w, h).msg(Message::BackSpace).make();
-        let b_more = ButtonBuilder::new("DRG", w, h).msg(Message::ToggleMode).make();
+        let b_left = ButtonBuilder::new("<-").msg(Message::MoveLeft).make();
+        let b_right = ButtonBuilder::new("->").msg(Message::MoveRight).make();
+        let b_back = ButtonBuilder::new("<del").msg(Message::BackSpace).make();
+        let b_more = ButtonBuilder::new("DRG").msg(Message::ToggleMode).make();
 
+        let row_height = Length::FillPortion(1);
         let col_all = Column::with_children([
             lcd_container.height(Length::FillPortion(3)).into(),
             Row::with_children([
                 Column::with_children([
-                    Row::with_children([b_back, b_left, b_right, b_more, b_clear]).spacing(2).into(),
-                    Row::with_children([b_sin, b_cos, b_tan, b_sqrt, b_abs]).spacing(2).into(),
-                    Row::with_children([b_asin, b_acos, b_atan, b_ceil, b_floor]).spacing(2).into(),
-                    Row::with_children([b_exp, b_ln, b_log, b_log2, b_fact]).spacing(2).into(),
-                ]).spacing(2).into(),
-            ]).spacing(2).height(Length::FillPortion(3)).into(),
-            Row::with_children([
-                Column::with_children([
-                    Row::with_children([b_seven, b_eight, b_nine, b_lparen, b_rparen]).spacing(2).into(),
-                    Row::with_children([b_four, b_five, b_six, b_mult, b_div]).spacing(2).into(),
-                    Row::with_children([b_one, b_two, b_three, b_plus, b_minus]).spacing(2).into(),
-                    Row::with_children([b_zero, b_dec, b_equals, b_pow]).spacing(2).into(),
-                ]).spacing(2).into(),
-            ]).spacing(2).height(Length::FillPortion(3)).into(),
-        ]).spacing(2);
+                    Row::with_children([b_back, b_left, b_right, b_more, b_clear]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_sin, b_cos, b_tan, b_sqrt, b_abs]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_asin, b_acos, b_atan, b_ceil, b_floor]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_exp, b_ln, b_log, b_log2, b_fact]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_seven, b_eight, b_nine, b_lparen, b_rparen]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_four, b_five, b_six, b_mult, b_div]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_one, b_two, b_three, b_plus, b_minus]).spacing(sp).height(row_height).into(),
+                    Row::with_children([b_zero, b_dec, b_equals, b_pow]).spacing(sp).height(row_height).into(),
+                ]).spacing(sp).into(),
+            ]).spacing(sp).height(Length::FillPortion(6)).into(),
+        ]).spacing(sp);
 
         container(col_all)
             .width(Length::Fill)
@@ -485,21 +478,20 @@ fn wrap_with_copy(text: Text, value: f64) -> Element<Message> {
 /// # Examples
 /// Build a button using the default message ```Message::Char(self.name.to_string()```
 /// ```
-/// let b_one = ButtonBuilder::new("1", w, h).make();
+/// let b_one = ButtonBuilder::new("1").make();
 /// ```
 /// Build a message specifying message and colors
 /// ```
-/// let b_clear = ButtonBuilder::new("AC", w, h)
+/// let b_clear = ButtonBuilder::new("AC")
 ///             .msg(Message::Clear)
 ///             .colors((Color::from_rgb8(0xf0, 0x24, 0x24), Color::from_rgb8(0xD0, 0x24, 0x24)))
 ///             .make();
 /// ```
 struct ButtonBuilder<'a> {
     name : &'a str,
-    w : Length,
-    h : Length,
     msg : Option<Message>,
     danger : bool,
+    span : u16,
 }
 impl <'a> ButtonBuilder<'a> {
 
@@ -509,18 +501,16 @@ impl <'a> ButtonBuilder<'a> {
     ///
     /// * `name`: The string to show on the button. This will also be used as the default
     ///           Message value if no Message is added to the builder
-    /// * `w`: The width of the button
-    /// * `h`: The height of the button
     ///
     /// returns: ButtonBuilder
     ///
     /// # Examples
     ///
     /// ```
-    /// ButtonBuilder::new("1", w, h)
+    /// ButtonBuilder::new("1")
     /// ```
-    fn new(name: &'a str, w: Length, h: Length) -> Self {
-        Self {name, w, h , msg: None, danger: false}
+    fn new(name: &'a str) -> Self {
+        Self {name, msg: None, danger: false, span: 1}
     }
 
     /// Get a new builder for a button that provides a Func message.
@@ -531,18 +521,16 @@ impl <'a> ButtonBuilder<'a> {
     ///
     /// * `name`: The string to show on the button. This will also be used as the default
     ///           Message value if no Message is added to the builder
-    /// * `w`: The width of the button
-    /// * `h`: The height of the button
     ///
     /// returns: ButtonBuilder
     ///
     /// # Examples
     ///
     /// ```
-    /// ButtonBuilder::for_func("ln", w, h)
+    /// ButtonBuilder::for_func("ln")
     /// ```
-    fn for_func(name: &'a str, w: Length, h: Length) -> Self {
-        Self {name, w, h, msg: Some(Message::Func(name.to_string())), danger: false}
+    fn for_func(name: &'a str) -> Self {
+        Self {name, msg: Some(Message::Func(name.to_string())), danger: false, span: 1}
     }
 
     /// Add the message to be generated by the button. This will replace any default message.
@@ -581,6 +569,24 @@ impl <'a> ButtonBuilder<'a> {
         self
     }
 
+    /// Specify the relative width of a button
+    ///
+    /// # Arguments
+    ///
+    /// * `span`: Defaults to 1,
+    ///
+    /// returns: ButtonBuilder
+    ///
+    /// # Examples
+    /// A button that spans 2 button widths
+    /// ```
+    /// .span(2)
+    /// ```
+    fn span(mut self, span: u16) -> Self {
+        self.span = span;
+        self
+    }
+
     /// Make the button
     fn make(self) -> Element<'a, Message> {
         let container: Container<'_, Message, Theme, Renderer> = Container::new(self.name)
@@ -590,8 +596,8 @@ impl <'a> ButtonBuilder<'a> {
             .width(Length::Fill);
 
         Button::new(container)
-            .width(self.w)
-            .height(self.h)
+            .width(Length::FillPortion(self.span))
+            .height(Length::Fill)
             .style(move |theme, status| {
 
                 let color_active = if self.danger {
