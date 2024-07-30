@@ -95,7 +95,7 @@ fn menu_insert() -> Menu<'static, Message, Theme, Renderer> {
     items.push(Item::with_menu(menu_item("Constants".to_string(), Message::Null), menu_constants()));
     items.push(Item::with_menu(menu_item("Functions".to_string(), Message::Null), menu_functions()));
 
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(120.0)
+    Menu::new(items).offset(3.0).spacing(2.0).max_width(120.0)
 }
 
 fn menu_constants() -> Menu<'static, Message, Theme, Renderer> {
@@ -150,7 +150,7 @@ fn menu_theme() -> Menu<'static, Message, Theme, Renderer> {
             Message::ThemeChanged(t.clone())
         )));
     }
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(200.0)
+    Menu::new(items).offset(3.0).spacing(2.0).max_width(200.0)
 
 }
 
@@ -162,7 +162,7 @@ fn menu_dimension()  -> Menu<'static, Message, Theme, Renderer> {
             Message::Null
         ), menu_unit_from(&d)));
     }
-    Menu::new(items).offset(0.0).spacing(2.0).max_width(90.0)
+    Menu::new(items).offset(3.0).spacing(2.0).max_width(90.0)
 
 }
 
