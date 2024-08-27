@@ -84,7 +84,7 @@ pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
 fn menu_top(label: &str) -> Container<Message> {
     let t = text(label);
     let container = Container::new(t)
-        .padding(Padding::from([0,3,0,3]));
+        .padding(Padding::from([0,3]));
     container
 }
 
@@ -201,15 +201,15 @@ fn menu_item_sub(label: String, msg: Message) -> Element<'static, Message> {
                 text(label)
                     .width(Length::Fill)
                     .shaping(Shaping::Advanced)
-                    .vertical_alignment(alignment::Vertical::Center),
+                    .align_y(alignment::Vertical::Center),
                 text(iced_aw::bootstrap::icon_to_string(
                     Bootstrap::CaretRightFill
                 ))
                 .font(BOOTSTRAP_FONT)
                 .width(Length::Shrink)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_y(alignment::Vertical::Center),
             ]
-        .align_items(iced::Alignment::Center);
+        .align_y(iced::Alignment::Center);
     menu_item_core(msg, content.into())
 }
 
@@ -233,7 +233,7 @@ fn menu_item_core(msg: Message, content: Element<'static, Message>) -> Element<'
                 }
             }
         })
-        .padding(Padding::from([0, 3, 0, 3]))
+        .padding(Padding::from([0, 3]))
         .on_press(msg)
         .height(Length::Shrink)
         .into()

@@ -50,10 +50,10 @@ pub(crate) struct CalcWindow {
     is_converting: bool,
     convert_from: Option<&'static Unit>,
     convert_to: Option<&'static Unit>,
-    window_width: u32,
-    window_height: u32,
-    window_x: i32,
-    window_y: i32,
+    window_width: f32,
+    window_height: f32,
+    window_x: f32,
+    window_y: f32,
 }
 
 impl Default for CalcWindow {
@@ -74,10 +74,10 @@ impl Default for CalcWindow {
             is_converting: false,
             convert_from: None,
             convert_to: None,
-            window_width: 0,
-            window_height: 0,
-            window_x: 0,
-            window_y: 0,
+            window_width: 0.0,
+            window_height: 0.0,
+            window_x: 0.0,
+            window_y: 0.0,
         }
     }
 }
@@ -227,8 +227,8 @@ impl CalcWindow {
             .style(|theme: &Theme, status| {
                 text_editor::Style {
                     background: Background::Color(Color::TRANSPARENT),
-                    border: Border::default().with_width(Pixels::from(1))
-                        .with_color(theme.extended_palette().background.base.text),
+                    border: Border::default().width(Pixels::from(1))
+                        .color(theme.extended_palette().background.base.text),
                     .. text_editor::default(theme, status)
                 }
             })
@@ -288,7 +288,7 @@ impl CalcWindow {
                 } else {
                     warn!("Converting units, but no 'from' unit set");
                     text("")
-                }.horizontal_alignment(Horizontal::Left).into();
+                }.align_x(Horizontal::Left).into();
 
                 let conv_to = if let Some(unit_to) = &self.convert_to {
                     text(unit_to.name)
@@ -296,7 +296,7 @@ impl CalcWindow {
                 } else {
                     warn!("Converting units, but no 'to' unit set");
                     text("")
-                }.horizontal_alignment(Horizontal::Left)
+                }.align_x(Horizontal::Left)
                     .into();
                 let converted_result = match &self.result {
                     Some(r) => {
@@ -334,7 +334,7 @@ impl CalcWindow {
             .style(move |theme| {
                 container::Style {
                     background: Some(Background::Color(theme.extended_palette().background.strong.color)),
-                    border: Border::default().with_width(Pixels::from(1)).with_color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
+                    border: Border::default().width(Pixels::from(1)).color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
                     ..Default::default()
                 }
             })
@@ -428,11 +428,11 @@ impl CalcWindow {
     pub(crate) fn subscription(&self) -> Subscription<Message> {
         event::listen_with(|event, _status, _id| {
             match event {
-                Event::Window(window::Event::Resized { width, height}) => {
-                    Some(Message::WindowResized(width, height))
+                Event::Window(window::Event::Resized(size)) => {
+                    Some(Message::WindowResized(size.width, size.height))
                 }
-                Event::Window(window::Event::Moved { x, y}) => {
-                    Some(Message::WindowMoved(x, y))
+                Event::Window(window::Event::Moved ( p)) => {
+                    Some(Message::WindowMoved(p.x, p.y))
                 }
                 Event::Window(window::Event::Closed {}) => {
                     Some(Message::WindowClosed())
@@ -635,7 +635,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
             button::Style {
                 background: Some(Background::from(g)),
                 text_color: active.text,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::from_rgb8(0x20, 0x20, 0x20)),
+                border: Border::default().width(Pixels::from(2)).color(Color::from_rgb8(0x20, 0x20, 0x20)),
                 shadow: Shadow { color: Color::WHITE, offset: Vector::new(-2.0, -2.0), blur_radius: 2.0 },
             }
         }
@@ -647,7 +647,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
             button::Style {
                 background: Some(Background::from(g)),
                 text_color: hover.text,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
+                border: Border::default().width(Pixels::from(2)).color(Color::BLACK),
                 shadow: Default::default(),
             }
         }
@@ -659,7 +659,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
             button::Style {
                 background: Some(Background::from(g)),
                 text_color: pressed.text,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
+                border: Border::default().width(Pixels::from(2)).color(Color::BLACK),
                 shadow: Default::default(),
             }
         }
@@ -667,7 +667,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
             button::Style {
                 background: None,
                 text_color: Color::BLACK,
-                border: Border::default().with_width(Pixels::from(2)).with_color(Color::BLACK),
+                border: Border::default().width(Pixels::from(2)).color(Color::BLACK),
                 shadow: Default::default(),
             }
         }
@@ -701,7 +701,7 @@ fn lighten(color: Color, amount: f32) -> Color {
     Color::from(Rgb::from_color(hsl))
 }
 
-pub fn save_window_size(width: u32, height: u32) -> Result<(), String> {
+pub fn save_window_size(width: f32, height: f32) -> Result<(), String> {
     // Set the window state in `settings`
     let pref = crate::ui::preferences::manager();
     pref.put("window-width", width);
