@@ -27,8 +27,8 @@ use crate::conversions::Unit;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    WindowResized(u32, u32),
-    WindowMoved(i32, i32),
+    WindowResized(f32, f32),
+    WindowMoved(f32, f32),
     WindowClosed(),
     EditorAction(Action),
     Char(String),

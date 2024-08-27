@@ -25,7 +25,7 @@ use std::fs::File;
 use iced::settings::Settings;
 use iced::Size;
 use iced::window;
-use iced_aw::BOOTSTRAP_FONT_BYTES;
+use iced_fonts::BOOTSTRAP_FONT_BYTES;
 use log::info;
 use simplelog::*;
 
@@ -58,8 +58,7 @@ fn main() -> iced::Result {
     };
 
     let settings: Settings = Settings {
-        id: Some(String::from("RustyCalc")),
-
+        id: Some(String::from("com.shartrec.RustyCalc")),
         fonts: vec![BOOTSTRAP_FONT_BYTES.into()],
         antialiasing: true,
         .. Settings::default()
