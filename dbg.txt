@@ -1,0 +1,6 @@
+[New Thread 0x7fffd57fa6c0 (LWP 3519)]
+
+Thread 11 "rusty_calc" received signal SIGILL, Illegal instruction.
+[Switching to Thread 0x7ffff60576c0 (LWP 3502)]
+0x00007fffc7bbb440 in llvm::CastInst::isEliminableCastPair(llvm::Instruction::CastOps, llvm::Instruction::CastOps, llvm::Type*, llvm::Type*, llvm::Type*, llvm::Type*, llvm::Type*, llvm::Type*) ()
+   from /lib64/libLLVM.so.20.1

@@ -22,13 +22,11 @@
 
 use std::fs::File;
 
-use iced::settings::Settings;
-use iced::Size;
-use iced::window;
-use iced_fonts::BOOTSTRAP_FONT_BYTES;
+use floem::{prelude::create_rw_signal, views::{button, dyn_view, Decorators}, Application, IntoView};
+use floem::kurbo::Size;
+use floem::window::WindowConfig;
 use log::info;
 use simplelog::*;
-
 use crate::ui::calc_window::CalcWindow;
 
 mod evaluator;
@@ -39,40 +37,35 @@ mod ui;
 pub(crate) mod history;
 pub(crate) mod conversions;
 
-/// Calculate.
-fn main() -> iced::Result {
 
-    // todo Remove when we can
-    #[cfg(target_os = "redox")]
-    {
-        std::env::set_var("ICED_BACKEND", "tiny-skia");
-    }
+/// Calculate.
+fn main() {
+
+    let calc = CalcWindow::default();
 
     init_logger();
     info!("Calculator started");
 
-    let window_settings = window::Settings {
-        size: load_window_size().unwrap_or(Size::new(330.0, 450.0)),
-        min_size: Some(Size::new(330.0, 450.0)),
-        ..window::Settings::default()
-    };
+    let window_config = WindowConfig::default()
+            .size(load_window_size())
+            .title("Rusty Calculator");
 
-    let settings: Settings = Settings {
-        id: Some(String::from("com.shartrec.RustyCalc")),
-        fonts: vec![BOOTSTRAP_FONT_BYTES.into()],
-        antialiasing: true,
-        .. Settings::default()
-    };
 
-    let result = iced::application(CalcWindow::title, CalcWindow::update, CalcWindow::view)
-        .settings(settings)
-        .window(window_settings)
-        .subscription(CalcWindow::subscription)
-        .theme(CalcWindow::theme)
-        .run();
+    // let settings: Settings = Settings {
+    //     id: Some(String::from("com.shartrec.RustyCalc")),
+    //     fonts: vec![BOOTSTRAP_FONT_BYTES.into()],
+    //     antialiasing: true,
+    //     .. Settings::default()
+    // };
+
+    let app = Application::new().window(
+        move |_| calc.view(),
+        Some(window_config)
+    );
+
+    app.run();
 
     info!("Calculator shutdown");
-    result
 }
 
 fn init_logger() {
@@ -110,15 +103,15 @@ fn init_logger() {
     });
 }
 
-fn load_window_size() -> Option<Size> {
+fn load_window_size() -> Size {
     // Get the window state from `settings`
     let pref = ui::preferences::manager();
 
     // Set the size of the window
-    if let Some(w) = pref.get::<f32>("window-width") {
-        if let Some(h) = pref.get::<f32>("window-height") {
-            return Some(Size::new(w, h))
+    if let Some(w) = pref.get::<f64>("window-width") {
+        if let Some(h) = pref.get::<f64>("window-height") {
+            return Size::new(w, h)
         }
     }
-    None
+    Size::new(400.0, 600.0)
 }
