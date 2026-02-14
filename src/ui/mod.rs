@@ -25,7 +25,7 @@ use std::sync::{Arc, LazyLock};
 use iced::{Color, Theme};
 use iced::theme::Custom;
 use iced::theme::Palette;
-use iced::theme::palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success};
+use iced::theme::palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success, Warning};
 
 pub(crate) mod calculator;
 pub(crate) mod messages;
@@ -50,6 +50,11 @@ pub static PALETT_LCD: Palette = Palette {
         0x66 as f32 / 255.0,
         0x4F as f32 / 255.0,
     ),
+    warning: Color::from_rgb(
+        0xE9 as f32 / 255.0,
+        0xD5 as f32 / 255.0,
+        0x02 as f32 / 255.0,
+    ),
     danger: Color::from_rgb(
         0xC3 as f32 / 255.0,
         0x00 as f32 / 255.0,
@@ -73,6 +78,11 @@ static LCD_THEME: LazyLock<Theme> = LazyLock::new( || {
                 palette.primary,
                 Color::BLACK,
                 Color::WHITE,
+            ),
+            warning: Warning::generate(
+                palette.warning,
+                palette.background,
+                palette.text,
             ),
             danger: Danger::generate(
                 palette.danger,

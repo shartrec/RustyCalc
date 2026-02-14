@@ -22,8 +22,7 @@
 
 use std::fs::File;
 
-use iced::settings::Settings;
-use iced::Size;
+use iced::{Settings, Size};
 use iced::window;
 use iced_fonts::BOOTSTRAP_FONT_BYTES;
 use log::info;
@@ -64,11 +63,12 @@ fn main() -> iced::Result {
         .. Settings::default()
     };
 
-    let result = iced::application(CalcWindow::title, CalcWindow::update, CalcWindow::view)
+    let result = iced::application(CalcWindow::default(), CalcWindow::update, CalcWindow::view)
         .settings(settings)
         .window(window_settings)
         .subscription(CalcWindow::subscription)
         .theme(CalcWindow::theme)
+        .title(CalcWindow::title)
         .run();
 
     info!("Calculator shutdown");

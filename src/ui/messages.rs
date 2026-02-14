@@ -34,6 +34,7 @@ pub enum Message {
     Char(String),
     Constant(String),
     Func(String),
+    FocusInput,
     History(String, f64),
     MoveRight,
     MoveLeft,

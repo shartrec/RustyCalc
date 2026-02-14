@@ -21,14 +21,14 @@
  */
 
 /// This module contains the funcrtions to build our menu bar and menus descending from it.
-use iced::{alignment, Background, Border, Element, Length, Padding, Renderer, Theme};
+use iced::{alignment, Background, Border, Element, Font, Length, Padding, Renderer, Theme};
 use iced::advanced::text::Shaping;
 use iced::border::Radius;
 use iced::widget::{Button, button, Container, row, text};
 use iced_aw::menu::{Item, Menu, primary};
-use iced_aw::{menu, menu_bar};
+use iced_aw::{menu, menu_bar, menu_items};
 use iced_aw::style::Status;
-use iced_fonts::{Bootstrap, BOOTSTRAP_FONT};
+use iced_fonts::{Bootstrap};
 use strum::IntoEnumIterator;
 use crate::{conversions, evaluator, history, ui};
 use crate::conversions::{Dimension, Unit};
@@ -44,15 +44,15 @@ pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
     let mb=
         if let Some(history_menu) = menu_history() {
             menu_bar!(
-                (menu_top("Convert"), convert_menu)
-                (menu_top("Insert"), insert_menu)
-                (menu_top("History"), history_menu)
+                (menu_top("Convert"), convert_menu),
+                (menu_top("Insert"), insert_menu),
+                (menu_top("History"), history_menu),
                 (menu_top("Theme"), theme_menu)
             )
         } else {
             menu_bar!(
-                (menu_top("Convert"), convert_menu)
-                (menu_top("Insert"), insert_menu)
+                (menu_top("Convert"), convert_menu),
+                (menu_top("Insert"), insert_menu),
                 (menu_top("Theme"), theme_menu)
             )
         };
@@ -71,10 +71,8 @@ pub(crate) fn build_menu_bar<'a> () -> Element<'a, Message> {
                 radius: Radius::from(0),
                 ..Default::default()
             },
-            bar_background_expand: Padding::from(0),
             bar_background: Background::Color(theme.extended_palette().background.strong.color),
             menu_background: Background::Color(theme.extended_palette().background.strong.color),
-            menu_background_expand: Padding::from(0),
             ..primary(theme, status)
         })
     .into()
@@ -205,7 +203,7 @@ fn menu_item_sub(label: String, msg: Message) -> Element<'static, Message> {
                 text(iced_fonts::bootstrap::icon_to_string(
                     Bootstrap::CaretRightFill
                 ))
-                .font(BOOTSTRAP_FONT)
+                .font(Font::with_name("bootstrap-icons"))
                 .width(Length::Shrink)
                 .align_y(alignment::Vertical::Center),
             ]

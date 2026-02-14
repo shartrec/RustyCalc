@@ -22,17 +22,19 @@
 
 // This is the main ICED UI Application.
 
+use iced::application::BootFn;
 use iced::{Background, Border, Color, Degrees, Element, event, Event, Font, gradient, Length, Padding, Pixels, Radians, Renderer, Shadow, Subscription, Task, Theme, Vector, window};
 use iced::clipboard;
 use iced::alignment::{Horizontal, Vertical};
 use iced::theme::palette::Pair;
-use iced::widget::{Button, button, Column, container, Container, horizontal_rule, Row, rule, text, Text, text_editor, tooltip};
+use iced::widget::{Button, button, Column, container, Container, Row, rule, text, Text, text_editor, tooltip};
 use iced::widget::button::Status;
+use iced::widget::operation::focus;
 use iced::widget::text_editor::{Action, Content, Edit, Motion};
 use iced::widget::tooltip::Position;
 use log::warn;
 use palette::{convert::FromColor, Hsl};
-use palette::rgb::Rgb;
+use palette::rgb::Rgba;
 
 use crate::conversions::{try_convert, Unit};
 use crate::evaluator::AngleMode;
@@ -81,6 +83,11 @@ impl Default for CalcWindow {
         }
     }
 }
+impl BootFn<CalcWindow, Message> for CalcWindow {
+    fn boot(&self) -> (CalcWindow, iced::Task<Message>) {
+        (Self::default(), Task::perform(async {}, |_| Message::FocusInput))
+    }
+}
 
 impl CalcWindow {
 
@@ -93,13 +100,13 @@ impl CalcWindow {
                 for c in s.chars() {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
-                Task::none()
+                self.do_focus()
             }
             Message::Constant(s) => {
                 for c in s.chars() {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
-                Task::none()
+                self.do_focus()
             }
             Message::Copy(v) => {
                 clipboard::write(v.to_string())
@@ -115,7 +122,7 @@ impl CalcWindow {
                         self.content.perform(Action::Edit(Edit::Insert(c)));
                     }
                     self.content.perform(Action::Edit(Edit::Insert(')')));
-                    Task::none()
+                    self.do_focus()
                 } else {  //otherwise insert the function and move cursor between the parentheses
                     for c in s.chars() {
                         self.content.perform(Action::Edit(Edit::Insert(c)));
@@ -133,9 +140,13 @@ impl CalcWindow {
                     }
                     _ => {
                         self.content.perform(action);
-                        Task::none()
+                        self.do_focus()
                     }
                 }
+            }
+            Message::FocusInput => {
+                // This is where the magic happens
+                self.do_focus()
             }
             Message::History(expr, value) => {
                 self.content.perform(Action::Move(Motion::DocumentStart));
@@ -145,12 +156,12 @@ impl CalcWindow {
                     self.content.perform(Action::Edit(Edit::Insert(c)));
                 }
                 self.result = Some(Ok(value));
-                Task::none()
+                self.do_focus()
             }
 
             Message::Evaluate => {
                 self.result = Some(self.calc.evaluate(&self.content.text().trim()));
-                Task::none()
+                self.do_focus()
             }
             Message::Clear => {
                 self.content.perform(Action::Move(Motion::DocumentStart));
@@ -160,23 +171,23 @@ impl CalcWindow {
                 self.convert_from = None;
                 self.convert_to = None;
                 self.result = None;
-                Task::none()
+                self.do_focus()
             }
             Message::MoveLeft => {
                 self.content.perform(Action::Move(Motion::Left));
-                Task::none()
+                self.do_focus()
             }
             Message::MoveRight => {
                 self.content.perform(Action::Move(Motion::Right));
-                Task::none()
+                self.do_focus()
             }
             Message::MoveEnd => {
                 self.content.perform(Action::Move(Motion::DocumentEnd));
-                Task::none()
+                self.do_focus()
             }
             Message::BackSpace => {
                 self.content.perform(Action::Edit(Edit::Backspace));
-                Task::none()
+                self.do_focus()
             }
             Message::ConvertPerform(from_unit, to_unit) => {
                 self.is_converting = true;
@@ -185,28 +196,28 @@ impl CalcWindow {
                 if self.content.text().trim().len() > 0 {
                     Task::perform(async {}, |_| Message::Evaluate)
                 } else {
-                    Task::none()
+                    self.do_focus()
                 }
             }
             Message::ThemeChanged(t) => {
                 self.theme = t;
                 let pref = ui::preferences::manager();
                 pref.put(ui::preferences::THEME, format!("{}", &self.theme));
-                Task::none()
+                self.do_focus()
             }
             Message::WindowResized(w, h) => {
                 self.window_width = w.clone();
                 self.window_height = h.clone();
-                Task::none()
+                self.do_focus()
             }
             Message::WindowMoved(x, y) => {
                 self.window_x = x.clone();
                 self.window_y = y.clone();
-                Task::none()
+                self.do_focus()
             }
             Message::WindowClosed() => {
                 let _ = save_window_size(self.window_width, self.window_height);
-                Task::none()
+                self.do_focus()
             }
             Message::ToggleMode => {
                 self.calc.set_angle_mode(match self.calc.angle_mode() {
@@ -216,15 +227,21 @@ impl CalcWindow {
                 });
                 let pref = crate::ui::preferences::manager();
                 pref.put(crate::ui::preferences::ANGLE_MODE, self.calc.angle_mode());
-                Task::none()
+                self.do_focus()
             }
-            Message::Null => Task::none()
+            Message::Null => self.do_focus()
         }
     }
+
+    fn do_focus(&self) -> Task<Message> {
+        focus::<Message>("lcd")
+    }
+
     pub(crate) fn view<'a>(&'a self) -> Element<'a, Message> {
-        let lcd = text_editor(&self.content)
+        let lcd : Element<Message> = text_editor(&self.content)
+            .id("lcd")
             .height(Length::Fill)
-            .font(Font::with_name("DejaVu Sans"))
+            .font(Font::default())
             .style(|theme: &Theme, status| {
                 text_editor::Style {
                     background: Background::Color(Color::TRANSPARENT),
@@ -320,7 +337,7 @@ impl CalcWindow {
                 let r1 = Row::with_children([conv_from, con_result]).into();
                 let r2 = Row::with_children([conv_to, con_conv_result]).into();
 
-                let rule1:Element<Message> = horizontal_rule(1)
+                let rule1:Element<Message> = rule::horizontal(1)
                     .style(|theme| {
                         iced::widget::rule::Style {
                                 color: Color::from_rgb8(0x35, 0x3f, 0x3f),
@@ -332,7 +349,7 @@ impl CalcWindow {
             };
         let lcd_container = container(top)
             .width(Length::Fill)
-            .style(move |theme| {
+            .style(move |theme: &Theme| {
                 container::Style {
                     background: Some(Background::Color(theme.extended_palette().background.strong.color)),
                     border: Border::default().width(Pixels::from(1)).color(Color::from_rgb8(0x7f, 0x7f, 0x7f)),
@@ -408,7 +425,7 @@ impl CalcWindow {
         container(col_all)
             .width(Length::Fill)
             .height(Length::Fill)
-            .style(move |_theme| {
+            .style(move |_theme: &Theme| {
                 container::Style {
                     background: Some(Background::Color(_theme.extended_palette().background.weak.color)),
                     ..Default::default()
@@ -468,6 +485,7 @@ fn wrap_with_copy(text: Text, value: f64) -> Element<Message> {
                 background: Some(Background::from(theme.extended_palette().primary.weak.color)),
                 border: Default::default(),
                 shadow: Default::default(),
+                snap: true,
             }
         })
         .into()
@@ -638,6 +656,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
                 text_color: active.text,
                 border: Border::default().width(Pixels::from(2)).color(Color::from_rgb8(0x20, 0x20, 0x20)),
                 shadow: Shadow { color: Color::WHITE, offset: Vector::new(-2.0, -2.0), blur_radius: 2.0 },
+                snap: true,
             }
         }
         Status::Hovered => {
@@ -650,6 +669,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
                 text_color: hover.text,
                 border: Border::default().width(Pixels::from(2)).color(Color::BLACK),
                 shadow: Default::default(),
+                snap: true,
             }
         }
         Status::Pressed => {
@@ -662,6 +682,7 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
                 text_color: pressed.text,
                 border: Border::default().width(Pixels::from(2)).color(Color::BLACK),
                 shadow: Default::default(),
+                snap: true,
             }
         }
         Status::Disabled => {
@@ -670,15 +691,16 @@ fn get_style(status: Status, active: Pair, hover: Pair, pressed: Pair) -> button
                 text_color: Color::BLACK,
                 border: Border::default().width(Pixels::from(2)).color(Color::BLACK),
                 shadow: Default::default(),
+                snap: true,
             }
         }
     }
 }
 
 fn darken(color: Color, amount: f32) -> Color {
-
-    let srgb = Rgb::from(color);
-    let mut hsl = Hsl::from_color(srgb);
+    let rgb = color.into_rgba8();
+    let srgb = Rgba::new(rgb[0] as f32 / 255.0, rgb[1] as f32 / 255.0, rgb[2] as f32 / 255.0, rgb[3] as f32 / 255.0);
+    let mut hsl: Hsl<f32> = Hsl::from_color(srgb);
 
     hsl.lightness = if hsl.lightness - amount < 0.0 {
         0.0
@@ -686,12 +708,19 @@ fn darken(color: Color, amount: f32) -> Color {
         hsl.lightness - amount
     };
 
-    Color::from(Rgb::from_color(hsl))
+    let rgb = Rgba::from_color(hsl);
+    Color::from_rgba(
+        rgb.red,
+        rgb.green,
+        rgb.blue,
+        rgb.alpha,
+    )
 }
 
 fn lighten(color: Color, amount: f32) -> Color {
-    let srgb = Rgb::from(color);
-    let mut hsl = Hsl::from_color(srgb);
+    let rgb = color.into_rgba8();
+    let srgb = Rgba::new(rgb[0] as f32 / 255.0, rgb[1] as f32 / 255.0, rgb[2] as f32 / 255.0, rgb[3] as f32 / 255.0);
+    let mut hsl: Hsl<f32> = Hsl::from_color(srgb);
 
     hsl.lightness = if hsl.lightness + amount > 1.0 {
         1.0
@@ -699,7 +728,13 @@ fn lighten(color: Color, amount: f32) -> Color {
         hsl.lightness + amount
     };
 
-    Color::from(Rgb::from_color(hsl))
+    let rgb = Rgba::from_color(hsl);
+    Color::from_rgba(
+        rgb.red,
+        rgb.green,
+        rgb.blue,
+        rgb.alpha,
+    )
 }
 
 pub fn save_window_size(width: f32, height: f32) -> Result<(), String> {
